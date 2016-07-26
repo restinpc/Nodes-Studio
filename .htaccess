@@ -1,0 +1,34 @@
+RewriteEngine on
+AddDefaultCharset UTF-8
+SetOutputFilter DEFLATE
+RewriteCond %{HTTP_HOST} ^www\.(.*)
+RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
+<ifModule mod_headers.c>
+    ExpiresActive On
+    FileETag None
+    Header unset ETag
+    Header unset Cache-Control
+    Header unset Pragma
+    Header unset Expires
+    Header unset Last-Modified
+    Header set Cache-Control "max-age=0, pre-check=0, no-cache, no-store, must-revalidate"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    <FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|ttf|svg|woff2|FLV|GIF|JPG|JPEG|PNG|ICO|SWF|JS|CSS|PDF|TTF|SVG|WOFF2)$">
+        Header unset Cache-Control
+        Header unset Expires
+        Header set Cache-Control "max-age=2592000"
+    </FilesMatch>
+</ifModule>
+RewriteRule ^favicon/(.*)$ favicon/$1 [L]
+RewriteRule ^files/(.*)$ files/$1 [L]
+RewriteRule ^fonts/(.*)$ fonts/$1 [L]
+RewriteRule ^img/(.*)$ img/$1 [L] 
+RewriteRule ^res/(.*)$ res/$1 [L]
+RewriteRule ^script/(.*)$ script/$1 [L]
+RewriteRule ^templates/(.*)$ templates/$1 [L]
+RewriteRule ^apple-touch-icon.png$ apple-touch-icon.png [L]
+RewriteRule ^apple-touch-icon-precomposed.png$ apple-touch-icon-precomposed.png [L]
+RewriteRule ^browserconfig.xml$ browserconfig.xml [L]
+RewriteRule ^favicon.ico$ favicon.ico [L]
+RewriteRule ^favicon.png$ favicon.png [L]
+RewriteRule ^(.*)$ index.php?$1 [L]

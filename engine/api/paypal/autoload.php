@@ -1,0 +1,46 @@
+<?php
+/* Nodes Studio system file. Do not edit! */
+require_once 'Rest/IResource.php';
+require_once 'Cache/AuthorizationCache.php';
+require_once 'Handler/IPayPalHandler.php';
+require_once 'Handler/RestHandler.php';
+require_once 'Handler/OauthHandler.php';
+require_once 'Transport/PayPalRestCall.php';
+require_once 'Common/ArrayUtil.php';
+require_once 'Common/PayPalModel.php';
+require_once 'Common/PayPalResourceModel.php';
+require_once 'Common/PayPalUserAgent.php';
+require_once 'Common/ReflectionUtil.php';
+require_once 'Core/PayPalConstants.php';
+require_once 'Core/PayPalConfigManager.php';
+require_once 'Core/PayPalHttpConfig.php';
+require_once 'Core/PayPalHttpConnection.php';
+require_once 'Core/PayPalLoggingManager.php';
+require_once 'Core/PayPalLoggingLevel.php';
+require_once 'Exception/PayPalConfigurationException.php';
+require_once 'Exception/PayPalConnectionException.php';
+require_once 'Exception/PayPalInvalidCredentialException.php';
+require_once 'Exception/PayPalMissingCredentialException.php';
+require_once 'Handler/IPayPalHandler.php';
+require_once 'Rest/ApiContext.php';
+require_once 'Security/Cipher.php';
+require_once 'Auth/OAuthTokenCredential.php';
+require_once 'Validation/ModelAccessorValidator.php';
+require_once 'Validation/NumericValidator.php';
+require_once 'Converter/FormatConverter.php';
+require_once 'Api/Links.php';
+require_once 'Api/Details.php';
+require_once 'Api/BaseAddress.php';
+require_once 'Api/Address.php';
+require_once 'Api/ShippingAddress.php';
+require_once 'Api/Payer.php';
+require_once 'Api/PayerInfo.php';
+require_once 'Api/Amount.php';
+require_once 'Api/Item.php';
+require_once 'Api/ItemList.php';
+require_once 'Api/CartBase.php';
+require_once 'Api/TransactionBase.php';
+require_once 'Api/Transaction.php';
+require_once 'Api/Payment.php';
+require_once 'Api/PaymentExecution.php';
+
