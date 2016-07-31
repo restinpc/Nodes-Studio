@@ -172,10 +172,10 @@ $this->content .= '<br/>
             $this->title = lang("Messages").' - '.$this->title;
             $this->content .= '<h1 style="padding: 5px;">'.lang("Messages").'</h1><br/>';
             if(empty($_GET[2])){
-                $this->content .= '<center><iframe id="message_frame" src="'.$_SERVER["DIR"].'/messages.php?id='.$_SESSION["user"]["id"].'" width=100% height=390 style="max-width: 710px;" ></iframe></center>'
+                $this->content .= '<center><iframe id="message_frame" src="'.$_SERVER["DIR"].'/messages.php?id='.$_SESSION["user"]["id"].'" width=100% height=385 style="max-width: 710px;" ></iframe></center>'
                         . '<br/><a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn btnSmall" style="width: 280px;" value="'.lang("Back to account").'"  /></a>';
             }else{
-                $this->content .= '<center><iframe id="message_frame" src="'.$_SERVER["DIR"].'/messages.php?mode=dialog&id='.$_SESSION["user"]["id"].'&target='.$_GET[2].'" width=100% height=390 style="max-width: 710px;" ></iframe></center>'
+                $this->content .= '<center><iframe id="message_frame" src="'.$_SERVER["DIR"].'/messages.php?mode=dialog&id='.$_SESSION["user"]["id"].'&target='.$_GET[2].'" width=100% height=385 style="max-width: 710px;" ></iframe></center>'
                         . '<br/><a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn btnSmall" style="width: 280px;" value="'.lang("Back to account").'"  /></a>';
             }
         }else{
@@ -195,5 +195,5 @@ $this->content .= '<br/>
     }
 }else{
     $this->title = lang("Access denied").' - '.$this->title;
-    $this->content = '<h3 style="padding-top: 100px;">'.lang("Access denied").'</h3><br/>';
+    $this->content = '<script language="JavaScript">parent.window.location = "'.$_SERVER["DIR"].'/login";</script>';
 }

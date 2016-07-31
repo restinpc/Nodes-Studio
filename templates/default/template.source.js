@@ -1,4 +1,4 @@
-//  TODO - Your code here
+/* Nodes Studio source file. Do not edit directly */
 
 if(window.jQuery){
     
@@ -35,7 +35,7 @@ function navScroll() {
 }
 
 function scrolltoTop(){
-    var speed = 1000;
+    var speed = 200;
     jQuery('html, body').animate({scrollTop:0}, speed,'swing');
 }
 }

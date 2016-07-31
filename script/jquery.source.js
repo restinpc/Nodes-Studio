@@ -1,4 +1,4 @@
-/* Nodes Studio system file. Do not edit! */
+/* Nodes Studio source file. Do not edit directly */
 
 if(window.jQuery){
     
@@ -85,7 +85,7 @@ function goto(href) {
 function showAnchor(anchor){
     var element = 'a[name="'+anchor+'"]';
     var pos = jQuery(element);
-    jQuery('body,html').animate({scrollTop:(pos.offsetTop-80)}, 500,'swing');  
+    jQuery('body,html').animate({scrollTop:(pos.offsetTop-80)}, 200,'swing');  
 }
 
 function checkAnshors(){

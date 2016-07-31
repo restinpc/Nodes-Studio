@@ -1,4 +1,4 @@
-/* Nodes Studio system file. Do not edit! */
+/* Nodes Studio source file. Do not edit directly */
 
 var ua = navigator.userAgent.toLowerCase();
 var isOpera = (ua.indexOf('opera')  > -1);
@@ -115,6 +115,7 @@ function show_login_form(){
     try{ hideMenu(); scrolltoTop(); }catch(e){};
     if(parent.document.getElementById("nodes_window")) js_hide_wnd();
     js_show_wnd('<div style="float:right; margin-top: -15px; margin-right: -15px;"><img style="cursor:pointer;" onClick=\'js_hide_wnd();\' title="Close window" src="'+root_dir+'/img/x.png" width=15 height=15 /></div><img src="'+root_dir+'/img/load.gif" id="loader"><iframe frameborder=0 style="display:none;" width=200 height=260 id="nodes_iframe" src="'+root_dir+'/account.php" onLoad=\'document.getElementById("loader").style.display="none";this.style.display="block";js_pos_wnd();addHandler(window, "resize", js_pos_wnd);\'></iframe>');
+    preventDefault();
 }
 
 function logout(){

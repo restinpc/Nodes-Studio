@@ -34,7 +34,7 @@ if(!isset($_POST["jQuery"])){
             '; 
     if(empty($_SESSION["user"]["id"])){
         $header .= '<li class="last"><a href="'.$_SERVER["DIR"].'/register" class="btn">'.lang("Sign Up").'</a></li>
-            <li class="last" id="last"><a href="#" class="btn" onClick="show_login_form();">'.lang("Login").'</a></li>';
+            <li class="last" id="last"><a target="_parent" class="btn" onClick="show_login_form();" href="'.$_SERVER["DIR"].'/login">'.lang("Login").'</a></li>';
     }else{
         $header .= '<li class="last"><a href="'.$_SERVER["DIR"].'/account" class="btn">'.lang("My Account").'</a></li>
             <li class="last"  id="last"><a href="#" onClick="logout();" class="btn">'.lang("Logout").'</a></li>';
