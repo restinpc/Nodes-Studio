@@ -31,4 +31,5 @@ RewriteRule ^apple-touch-icon-precomposed.png$ apple-touch-icon-precomposed.png 
 RewriteRule ^browserconfig.xml$ browserconfig.xml [L]
 RewriteRule ^favicon.ico$ favicon.ico [L]
 RewriteRule ^favicon.png$ favicon.png [L]
+RewriteRule ^cron.php$ cron.php [L]
 RewriteRule ^(.*)$ index.php?$1 [L]

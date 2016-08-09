@@ -20,6 +20,9 @@ require_once("engine/include/print_search_result.php");
 if(!empty($_GET[3])){
     $this->content = engine::error();
     return; 
+}else if(empty($_GET[2])){
+    $this->content = '<div style="padding-top: 70px; padding-bottom: 70px;">Empty search query</div>';
+    return;
 }
 
 $this->title = lang("Search").' - '.$this->title;

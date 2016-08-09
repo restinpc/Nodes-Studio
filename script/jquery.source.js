@@ -25,11 +25,12 @@ jQuery('a').on('click', function(e) {
             try{
                 if(jQuery('.mdl-layout__drawer').attr('aria-hidden')=="false"){
                     jQuery('.mdl-layout__obfuscator').click();
-                }jQuery('.android-content').animate({scrollTop:0}, 200, 'swing');
+                }jQuery('.android-content').scrollTop(0);
+                jQuery('.android-header').removeClass("is-casting-shadow");
             }catch(err){};
             try{
                 hideMenu();
-                jQuery('body,html').animate({ scrollTop: 0}, 200,'swing');
+                jQuery('body,html').scrollTop(0);
             }catch(err){};
             if(searchText(jQuery(this).attr('href'), location.hostname)){
                 e.preventDefault();

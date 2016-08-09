@@ -35,8 +35,7 @@ function navScroll() {
 }
 
 function scrolltoTop(){
-    var speed = 200;
-    jQuery('html, body').animate({scrollTop:0}, speed,'swing');
+    jQuery('body,html').scrollTop(0);
 }
 }
 

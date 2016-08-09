@@ -11,9 +11,8 @@ $request = str_replace("index.php", "", str_replace("index.php?", "",
 if(strpos($request, "?")!==FALSE){ 
     $args = substr($request, strpos($request, "?"));
     $request = substr($request, 0, strpos($request, "?"));
-}$_GET = explode("/", $request);
-for($i = 0; $i < count($_GET); $i++) 
-    if(empty($_GET[$i])) unset($_GET[$i]);
+}$get = explode("/", $request); unset($_GET);
+for($i = 0; $i < count($get); $i++) if(!empty($get[$i])) $_GET[count($_GET)] = $get[$i];
 preg_match_all('/[\?|\&]?([^=]+)=([^\&]+)\&?/six', $args, $m);
 for($i = 0; $i<count($m[1]);$i++) 
     $_GET[$m[1][$i]] = $m[2][$i];
