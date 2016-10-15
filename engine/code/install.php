@@ -19,15 +19,22 @@ if(!empty($_POST["mysql_server"])){
     `nodes_attendance`,
     `nodes_catalog` ,
     `nodes_catch` ,
+    `nodes_category` ,
     `nodes_comments` ,
     `nodes_config` ,
     `nodes_content` ,
     `nodes_language` ,
+    `nodes_logs` ,
     `nodes_message` ,
     `nodes_module` ,
+    `nodes_orders` ,
+    `nodes_products` ,
+    `nodes_product_order` ,
+    `nodes_properties` ,
+    `nodes_seo` ,
+    `nodes_shipping` ,
     `nodes_transactions` ,
-    `nodes_users` ,
-    `nodes_logs` ;
+    `nodes_users`  ;
         
 CREATE TABLE IF NOT EXISTS `nodes_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -40,7 +47,6 @@ CREATE TABLE IF NOT EXISTS `nodes_config` (
 INSERT INTO `nodes_config` (`name`, `value`, `text`) VALUES
 ('name', '".mysql_real_escape_string($_POST["name"])."', 'Site name'),
 ('description', '".mysql_real_escape_string($_POST["description"])."', 'Description'),
-('image', '".mysql_real_escape_string($_POST["image"])."', 'Site image'),
 ('email', '".mysql_real_escape_string($_POST["admin_email"])."', 'Site email'),
 ('language', '".mysql_real_escape_string($_POST["language"])."', 'Site language'),
 ('languages', '".mysql_real_escape_string(str_replace("'", "\'", $_POST["languages"]))."', 'Available languages'),
@@ -64,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `nodes_users` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 INSERT INTO `nodes_users` (`id`, `name`, `photo`, `url`, `email`, `pass`, `balance`, `ip`, `ban`, `online`, `token`, `confirm`, `code`) VALUES
-(1, '".mysql_real_escape_string(str_replace("'", "\'", $_POST["admin_name"]))."', '".$_SERVER["DIR"]."/img/pic/admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".md5(strtolower($_POST["admin_pass"]))."', 0, '', -1, '', 'd4365236bc832dad6871c4ccd4d310f0', '1', '0');
+(1, '".mysql_real_escape_string(str_replace("'", "\'", $_POST["admin_name"]))."', 'admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".md5(strtolower($_POST["admin_pass"]))."', 0, '', -1, '', 'd4365236bc832dad6871c4ccd4d310f0', '1', '0');
 
 ";      $arr = explode(";
 ", $query);
@@ -179,23 +185,22 @@ function new_update(){
 <div style="clear:left;"></div>
 <div style="float:left; text-align: left; padding-left: 10%; padding-top: 5px; white-space:nowrap;">
     <form method="POST" id="post_form">
-    <div style="width: 110px; float: left; margin-right: 10px;">Mysql server</div> <input class="input" type="text" required="required" name="mysql_server" value="localhost" ><br/>
-    <div style="width: 110px; float: left; margin-right: 10px;">Mysql login</div> <input class="input" type="text" required="required" name="mysql_login" value="root" ><br/>
-    <div style="width: 110px; float: left; margin-right: 10px;">Mysql pass</div> <input class="input" type="text" name="mysql_pass" ><br/>
-    <div style="width: 110px; float: left; margin-right: 10px;">Mysql DB</div> <input class="input" type="text" required="required" name="mysql_db" value="" ><br/>
+    <div style="width: 110px; float: left; margin-right: 10px;">Mysql server</div> <input id="server" class="input" type="text" required="required" name="mysql_server" value="localhost" ><br/>
+    <div style="width: 110px; float: left; margin-right: 10px;">Mysql login</div> <input id="login" class="input" type="text" required="required" name="mysql_login" value="root" ><br/>
+    <div style="width: 110px; float: left; margin-right: 10px;">Mysql pass</div> <input id="pass" class="input" type="text" name="mysql_pass" ><br/>
+    <div style="width: 110px; float: left; margin-right: 10px;">Mysql DB</div> <input id="db" class="input" type="text" required="required" name="mysql_db" value="" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Admin name</div> <input class="input" required="required" type="text" name="admin_name" value="Admin" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Admin email</div> <input class="input" required="required" type="text" name="admin_email" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Admin pass</div> <input class="input" required="required" type="text" name="admin_pass" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site name</div> <input class="input" required="required" type="text" name="name" value="Nodes Studio" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site description</div> <input class="input" required="required" type="text" name="description" value="Web 2.0 Framework" ><br/>
-    <div style="width: 110px; float: left; margin-right: 10px;">Site image</div> <input class="input" required="required" type="text" name="image" value="/img/logo.png" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site language</div> <input class="input" required="required" type="text" name="language" value="en" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site languages</div> <input class="input" required="required" type="text" name="languages" value="en;ru;gr;" ><br/>
     <div style="width: 210px; float: left; margin-right: 10px;">Encoding source</div> <select class="input" type="text" name="encoding">'.$options.'</select><br/>
     </form><br/>
 </div>
 <div style=\'width: 100%; max-width: 395px; text-align: center; float:right;\' class=\'right-center\'>
-    <input type="button" class="btn" onClick=\'document.getElementById("content").style.display = "none"; document.getElementById("post_form").submit();\' value="Install Now" style="width: 280px;" />
+    <input id="install_now" type="button" class="btn" onClick=\'check_connection();\' value="Install Now" style="width: 280px;" />
     <br/><br/>
 </div>
 <div style="clear:both;"></div>';
@@ -205,7 +210,13 @@ session_name("token");
 session_cache_limiter('private');
 session_cache_expire((1*1));
 session_start();
-if(!file_exists("engine/nodes/engine.php")||$_SESSION["user"]["id"]=="1"){
+if(!empty($_POST["mysql_test"])){
+    if(mysql_connect($_POST["server"], 
+        $_POST["login"],
+        $_POST["pass"])){
+        if(mysql_select_db($_POST["db"])) die('1');
+    }die('0');
+}else if(!file_exists("engine/nodes/engine.php")||$_SESSION["user"]["id"]=="1"){
     $output = output();
 }else{
     die("Access Denied");
@@ -219,8 +230,6 @@ if(!file_exists("engine/nodes/engine.php")||$_SESSION["user"]["id"]=="1"){
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="description" content="Nodes Studio - Web 2.0 Framework" />
 <meta property="og:description" content="Nodes Studio - Web 2.0 Framework" />
-<meta property="og:image" content="/favicon.png" />
-<meta name="keywords" content="Nodes Studio" />
 <link href="<?php echo $_SERVER["DIR"]; ?>/templates/style.css" rel="stylesheet" type="text/css" />
 <link href="<?php echo $_SERVER["DIR"]; ?>/templates/default/template.css" rel="stylesheet" type="text/css" />
 <?php
@@ -239,18 +248,37 @@ echo $fout;
     <p>Web 2.0 Framework Setup</p>
 </div>
 </section>
-<div id="mainSection" style="padding-top: 70px; line-height: 2.2; text-align: left;">
+<div id="mainSection" style="padding-top: 80px; line-height: 2.2; text-align: left; max-width: 900px;">
 <?php echo $output; ?>
 </div>
 </div>
 </section>
 <!-- /content -->
 </div>
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript"></script>
-    <script language="JavaScript" type="text/javascript"> if(!window.jQuery) document.write(unescape('<script type="text/javascript" src="<?php echo $_SERVER["DIR"]; ?>/script/jquery-1.11.1.min.js">%3C/script%3E')); </script>
+    <script src="<?php echo $_SERVER["DIR"]; ?>/script/jquery-1.11.1.js" type="text/javascript"></script>
+    <script>
+    function check_connection(){
+        jQuery.ajax({
+            type: "POST",
+            data: { 
+                "mysql_test" : "1", 
+                "server" : jQuery('#server').val(), 
+                "login" : jQuery('#login').val(), 
+                "pass" : jQuery('#pass').val(), 
+                "db" : jQuery('#db').val()
+            },
+            success: function(data){ 
+                if(data=="1"){ 
+                    document.getElementById("content").style.display = "none"; 
+                    document.getElementById("post_form").submit();
+                }else alert("Error. MySQL connection is not established");
+            }
+        });
+    }
+    </script>
 </body>
 <script language="JavaScript" type="text/javascript">
 function display(){ if(!window.jQuery) setTimeout(function(){ document.body.style.opacity = "1";}, 1000); 
 else jQuery("html, body").animate({opacity: 1}, 1000); }var tm = setTimeout(display, 5000); window.onload = function(){ clearTimeout(tm); display(); 
 if(!window.jQuery) document.write(unescape('<script type="text/javascript" src="<?php echo $_SERVER["DIR"]; ?>/script/jquery-1.11.1.min.js">%3C/script%3E')); };</script>
-</html><?php die(); ?>
+</html>

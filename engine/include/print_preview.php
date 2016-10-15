@@ -21,8 +21,8 @@ function print_preview($data){
         </div><br/>';
     }
     $fout .= '
-            <a id="'.$data["url"].'" href="'.$_SERVER["DIR"].'/'.$data["url"].'"><h2>'.substr(strip_tags($data["caption"]),0,100).'</h2></a>
-            <p>
+            <a id="'.$data["url"].'" href="'.$_SERVER["DIR"].'/content/'.$data["url"].'"><h2>'.substr(strip_tags($data["caption"]),0,100).'</h2></a>
+            <p class="content_block_text">
             '.substr(strip_tags($data["text"]), 0 ,100).'...
             </p>
         </div>';

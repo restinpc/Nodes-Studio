@@ -80,7 +80,7 @@ if(!empty($_POST["version"])||!empty($GLOBALS["auto"])){
     foreach($arr as $a){
         $a = trim(str_replace("\r", "", $a));
         if(!empty($a)){
-            $output .= "Receiving ".$a.'.. ';
+            $output .= lang("Receiving")." ".$a.'.. ';
             $file = file_get_contents($url.$version."/".$a);
             if($file!="error" && !empty($file)){
                 $a = "temp/".$a;
@@ -108,7 +108,7 @@ if(!empty($_POST["version"])||!empty($GLOBALS["auto"])){
         }
     }
     
-    $output .= lang("Replacing downloaded files from")." /temp.. ";
+    $output .= lang("Replacing downloaded files from")." /temp.. <br/>";
     $files = explode("\n", $filelist);
     foreach($files as $file){
         $file = trim($file);
@@ -122,7 +122,10 @@ if(!empty($_POST["version"])||!empty($GLOBALS["auto"])){
             }
         }
         if(!empty($file)){
-            if(!copy("temp/".$file, $file)){
+            if(is_file($file)){ 
+                $output .= lang("File")." ".$file." ".lang("already exist").".<br/>";
+                continue;
+            }else if(!copy("temp/".$file, $file)){
                 return($output.lang("Error").".<br/>".lang("Update aborted").".".$error_output);
             }
         }

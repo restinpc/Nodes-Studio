@@ -16,7 +16,7 @@ function print_comment($id, $noreply = 0){
     if(!empty($c)){
         $fout .= '<tr><td align=left valign=top style="padding: 10px; padding-bottom: 0px; padding-left: 0px;">
                 <div style="float:left;">
-                    <img src="'.$d["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;" />
+                    <img src="'.$_SERVER["DIR"].'/img/pic/'.$d["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;" />
                 </div>
                 <div style="border: 0px solid; margin-left: 60px;">
                     <strong>'.$d["name"].'</strong> <small>'.date("d.m.Y H:i", $c["date"]).'</small>
@@ -29,7 +29,7 @@ function print_comment($id, $noreply = 0){
                 <div id="comment_'.$c["id"].'" style="display:none; float:left;">
                 ';
             if(empty($_SESSION["user"])){
-                $fout .= '<center>'.lang("To post a comment, please").' <a href="#" onClick="show_login_form();">'.mb_strtolower(lang("auth")).'</a> '.mb_strtolower(lang("or")).' <a href="/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center></div>';
+                $fout .= '<center>'.lang("To post a comment, please").' <a href="#" onClick="show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center></div>';
             }else{
                 $fout .= '
             <form method="POST">
@@ -116,6 +116,6 @@ function print_comment($id, $noreply = 0){
             </form>
             ';
     }else{
-        $fout .= '<center>'.lang("To post a comment, please").' <a href="#" onClick="show_login_form();">'.mb_strtolower(lang("auth")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center>';
+        $fout .= '<center>'.lang("To post a comment, please").' <a href="#" onClick="show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center>';
     }return $fout;
 }

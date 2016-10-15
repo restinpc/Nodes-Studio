@@ -113,7 +113,7 @@ modification follow.  Pay close attention to the difference between a
 "work based on the library" and a "work that uses the library".  The
 former contains code derived from the library, whereas the latter must
 be combined with the library in order to run.
- * 
+
 
 		  GNU LESSER GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
@@ -504,4 +504,5 @@ necessary.  Here is a sample; alter the names:
 
 That's all there is to it!
              
-*/ require_once("engine/nodes/autoload.php");
+*/
+require_once("engine/nodes/autoload.php");

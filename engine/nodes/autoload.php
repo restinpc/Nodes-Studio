@@ -1,4 +1,4 @@
-<?php /* Nodes Studio system file. Do not edit! */ 
+<?php /* Nodes Studio system file. Do not edit! */
 error_reporting(0); $time=microtime(); 
 $_SERVER["DIR"] = str_replace("/index.php", "", 
     str_replace($_SERVER["DOCUMENT_ROOT"], "", $_SERVER["SCRIPT_FILENAME"])); 

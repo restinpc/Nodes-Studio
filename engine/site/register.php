@@ -19,7 +19,6 @@ if(!empty($_GET[1])){
     $this->content = engine::error();
     return; 
 }else if(!empty($_SESSION["user"]["id"])){
-    header('Location: '.$_SERVER["DIR"].'/account');
     die('<script language="JavaScript">window.location = "'.$_SERVER["DIR"].'/account";</script>');
     return;
 }
@@ -48,7 +47,7 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             unset($_POST["email"]);
         }else if(strpos($email, "@")){
             $query = 'INSERT INTO `nodes_users` (`name`, `photo`, `email`, `pass`, `online`, `confirm`, `code`) 
-                VALUES ("'.$name.'", "'.$_SERVER["DIR"].'/img/pic/anon.jpg", "'.$email.'", "'.md5(trim($_POST["pass"])).'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
+                VALUES ("'.$name.'", "anon.jpg", "'.$email.'", "'.md5(trim($_POST["pass"])).'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(trim($_POST["pass"])).'"';
             $res = engine::mysql($query);
@@ -62,17 +61,17 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             . 'VALUES("1", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Sucsessful registration")';
             engine::mysql($query);
             if($this->configs["confirm_signup_email"]){
-                engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], lang("Registration at").' '.$_SERVER["HTTP_HOST"], 
-                $_SERVER["Dear"].' '.$name.'!<br/><br/>'.lang("We are glad to confirm sucsessful registration at").
-                ' <a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/">'.$_SERVER["HTTP_HOST"].'</a><br/>'.lang("Confirmation code").': <b>'.$code.'</b><br/>'.$this->configs["email_signature"]);
+                require_once("engine/include/send_email.php");
+                send_email::confirmation($email, $name, $code);  
             }else if($this->configs["send_registration_email"]){
-                engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], lang("Registration at").' '.$_SERVER["HTTP_HOST"], 
-                $_SERVER["Dear"].' '.$name.'!<br/><br/>'.lang("We are glad to confirm sucsessful registration at").
-                ' <a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/">'.$_SERVER["HTTP_HOST"].'</a>'.$this->configs["email_signature"]);
+                require_once("engine/include/send_email.php");
+                send_email::registration($email, $name);  
             }
-            header('Location: '.$_SERVER["DIR"].'/');
-            die('<script language="JavaScript">window.location = "'.$_SERVER["DIR"].'/";</script>');
-            return;  
+            if(empty($_SESSION["redirect"])){
+                die('<script language="JavaScript">window.location = "'.$_SERVER["DIR"].'/";</script>');
+            }else{
+                die('<script language="JavaScript">window.location = "'.$_SESSION["redirect"].'";</script>');
+            }return;   
         }else{
             $this->activejs .= ' alert("'.lang("Error").'. '.lang("Incorrect email").'."); '; 
             $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
@@ -82,8 +81,10 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
         }
     }
 }
-$this->content = '<h1>'.lang("Sign Up").'.</h1>'
-. '<br/><br/><form method="POST">'
+$this->content .= '<h1>'.lang("Sign Up").'.</h1>'
+. '<br/>'
+. '<a target="_parent" href="'.$_SERVER["DIR"].'/login" onClick="event.preventDefault(); show_login_form();">'.lang("Already have an account?").'</a><br/><br/>'
+. '<form method="POST">'
 . '<input required type="text" name="email" value="'.$_POST["email"].'" class="input" style="padding: 5px; width: 100%;max-width: 265px; margin-top: 0px;" placeHolder="'.lang("Email").'" title="'.lang("Email").'" /><br/>'
 . '<input required type="text" name="name" value="'.$_POST["name"].'" class="input" style="padding: 5px;width: 100%;max-width: 265px; margin-top: 10px;" placeHolder="'.lang("Name").'" title="'.lang("Name").'"  /><br/>'
 . '<input required type="password" name="pass" class="input" style="width: 100%;padding: 5px;max-width: 265px; margin-top: 10px;" placeHolder="'.lang("Password").'" title="'.lang("Password").'"  value="'.$_POST["pass"].'" /><br/>'

@@ -93,7 +93,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
             $count = $data[0];
             if($to > $count) $to = $count;
             if($data[0]>0){
-                $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' entries, 
+                $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
                     <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
                      <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
                      <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
@@ -172,36 +172,44 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
             if($_SESSION["user"]["id"]=="1"){
                 $this->content .= '<a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["cat_id"].'&id='.$data["id"].'&act=edit"><input type="button" class="btn" style="width: 280px;" value="Edit article" /></a>';
             }
-
-            $this->content .= '
-                <div style="clear:both;"></div>
-                <br/><br/>
+            $this->content .= '<div style="clear:both;"></div>';
+            
+            $fout .= '<br/><div style="text-align:left;"><h6>'.lang("You might also be interested in").':</h6><br/></div>
                 <div class="preview_blocks">';
-
-            $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` = "'.$data["cat_id"].'" AND `id` <> "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `date` DESC';
+            $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` = "'.$data["cat_id"].'" AND `id` <> "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND()';
             $res = engine::mysql($query); 
             require_once ("engine/include/print_preview.php");
             $count = 0;
             $urls = array();
             while($d = mysql_fetch_array($res)){
-                if($count++>=3) break;
-                $this->content .= print_preview($d);
+                if($count>2) break;
+                $count++;
+                $fout .= print_preview($d);
                 array_push($urls, $d["id"]);
             }
             if($count<3){
-                $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` <> "'.$data["cat_id"].'" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `date` DESC';
+                $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` <> "'.$data["cat_id"].'" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND()';
                 $res = engine::mysql($query); 
                 while($d = mysql_fetch_array($res)){
                     if(!in_array($d["id"], $urls)){
-                        if($count++>3) break;
-                        $this->content .= print_preview($d);
+                        if($count>2) break;
+                        $count++;
+                        $fout .= print_preview($d);
                         array_push($urls, $d["id"]);
                     }
                 }
             }
-            $this->content .= '</div>
+            $query = 'SELECT * FROM `nodes_products` WHERE `status` = "1" ORDER BY RAND() LIMIT 0, '.(6-$count);
+            $res = engine::mysql($query);
+            require_once('engine/include/print_product_preview.php');
+            while($d = mysql_fetch_array($res)){
+                $count++;
+                $fout .= print_product_preview($d);
+            }
+            $fout .= '</div>
                 <div style="clear:both;"></div>
                 ';
+            if($count) $this->content .= $fout;
         }
     }
 }else{
@@ -235,7 +243,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
         $count = $data[0];
         if($to > $count) $to = $count;
         if($data[0]>0){
-            $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' entries, 
+            $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
                 <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
                  <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
                  <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
