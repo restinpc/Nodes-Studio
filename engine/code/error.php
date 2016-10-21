@@ -20,13 +20,22 @@ $fout .= '
     color: #349ac5;
     text-decoration: none;
 }
+.error_code{
+    font-size: 120px;
+}
+.error_text{
+    font-size: 28px;
+}
+.clear{
+    clear:both;
+}
 @media (max-width: 680px) {
-#robot{
-    display: none;
-}
-#div{
-    padding-top: 100px;
-}
+    #robot{
+        display: none;
+    }
+    #div{
+        padding-top: 100px;
+    }
 }
 </style>
 <div id="div">
@@ -34,13 +43,13 @@ $fout .= '
     <div id="caption">';
         if(isset($_GET["504"])){
             $fout .= '
-        <span style="font-size: 120px;">504</span><br/>
-        <span style="font-size: 28px;">'.lang("Gateway Timeout").'</span><br/><br/><br/>
+        <span class="error_code">504</span><br/>
+        <span class="error_text">'.lang("Gateway Timeout").'</span><br/><br/><br/>
                 ';  
         }else{
             $fout .= '
-        <span style="font-size: 120px;">404</span><br/>
-        <span style="font-size: 28px;">'.lang("Page not found").'</span><br/><br/><br/>
+        <span class="error_code">404</span><br/>
+        <span class="error_text">'.lang("Page not found").'</span><br/><br/><br/>
                 ';
         }
         
@@ -48,7 +57,7 @@ $fout .= '
         <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
     </div>
 </div>
-<div style="clear:both;"></div>';
+<div class="clear"></div>';
 echo str_replace("  ", " ", str_replace("
 ", "", $fout));
 

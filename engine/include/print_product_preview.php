@@ -34,7 +34,7 @@ function print_product_preview($data, $right=0){
                 ';
         }
         $fout .= '
-        <div style="clear:both;"></div>
+        <div class="clear"></div>
     </div>
 <br/> 
 </div>';

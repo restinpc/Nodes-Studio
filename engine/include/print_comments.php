@@ -14,34 +14,34 @@ function print_comment($id, $noreply = 0){
     $rd = engine::mysql($query);
     $d = mysql_fetch_array($rd);
     if(!empty($c)){
-        $fout .= '<tr><td align=left valign=top style="padding: 10px; padding-bottom: 0px; padding-left: 0px;">
-                <div style="float:left;">
-                    <img src="'.$_SERVER["DIR"].'/img/pic/'.$d["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;" />
+        $fout .= '<tr><td align=left valign=top class="comment">
+                <div class="comment_image">
+                    <img src="'.$_SERVER["DIR"].'/img/pic/'.$d["photo"].'" width=50 />
                 </div>
-                <div style="border: 0px solid; margin-left: 60px;">
+                <div class="comment_div">
                     <strong>'.$d["name"].'</strong> <small>'.date("d.m.Y H:i", $c["date"]).'</small>
-                    <div style="padding-top: 5px; padding-bottom: 5px;">'.$c["text"].'</div>';
+                    <div class="comment_text">'.$c["text"].'</div>';
         
         if($_SESSION["user"]["id"]=="1" && !$noreply){
             $fout .= '
                 <a onClick=\'document.getElementById("comment_'.$c["id"].'").style.display ="block";'
                     .'this.style.display = "none";\'>'.lang("Reply").'</a><br/>
-                <div id="comment_'.$c["id"].'" style="display:none; float:left;">
+                <div id="comment_'.$c["id"].'" class="comment_reply">
                 ';
             if(empty($_SESSION["user"])){
-                $fout .= '<center>'.lang("To post a comment, please").' <a href="#" onClick="show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center></div>';
+                $fout .= '<center>'.lang("To post a comment, please").' <a href="'.$_SERVER["DIR"].'/login" onClick="event.preventDefault(); show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center></div>';
             }else{
                 $fout .= '
             <form method="POST">
                 <input type="hidden" name="reply" value="'.$c["id"].'" />
-                <textarea name="comment" cols=50 style="height: 80px; width: 100%; max-width: 500px;"></textarea>
+                <textarea name="comment" cols=50 class="comment_textarea"></textarea>
                 <br/><br/>
                 <input type="submit" class="btn"  value="'.lang("Add comment").'" />
             </form>
             </div>';
             }
         }
-        $fout1 .= '<table align=center style="border: 0px solid; width: 100%; max-width: 500px; margin-top: 5px;">';
+        $fout1 .= '<table align=center class="comment_table">';
         $query = 'SELECT * FROM `nodes_comments` WHERE `reply` = "'.$c["id"].'"';
         $rf = engine::mysql($query);
         $flag = 0;
@@ -55,7 +55,9 @@ function print_comment($id, $noreply = 0){
             </div>
         </td></tr>';
     }return $fout;
-}function print_comments($url){
+}
+
+function print_comments($url){
     $url = trim(str_replace('"', "'", urldecode($url)));
     if(!empty($_POST["comment"])){
         $text = str_replace('"', "'", htmlspecialchars(strip_tags($_POST["comment"])));
@@ -74,14 +76,8 @@ function print_comment($id, $noreply = 0){
             $r_conf = engine::mysql($query);
             $d_conf = mysql_fetch_array($r_conf);
             if(intval($d_conf["value"])){
-                $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"'; 
-                $r_email = engine::mysql($query);
-                $d_email = mysql_fetch_array($r_email);
-                $message = 'User '.$_SESSION["user"]["name"].' add new comment!<br/>'
-                        . '<a href="'.$_SERVER["SCRIPT_URI"].'">'.$_SERVER["SCRIPT_URI"].'</a><br/>'
-                        . '<br/>Comment:<br/>-----------------------------<br/>'.$text;
-                engine::send_mail($d_email["value"], "no-reply@".$_SERVER["HTTP_HOST"], 
-                        "New comment at ".$_SERVER["HTTP_HOST"], $message);
+                require_once("engine/include/send_email.php");
+                send_email::new_comment($_SESSION["user"]["id"], $url);     
             }
             $fout .= '
             <script>alert("'.lang("Comment submited!").'");</script>
@@ -89,7 +85,7 @@ function print_comment($id, $noreply = 0){
         }
     }
     $flag = 0;
-    $fout1 .= '<table align=center style="width: 100%; max-width: 500px; font-size: 14px;">';
+    $fout1 .= '<table align=center class="w400">';
     $query = 'SELECT * FROM `nodes_comments` WHERE `url` LIKE "'.$url.'" AND `reply` = 0';
     $res = engine::mysql($query);
     while($data = mysql_fetch_array($res)){
@@ -107,15 +103,15 @@ function print_comment($id, $noreply = 0){
         }
         $fout .= '
             <form method="POST">
-                <div id="new_comment" style="display:none;">
+                <div id="new_comment" class="hidden">
                     <strong>'.lang("Add new comment").'</strong><br/><br/>
-                    <textarea name="comment" cols=50 style="height: 80px; width: 100%; max-width: 500px;"></textarea><br/><br/>
-                    <center><input type="submit" class="btn"  value="'.lang("Submit comment").'" style="width: 280px;" /></center>
+                    <textarea name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>
+                    <center><input type="submit" class="btn w280" value="'.lang("Submit comment").'" /></center>
                 </div>
-                <input type="button" class="btn"  value="'.lang("Add comment").'" style="width: 280px;" onClick=\'document.getElementById("new_comment").style.display="block";this.style.display="none";\' />
+                <input type="button" class="btn w280" value="'.lang("Add comment").'" onClick=\'document.getElementById("new_comment").style.display="block";this.style.display="none";\' />
             </form>
             ';
     }else{
-        $fout .= '<center>'.lang("To post a comment, please").' <a href="#" onClick="show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center>';
+        $fout .= '<center>'.lang("To post a comment, please").' <a href="'.$_SERVER["DIR"].'/login" onClick="event.preventDefault(); show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center>';
     }return $fout;
 }

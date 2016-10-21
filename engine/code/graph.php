@@ -1,10 +1,6 @@
 <?php
 
 function imagelinethick($image, $x1, $y1, $x2, $y2, $color, $thick = 0){
-    /* этот способ применим только для ортогональных прямых
-    imagesetthickness($image, $thick);
-    return imageline($image, $x1, $y1, $x2, $y2, $color);
-    */
     if ($thick == 1) {
         return imageline($image, $x1, $y1, $x2, $y2, $color);
     }
@@ -23,14 +19,6 @@ function imagelinethick($image, $x1, $y1, $x2, $y2, $color, $thick = 0){
     imagefilledpolygon($image, $points, 4, $color);
     return imagepolygon($image, $points, 4, $color);
 }
-
-// Задаем входные данные ############################################
-
-// Входные данные - три ряда, содержащие случайные данные.
-// Деление на 2 и 3 взято для того чтобы передние ряды не 
-// пересекались
-
-// Массив $DATA["x"] содержит подписи по оси "X"
 
 $DATA=Array();
 for ($i=0;$i<10;$i++) {

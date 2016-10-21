@@ -100,7 +100,6 @@ if(empty($_SESSION["order_confirm"])){
         <div class="document">
         <form method="POST">
             <input type="hidden" name="order_confirm" value="1" />';
-
     $price = 0;
     foreach($_SESSION["products"] as $key=>$value){
         if($value>0){
@@ -113,23 +112,23 @@ if(empty($_SESSION["order_confirm"])){
             $shipping = mysql_fetch_array($res);
             $images = explode(";", $product["img"]);
             $this->content .= '<div class="order_detail">
-            <div style="float:left; width: 180px; height: 180px; background: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].') center no-repeat;background-size: cover; margin-right: 10px;">&nbsp;</div>
-                <b style="font-size: 21px;">'.$product["title"].'</b><br/><br/>
-                <font style="font-size: 18px;">$ '.$product["price"].'</font><br/><br/>
+            <div class="order_detail_image" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
+                <b class="fs21">'.$product["title"].'</b><br/><br/>
+                <font class="fs18">$ '.$product["price"].'</font><br/><br/>
                 '.lang("Shipping from").': <a title="'.$shipping["country"].', '.$shipping["state"].', '.$shipping["city"].', '.$shipping["street1"].', '.$shipping["street2"].' ">'.$shipping["country"].'</a><br/>
-                <div style="padding-top: 10px; text-align:center; float:right;">
-                    <input type="button" class="btn" style="margin: 5px; width: 170px; margin-top: 10px;" name="remove" value="'.lang("Remove product").'" onClick=\'remove_from_bin("'.$id.'");\' />
+                <div class="order_detail_button">
+                    <input type="button" class="btn" name="remove" value="'.lang("Remove product").'" onClick=\'remove_from_bin("'.$id.'");\' />
                 </div>
-            <div style="clear:both;"></div>
+            <div class="clear"></div>
             </div>';
         }
     }if(!$price){
         $this->content .= '<br/>'.lang("Sorry, there is no products").'<br/><br/><br/>';
     }else{
         $this->content .= '<br/>'
-                . '<div style="text-align:right;"><h6>'.lang("Total price").': $'.$price.'</h6></div>'
+                . '<div class="tar"><h6>'.lang("Total price").': $'.$price.'</h6></div>'
                 . '<br/><br/>'
-                . '<input type="submit" class="btn" value="'.lang("Next").'" style="width: 280px;" />';
+                . '<input type="submit" class="btn w280" value="'.lang("Next").'" />';
     }
     $this->content .= '
         </form>
@@ -142,27 +141,25 @@ if(empty($_SESSION["order_confirm"])){
     $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
-
     $this->content .= '<h1>'.lang("Shipping").'</h1><br/>
     '.lang("Please, confirm your shipping address").'<br/><br/><br/>
     <form method="POST">
         <input type="hidden" name="shipping_confirm" value="1" />
-        <input type="text" class="input" placeHolder="'.lang("First name").'" style="width: 280px;" name="fname" required value="'.$data["fname"].'" /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("Last name").'" style="width: 280px;" name="lname" required value="'.$data["lname"].'" /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("Country").'" id="country_selector" style="width: 280px;"  name="country" required value="'.$data["country"].'"  /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("State").'" style="width: 280px;" name="state" value="'.$data["state"].'" required /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("City").'" style="width: 280px;" name="city" required value="'.$data["city"].'"  /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("Zip code").'" style="width: 280px;" name="zip" required value="'.$data["zip"].'"  /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("Street").' 1" style="width: 280px;" name="street1" required value="'.$data["street1"].'"  /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("Street").' 2" style="width: 280px;" name="street2" value="'.$data["street2"].'"  /><br/><br/>
-        <input type="text" class="input" placeHolder="'.lang("Phone number").'" style="width: 280px;" name="phone" required value="'.$data["phone"].'"  /><br/><br/>
-        <input type="submit" class="btn" value="'.lang("Next").'" style="width: 280px;" />
+        <input type="text" class="input w280" placeHolder="'.lang("First name").'" name="fname" required value="'.$data["fname"].'" /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("Last name").'" name="lname" required value="'.$data["lname"].'" /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("Country").'" id="country_selector" name="country" required value="'.$data["country"].'"  /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("State").'" name="state" value="'.$data["state"].'" required /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("City").'" name="city" required value="'.$data["city"].'"  /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("Zip code").'" name="zip" required value="'.$data["zip"].'"  /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("Street").' 1" name="street1" required value="'.$data["street1"].'"  /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("Street").' 2" name="street2" value="'.$data["street2"].'"  /><br/><br/>
+        <input type="text" class="input w280" placeHolder="'.lang("Phone number").'" name="phone" required value="'.$data["phone"].'"  /><br/><br/>
+        <input type="submit" class="btn w280" value="'.lang("Next").'" />
     </form><br/><br/>'; 
     $this->activejs .= '
-            jQuery("#country_selector").countrySelect({
-                    defaultCountry: "us"
-            });
-        ';
+        jQuery("#country_selector").countrySelect({  defaultCountry: "us" });
+    ';
+    
 }else{
     
     $this->content .= '
@@ -172,7 +169,7 @@ if(empty($_SESSION["order_confirm"])){
     $query = 'SELECT * FROM `nodes_product_order` WHERE `order_id` = "'.$_SESSION["order_confirm"].'"';
     $res = engine::mysql($query);
     $price = 0;
-    $products = '<div style="text-align:left; float:left; width: 290px; border: 0px solid; padding:10px;">
+    $products = '<div class="order_detail_left">
         <b>'.lang("Order").'</b><br/><br/>';
     while($data = mysql_fetch_array($res)){
         if($data["count"]>0){
@@ -184,10 +181,10 @@ if(empty($_SESSION["order_confirm"])){
             $shipping = mysql_fetch_array($r);
             $images = explode(";", $product["img"]);
             $products .= '<div class="order_detail">
-            <div style="float:left; width: 100px; height: 100px; background: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].') center no-repeat;background-size: cover; margin-right: 10px;">&nbsp;</div>
-                <b style="font-size: 21px;">'.$product["title"].'</b><br/><br/>
-                <font style="font-size: 18px;">$ '.$product["price"].'</font><br/>
-            <div style="clear:both;"></div>
+            <div class="order_detail_preview" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
+                <b class="fs21">'.$product["title"].'</b><br/><br/>
+                <font class="fs18">$ '.$product["price"].'</font><br/>
+            <div class="clear"></div>
             </div>';
             $price += $data["price"];
         }
@@ -196,7 +193,7 @@ if(empty($_SESSION["order_confirm"])){
     $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
-    $shipping = '<div style="text-align:left; float:left; width: 290px; border: 0px solid; padding: 10px;">
+    $shipping = '<div class="order_detail_shipping">
         <b>'.lang("Shipping").'</b><br/><br/>
         '.lang("First name").': '.$data["fname"].'<br/><br/>
         '.lang("Last name").': '.$data["lname"].'<br/><br/>
@@ -205,18 +202,17 @@ if(empty($_SESSION["order_confirm"])){
         '.lang("City").': '.$data["city"].'<br/><br/>
         '.lang("Zip code").': '.$data["zip"].'<br/><br/>
         '.lang("Street").': '.$data["street1"].'<br/>'
-            .$data["street2"].'<br/><br/>
-            </div>
-        ';
+        .$data["street2"].'<br/><br/>
+        </div>';
     
     $this->content .= $shipping.$products;
     
-    $this->content .= '<div style="clear:both;"><br/></div>
+    $this->content .= '<div class="clear"><br/></div>
         <h6>'.lang("Total price").': $'.$price.'</h6><br/><br/>';
     
     if($this->configs["sandbox"]){
         $this->content .= '
-            <button class="btn" style="width: 280px;" onClick=\'process_payment("'.$_SESSION["order_confirm"].'","'.$price.'");\'>'.lang("Process payment").'</button><br/><br/>
+            <button class="btn w280" onClick=\'process_payment("'.$_SESSION["order_confirm"].'","'.$price.'");\'>'.lang("Process payment").'</button><br/><br/>
             ';
     }else{
         if($this->configs["paypal_test"]) $domain = 'www.sandbox.paypal.com';
@@ -232,7 +228,7 @@ if(empty($_SESSION["order_confirm"])){
             <input type="hidden" name="return" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account/purchases">
             <input type="hidden" name="no_shipping" value="1">
             <input type="hidden" name="notify_url" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/paypal.php?order_id='.$_SESSION["order_confirm"].'">
-            <button type="submit" class="btn" style="width: 280px;">PayPal</button><br/><br/>
+            <button type="submit" class="btn w280">PayPal</button><br/><br/>
             </form>';
     }
     $this->content .= '</div>';

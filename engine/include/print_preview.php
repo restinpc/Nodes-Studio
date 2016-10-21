@@ -9,13 +9,13 @@ function print_preview($data){
         ';
     if(!empty($data["img"])){
         $fout .= '
-        <div class="content_img" style="background: url(\''.$_SERVER["DIR"].'/img/data/thumb/'.$data["img"].'\') no-repeat;background-size: cover;"
+        <div class="content_img" style="background-image: url(\''.$_SERVER["DIR"].'/img/data/thumb/'.$data["img"].'\');"
             onClick=\'document.getElementById("'.$data["url"].'").click();\'>
             &nbsp;
         </div><br/>';
     }else{
         $fout .= '
-        <div class="content_img" style="background: url(\''.$_SERVER["DIR"].'/img/no-image.jpg\') no-repeat;background-size: cover;"
+        <div class="content_img" style="background-image: url(\''.$_SERVER["DIR"].'/img/no-image.jpg\');"
             onClick=\'document.getElementById("'.$data["url"].'").click();\'>
             &nbsp;
         </div><br/>';

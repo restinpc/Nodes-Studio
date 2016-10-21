@@ -93,19 +93,19 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
             $count = $data[0];
             if($to > $count) $to = $count;
             if($data[0]>0){
-                $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+                $this->content .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
                     <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
                      <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
                      <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
                      <option'; if($_SESSION["count"]=="100") $this->content .= ' selected'; $this->content .= '>100</option>
                     </select> '.lang("per page").'.</nobr></p>';
             }$this->content .= '
-            </div><div style="clear:right;"></div>';
+            </div><div class="cr"></div>';
             if($count>$_SESSION["count"]){
                $this->content .= '<div class="pagination" >';
                     $pages = ceil($count/$_SESSION["count"]);
                    if($_SESSION["page"]>1){
-                        $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="en" href="#">'.lang("Previous").'</a></span>';
+                        $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
                     }$this->content .= '<ul>';
                    $a = $b = $c = $d = $e = $f = 0;
                    for($i = 1; $i <= $pages; $i++){
@@ -118,7 +118,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
                                $b = 1; $e = 0;
                               $this->content .= '<li class="active-page">'.$i.'</li>';
                            }else{
-                               $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="en" href="#">'.$i.'</a></li>';
+                               $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                            }
                        }else if((!$c||!$b) && !$f && $i<$pages){
                            $f = 1; $e = 0;
@@ -127,23 +127,23 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
                            $this->content .= '<li class="dots">. . .</li>';
                        }
                    }if($_SESSION["page"]<$pages){
-                       $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="en" href="#">'.lang("Next").'</a></li>';
+                       $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
                    }$this->content .= '
              </ul>
             </div>';
-            }$this->content .= '<div style="clear:both;"></div></form>';
+            }$this->content .= '<div class="clear"></div></form>';
             if($_SESSION["user"]["id"]=="1"){
-                $this->content .= '<br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn" style="width: 280px;" value="'.lang("Add article").'" /></a>'
-                        . '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn" style="width: 280px;" value="Edit directory" /></a><br/><br/>';
+                $this->content .= '<br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn w280" value="'.lang("Add article").'" /></a>'
+                . '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit directory").'" /></a><br/><br/>';
             }  
         }else{
         //  print catalog
             require_once ("engine/include/print_catalog.php");
             $this->content .= print_catalog($data);
-            $this->content .= '<div style="clear:both;"></div>';
+            $this->content .= '<div class="clear"></div>';
             if($_SESSION["user"]["id"]=="1"){
-                $this->content .= '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn" style="width: 280px;" value="'.lang("Add article").'" /></a>'
-                        . '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn" style="width: 280px;" value="'.lang("Edit directory").'" /></a>';
+                $this->content .= '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn w280" value="'.lang("Add article").'" /></a>'
+                        . '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit directory").'" /></a>';
             }
         }
     }else{
@@ -170,11 +170,11 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
             $this->content .= print_content($data);
 
             if($_SESSION["user"]["id"]=="1"){
-                $this->content .= '<a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["cat_id"].'&id='.$data["id"].'&act=edit"><input type="button" class="btn" style="width: 280px;" value="Edit article" /></a>';
+                $this->content .= '<a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["cat_id"].'&id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit article").'" /></a>';
             }
-            $this->content .= '<div style="clear:both;"></div>';
+            $this->content .= '<div class="clear"></div>';
             
-            $fout .= '<br/><div style="text-align:left;"><h6>'.lang("You might also be interested in").':</h6><br/></div>
+            $fout .= '<br/><div class="tal pl10"><h6>'.lang("You might also be interested in").':</h6><br/></div>
                 <div class="preview_blocks">';
             $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` = "'.$data["cat_id"].'" AND `id` <> "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND()';
             $res = engine::mysql($query); 
@@ -207,7 +207,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
                 $fout .= print_product_preview($d);
             }
             $fout .= '</div>
-                <div style="clear:both;"></div>
+                <div class="clear"></div>
                 ';
             if($count) $this->content .= $fout;
         }
@@ -227,7 +227,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
         $arr_count++;
         $table .=  print_preview($data);
     }
-    $table .= '</div><div style="clear:both;"></div>';
+    $table .= '</div><div class="clear"></div>';
     if($arr_count){
         $this->content .= $table.'
         <form method="POST"  id="query_form"  onSubmit="submit_search();">
@@ -243,19 +243,19 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
         $count = $data[0];
         if($to > $count) $to = $count;
         if($data[0]>0){
-            $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+            $this->content .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
                 <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
                  <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
                  <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
                  <option'; if($_SESSION["count"]=="100") $this->content .= ' selected'; $this->content .= '>100</option>
                 </select> '.lang("per page").'.</nobr></p>';
         }$this->content .= '
-        </div><div style="clear:right;"></div>';
+        </div><div class="cr"></div>';
         if($count>$_SESSION["count"]){
            $this->content .= '<div class="pagination" >';
                 $pages = ceil($count/$_SESSION["count"]);
                if($_SESSION["page"]>1){
-                    $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="en" href="#">'.lang("Previous").'</a></span>';
+                    $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
                 }$this->content .= '<ul>';
                $a = $b = $c = $d = $e = $f = 0;
                for($i = 1; $i <= $pages; $i++){
@@ -268,7 +268,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
                            $b = 1; $e = 0;
                           $this->content .= '<li class="active-page">'.$i.'</li>';
                        }else{
-                           $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="en" href="#">'.$i.'</a></li>';
+                           $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                        }
                    }else if((!$c||!$b) && !$f && $i<$pages){
                        $f = 1; $e = 0;
@@ -277,13 +277,13 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
                        $this->content .= '<li class="dots">. . .</li>';
                    }
                }if($_SESSION["page"]<$pages){
-                   $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="en" href="#">'.lang("Next").'</a></li>';
+                   $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
                }$this->content .= '
          </ul>
         </div>';
-        }$this->content .= '<div style="clear:both;"></div></form>';
+        }$this->content .= '<div class="clear"></div></form>';
     }else{
-        $this->content = '<div style="padding-top: 70px; padding-bottom: 70px;">'.lang("No articles found").'</div>';
+        $this->content = '<div class="clear_block">'.lang("No articles found").'</div>';
     }
 }
 

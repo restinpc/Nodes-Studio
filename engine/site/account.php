@@ -37,9 +37,9 @@ if(!empty($_SESSION["user"]["id"])){
         $this->title .= ' - '.lang("Account confirmation");
         $this->content .= '<h3>'.lang("Account confirmation").'</h3><br/><br/>'
                 . '<form method="POST">'
-                . '<input type="text" class="input" required name="code" placeHolder="'.lang("Confirmation code").'" style="width: 280px;" />'
+                . '<input type="text" class="input w280" required name="code" placeHolder="'.lang("Confirmation code").'" />'
                 . '<br/><br/>'
-                . '<input type="submit" class="btn" style="width: 280px;" value="'.lang("Submit").'" />'
+                . '<input type="submit" class="btn w280" value="'.lang("Submit").'" />'
                 . '</form>';
         return;
     }
@@ -71,37 +71,37 @@ if(!empty($_SESSION["user"]["id"])){
                 $this->content .= '<p>'.lang("Enter your email and password to continue").'</p>';
             }
             $this->content .= '<br/><form method="POST" enctype="multipart/form-data">
-                <div style="width: 300px; margin:auto; text-align:center;">
+                <div class="settings_block">
                 <table>
                 <tr>
-                    <td style="padding-bottom: 10px; width: 70px; padding-right: 5px;" align=right><img src="'.$_SERVER["DIR"].'/img/pic/'.$_SESSION["user"]["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;  margin-top: -5px;" /></td>
-                    <td style="padding-bottom: 0px;" valign=top><div style="float:left; text-align:left; padding-left: 5px;">'.lang("Change picture").':<br/><input type="file" name="img" class="input" style="width: 200px;margin-top: 5px;" /></div></td>
+                    <td class="settings_pic" align=right><img src="'.$_SERVER["DIR"].'/img/pic/'.$_SESSION["user"]["photo"].'" width=50 /></td>
+                    <td valign=top><div class="settings_upload">'.lang("Change picture").':<br/><input type="file" name="img" class="input" /></div></td>
                 </tr>
 
                 <tr>
-                    <td align=right style="padding-bottom: 10px; width: 70px; padding-right: 5px;">'.lang("Name").':</td>
-                    <td style="padding-bottom: 10px;" ><input type="text" name="name" value="'.$_SESSION["user"]["name"].'" class="input" style="width: 200px;" /></td>
+                    <td align=right class="settings_caption">'.lang("Name").':</td>
+                    <td class="pb10"><input type="text" name="name" value="'.$_SESSION["user"]["name"].'" class="input w200" /></td>
                 </tr>';
 
             if(!empty($_SESSION["user"]["email"])){
                 $this->content .= '
                 <tr>
-                    <td align=right style="padding-bottom: 10px; width: 70px; padding-right: 5px;">'.lang("Email").':</td>
-                    <td style="padding-bottom: 10px;" ><input type="text" name="email" value="'.$_SESSION["user"]["email"].'" class="input" style="width: 200px;" /></td>
+                    <td align=right class="settings_caption">'.lang("Email").':</td>
+                    <td class="pb10"><input type="text" name="email" value="'.$_SESSION["user"]["email"].'" class="input w200" /></td>
                 </tr>
                 <tr>
-                    <td align=right style="padding-bottom: 10px; width: 70px; padding-right: 5px;">'.lang("Password").':</td>
-                    <td style="padding-bottom: 10px;" ><input type="password" name="pass" value="" placeHolder="'.lang("New password").'" class="input" style="width: 200px;" /></td>
+                    <td align=right class="settings_caption">'.lang("Password").':</td>
+                    <td class="pb10"><input type="password" name="pass" value="" placeHolder="'.lang("New password").'" class="input w200" /></td>
                 </tr>';
             }else{
                 $this->content .= '
                 <tr>
-                    <td align=right style="padding-bottom: 10px; width: 70px; padding-right: 5px;">'.lang("Email").':</td>
-                    <td style="padding-bottom: 10px;" ><input required type="text" name="email" placeHolder="'.lang("Enter your email").'" class="input" style="width: 200px;" /></td>
+                    <td align=right class="settings_caption">'.lang("Email").':</td>
+                    <td class="pb10"><input required type="text" name="email" placeHolder="'.lang("Enter your email").'" class="input w200" /></td>
                 </tr>
                 <tr>
-                    <td align=right style="padding-bottom: 10px; width: 70px; padding-right: 5px;">'.lang("Password").':</td>
-                    <td style="padding-bottom: 10px;" ><input required type="password" name="pass" value="" placeHolder="'.lang("Enter your password").'" class="input" style="width: 200px;" /></td>
+                    <td align=right class="settings_caption">'.lang("Password").':</td>
+                    <td class="pb10"><input required type="password" name="pass" value="" placeHolder="'.lang("Enter your password").'" class="input w200" /></td>
                 </tr>'; 
             }
             $this->content .= '
@@ -110,7 +110,7 @@ if(!empty($_SESSION["user"]["id"])){
 
 if(empty($_SESSION["user"]["url"])){
 
-    $this->content .= '<td colspan=2 style="padding: 5px;">';
+    $this->content .= '<td colspan=2 class="p5">';
 
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "vk_id"';
     $res = engine::mysql($query);
@@ -133,19 +133,19 @@ if(empty($_SESSION["user"]["url"])){
             !empty($gp_id["value"])||
             !empty($vk["value"])){
 
-    $this->content .= '<div style="padding: 5px; border: #eee 1px solid; border-radius: 5px;">'.lang("Connect with social network").'<br/><br/>';
-    if(!empty($fb_id["value"])) $this->content .= '<a rel="nofollow" target="_parent"  href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" style="margin: 15px; margin-left: 0px; cursor: pointer;"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
-    if(!empty($tw_key["value"])) $this->content .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" style="margin: 15px;"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
-    if(!empty($gp_id["value"])) $this->content .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" style="margin: 15px;"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
-    if(!empty($vk["value"])) $this->content .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" style="margin: 15px; margin-right: 0px;"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="VK"/></a>';
+    $this->content .= '<div class="settings_social">'.lang("Connect with social network").'<br/><br/>';
+    if(!empty($fb_id["value"])) $this->content .= '<a rel="nofollow" target="_parent"  href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" class="settings_fb"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
+    if(!empty($tw_key["value"])) $this->content .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" class="m15"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
+    if(!empty($gp_id["value"])) $this->content .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" class="m15"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
+    if(!empty($vk["value"])) $this->content .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="settings_vk"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="VK"/></a>';
     $this->content .= '</div>';
 
             }
 
 }else{
 
-    $this->content .= ' <td align=right style="padding-bottom: 10px; width: 70px; padding-right: 5px;">'.lang("Site").':</td>
-        <td align=left style="padding-left: 7px;"><div style="overflow:hidden; height: 14px; width: 200px;"><a href="'.$_SESSION["user"]["url"].'" target="_blank">'.str_replace('/', ' / ', str_replace("http://", '', $_SESSION["user"]["url"])).'</a></div><br/>';
+    $this->content .= ' <td align=right  class="settings_caption">'.lang("Site").':</td>
+        <td align=left class="pl7"><div class="settings_url"><a href="'.$_SESSION["user"]["url"].'" target="_blank">'.str_replace('/', ' / ', str_replace("http://", '', $_SESSION["user"]["url"])).'</a></div><br/>';
 
 }
 
@@ -153,9 +153,9 @@ $this->content .= '<br/>
                     </td>
                 </tr>
                 <tr>
-                    <td style="padding-top: 20px;" colspan=2>
-                        <input type="submit" class="btn" style="width: 280px;" value="'.lang("Save changes").'" /><br/><br/>
-                        <a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn btnSmall" style="width: 280px;" value="'.lang("Back to account").'"  /></a><br/><br/>
+                    <td class="pt20" colspan=2>
+                        <input type="submit" class="btn w280" value="'.lang("Save changes").'" /><br/><br/>
+                        <a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn w280" value="'.lang("Back to account").'"  /></a><br/><br/>
                     </td>
                 </tr>
                 </table>
@@ -225,26 +225,26 @@ $this->content .= '<br/>
                 $images = explode(';', $product["img"]);
                 $this->title .= ' - '.lang("Delivery confirmation");
                 $this->content = '<h1>'.lang("Delivery confirmation").'</h1><br/><br/>
-<div class="document delivery">
-    <div class="delivery_confirm">
-        <div class="delivery_image" style="background: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].') center no-repeat; background-size: cover;">&nbsp;</div>
-        <div>
-        <form method="POST">
-            <input type="hidden" name="rating" id="total_rating" value="5" />    
-            <div style="delivery_quality">'.lang("Quality").':</div>
-            <div id="raiting_star">
-                <div id="raiting" >
-                    <div id="raiting_blank"></div>
-                    <div id="raiting_hover"></div>
-                    <div id="raiting_votes"></div>
-                </div>
-            </div><br/>
-            <textarea name="comment" class="input delivery_textarea" placeHolder="'.lang("Your comment here").'"></textarea><br/><br/>
-            <input type="submit" class="btn" style="width: 280px;" value="'.lang("Submit").'" /><br/>
-        </form>
-        </div>
-    </div>
-</div>';
+                <div class="document delivery">
+                    <div class="delivery_confirm">
+                        <div class="delivery_image" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
+                        <div>
+                        <form method="POST">
+                            <input type="hidden" name="rating" id="total_rating" value="5" />    
+                            <div class="delivery_quality">'.lang("Quality").':</div>
+                            <div id="raiting_star">
+                                <div id="raiting" >
+                                    <div id="raiting_blank"></div>
+                                    <div id="raiting_hover"></div>
+                                    <div id="raiting_votes"></div>
+                                </div>
+                            </div><br/>
+                            <textarea name="comment" class="input delivery_textarea" placeHolder="'.lang("Your comment here").'"></textarea><br/><br/>
+                            <input type="submit" class="btn w280" value="'.lang("Submit").'" /><br/>
+                        </form>
+                        </div>
+                    </div>
+                </div>';
                 $this->activejs .= ' star_rating(5); ';
             }
             
@@ -270,14 +270,15 @@ $this->content .= '<br/>
                 require_once('engine/include/print_purchase.php');
                 $this->content .= print_purchase($data);
             }if(!$flag){
-                $this->content .= '<br/>'.lang("There is no purchases").'<br/><br/><br/>';
-            }$this->content .= '<br/><a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn btnSmall" style="width: 280px;" value="'.lang("Back to account").'"  /></a>'
+                $this->content .= '<div class="clear_block">'.lang("There is no purchases").'</div>';
+            }$this->content .= '<br/><a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn w280" value="'.lang("Back to account").'"  /></a>'
                     . '</div>';
             
         }else if($_GET[1]=="inbox"){
             
             $this->title = lang("Messages").' - '.$this->title;
-            $this->content .= '<h1>'.lang("Messages").'</h1><br/><br/>';
+            $this->content .= '<div class="chat_window">'
+                . '<h1>'.lang("Messages").'</h1><br/><br/>';
             
             if(!empty($_GET[2])){
                 $this->content .= '<div id="chat">';
@@ -296,35 +297,31 @@ $this->content .= '<br/>
                 $target= mysql_fetch_array($res);
 
                 if($target["online"] > date("U")-300){
-                    $online = '<br/><font style="font: bold 11px Tahoma; color: #c0c0c0;">'.lang("online").'</font>';
+                    $online = '<br/><font class="chat_font">'.lang("online").'</font>';
                 }else{
-                    $online = '<br/><font style="font: bold 11px Tahoma; color: #c0c0c0;">'.lang("offline").'</font>'; 
+                    $online = '<br/><font class="chat_font">'.lang("offline").'</font>'; 
                 }
-
-                $this->content .= '<table cellpadding=0 cellspacing=0 width=100% align=center valign=top border=0 style="padding-top: 0px;">
-                <tr><td title="'.$u["name"].'" width=55 valign=top align=center style="margin-top: 0px;">'.
-                '<img src="'.$_SERVER["DIR"].'/img/pic/'.$u["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;" /><br/>
-                    <div style="width:55px; overflow: hidden;">
-                        <font style="font-size: 12px; color: #c0c0c0;">'.$u["name"].'</font>
-                        <font style="font: bold 11px Tahoma; color: #c0c0c0;">'.lang("online").'</font>
+                $this->content .= '<div class="chat_user_left">
+                        <img src="'.$_SERVER["DIR"].'/img/pic/'.$u["photo"].'" width=50 /><br/>
+                        <div class="chat_user_name">
+                            <font class="chat_user_name_font">'.$u["name"].'</font>
+                            <font class="chat_font">'.lang("online").'</font>
+                        </div>
                     </div>
-                </td>
-                <td align=center valign=top style="margin-top: 0px;">'
-                . '<textarea name="text" cols=1 id="message_text" class="input" placeHolder="'.lang("Your message here").'"
-                    onkeypress=\'if(event.keyCode==13&&!event.shiftKey){ event.preventDefault(); post_message("'.$_GET[2].'"); } \'
-                    ></textarea>
-                    <input type="button" onClick=\'post_message("'.$_GET[2].'");\' class="btn" style="margin: 2px; max-width: 280px; width: 100%; margin-top: 5px;" value="'.lang("Send message").'"  />
-                </td>
-                <td title="'.$target["name"].'" width=55 valign=top align=center style="margin-top: 0px;">'.
-                    '<img src="'.$_SERVER["DIR"].'/img/pic/'.$target["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;" /><br/>
-                        <div style="width:55px; overflow: hidden;">
-                            <font style="font-size: 12px; color: #c0c0c0;">'.$target["name"].'</font>
+                    <div class="chat_user_right">
+                        <img src="'.$_SERVER["DIR"].'/img/pic/'.$target["photo"].'" width=50 /><br/>
+                        <div class="chat_user_name">
+                            <font class="chat_user_name_font">'.$target["name"].'</font>
                             '.$online.'
                         </div>
-                </td>
-                </tr>
-                </table>';
-
+                    </div>
+                    <div class="chat_center">
+                        <textarea name="text" id="message_text" class="input" placeHolder="'.lang("Your message here").'"
+                        onkeypress=\'if(event.keyCode==13&&!event.shiftKey){ event.preventDefault(); post_message("'.$_GET[2].'"); } \'
+                        ></textarea><br/>
+                        <input type="button" onClick=\'post_message("'.$_GET[2].'");\' class="btn" value="'.lang("Send message").'"  />
+                    </div>
+                    <div class="clear"></div>';
             }else{
 
                 $query = 'SELECT * FROM `nodes_users` WHERE `id` <> "'.$_SESSION["user"]["id"].'"';
@@ -333,7 +330,7 @@ $this->content .= '<br/>
                 while($data = mysql_fetch_array($res)){
                     $flag = 1;
                 }if(!$flag){
-                    $this->content .= '<div style="padding-top: 100px; text-align: center;">'.lang("There is no users, you can send a message").'</div>';
+                    $this->content .= '<div class="clear_block">'.lang("There is no users, you can send a message").'</div>';
                 }else{
                     $query = 'SELECT * FROM `nodes_users` WHERE `id` <> "'.$_SESSION["user"]["id"].'"';
                     $res = engine::mysql($query);
@@ -342,25 +339,25 @@ $this->content .= '<br/>
                         $r = engine::mysql($query);
                         $d = mysql_fetch_array($r);
                         if($d[0] > 0){ 
-                            if($d[0] == 1) $new = '<span style="font: bold 11px Tahoma; color:#ff0000;">'.lang("New message").'</span><br/>';
-                            else $new = '<span style="font: bold 11px Tahoma; color:#ff0000;">'.$d[0].' '.lang("new messages").'</span><br/>';
+                            if($d[0] == 1) $new = '<span class="new_message">'.lang("New message").'</span><br/>';
+                            else $new = '<span class="new_message">'.$d[0].' '.lang("new messages").'</span><br/>';
                         }else $new = '';
                         if($u["online"] > date("U")-300){
-                            $online = '<font style="font: bold 11px Tahoma; color: #c0c0c0;">'.lang("online").'</font>';
+                            $online = '<font class="chat_font">'.lang("online").'</font>';
                         }else{
-                            $online = '<font style="font: bold 11px Tahoma; color: #c0c0c0;">'.lang("offline").'</font>'; 
+                            $online = '<font class="chat_font">'.lang("offline").'</font>'; 
                         }
                         $this->content .= '<a href="'.$_SERVER["DIR"].'/account/inbox/'.$u["id"].'">'
                                 . '<div class="user_block">'
-                                . '<div style="float:left; background: #fff; padding-right: 10px;">
-                                        <img src="'.$_SERVER["DIR"].'/img/pic/'.$u["photo"].'" width=50  style="border: #d0d0d0 4px solid; border-radius: 4px;" />
+                                . '<div class="user_block_image">
+                                        <img src="'.$_SERVER["DIR"].'/img/pic/'.$u["photo"].'" width=50 />
                                     </div>
-                                    <div style="font-weight: bold; height:17px; overflow:hidden;">'.$u["name"].'</div>'.$new.$online
+                                    <div class="user_block_name">'.$u["name"].'</div>'.$new.$online
                                 . '</div></a>';
                     }
-                    $this->content .=  '<div style="clear:both;"></div>';
+                    $this->content .=  '<div class="clear"></div>';
                 }
-            }$this->content .= '<br/><a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn btnSmall" style="width: 280px;" value="'.lang("Back to account").'"  /></a>';
+            }$this->content .= '</div><br/><a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn w280" value="'.lang("Back to account").'"  /></a><br/><br/>';
             
         }else if($_GET[1]=="finances"){
 
@@ -407,15 +404,15 @@ $this->content .= '<br/>
             $this->content .= '<br/><br/>';
             if($this->configs["sandbox"]){
                 $this->content .= '
-                    <form method="POST" style="display:none;">
+                    <form method="POST" class="hidden">
                     <input type="hidden" name="amount" id="paypal_price" value="'.$price.'">
-                    <input type="submit" style="display:none;" id="pay_button"  /><br/><br/>
+                    <input type="submit" id="pay_button"  /><br/><br/>
                     </form>';
             }else{
                 if($this->configs["paypal_test"]) $domain = 'www.sandbox.paypal.com';
                 else $domain = 'www.paypal.com';
                 $this->content .= '
-                    <form action="https://'.$domain.'/cgi-bin/webscr" method="post" style="display:none;">			
+                    <form action="https://'.$domain.'/cgi-bin/webscr" method="post" class="hidden">			
                     <input type="hidden" name="cmd" value="_xclick">
                     <input type="hidden" name="business" value="'.$this->configs["paypal_id"].'">
                     <input type="hidden" name="item_name" value="'.$this->configs["paypal_description"].'">
@@ -425,7 +422,7 @@ $this->content .= '<br/>
                     <input type="hidden" name="return" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account/finances">
                     <input type="hidden" name="no_shipping" value="1">
                     <input type="hidden" name="notify_url" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/paypal.php?deposit='.$_SESSION["user"]["id"].'">
-                    <button type="submit" class="btn" style="width: 280px;"  id="pay_button" >PayPal</button><br/><br/>
+                    <button type="submit" class="btn w280" id="pay_button" >PayPal</button><br/><br/>
                     </form>';
             }
             
@@ -480,9 +477,9 @@ $this->content .= '<br/>
                 
                 $table .= '<tr>
                     <td align=left valign=middle>'.$type.'</td>
-                    <td align=center valign=middle>'.$data["amount"].'$</td>
-                    <td align=center valign=middle>'.$status.'</td>
-                    <td align=center valign=middle title="'.date("d.m H:i", $data["date"]).'">'.date("d.m", $data["date"]).'</td>
+                    <td align=left valign=middle>'.$data["amount"].'$</td>
+                    <td align=left valign=middle>'.$status.'</td>
+                    <td align=left valign=middle title="'.date("d.m H:i", $data["date"]).'">'.date("d.m", $data["date"]).'</td>
                 </tr>';
             }$table .= '</table>
         </div>';
@@ -502,19 +499,19 @@ $this->content .= '<br/>
             $count = $data[0];
             if($to > $count) $to = $count;
             if($data[0]>0){
-                $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' entries, 
+                $this->content .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
                     <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
                      <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
                      <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
                      <option'; if($_SESSION["count"]=="100") $this->content .= ' selected'; $this->content .= '>100</option>
                     </select> '.lang("per page").'.</nobr></p>';
             }$this->content .= '
-            </div><div style="clear:right;"></div>';
+            </div><div class="cr"></div>';
             if($count>$_SESSION["count"]){
                $this->content .= '<div class="pagination" >';
                     $pages = ceil($count/$_SESSION["count"]);
                    if($_SESSION["page"]>1){
-                        $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="en" href="#">'.lang("Previous").'</a></span>';
+                        $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
                     }$this->content .= '<ul>';
                    $a = $b = $c = $d = $e = $f = 0;
                    for($i = 1; $i <= $pages; $i++){
@@ -527,7 +524,7 @@ $this->content .= '<br/>
                                $b = 1; $e = 0;
                               $this->content .= '<li class="active-page">'.$i.'</li>';
                            }else{
-                               $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="en" href="#">'.$i.'</a></li>';
+                               $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                            }
                        }else if((!$c||!$b) && !$f && $i<$pages){
                            $f = 1; $e = 0;
@@ -536,18 +533,18 @@ $this->content .= '<br/>
                            $this->content .= '<li class="dots">. . .</li>';
                        }
                    }if($_SESSION["page"]<$pages){
-                       $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="en" href="#">'.lang("Next").'</a></li>';
+                       $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
                    }$this->content .= '
              </ul>
             </div>';
-                 }$this->content .= '<div style="clear:both;"></div>';
+                 }$this->content .= '<div class="clear"></div>';
             }else{
-                $this->content .= '<br/>'.lang('Transactions not found').'<br/><br/>';
+                $this->content .= '<div class="clear_block">'.lang('Transactions not found').'</div>';
             }            
             if($balance>0){
-                $this->content .= '<input type="button" class="btn" style="width: 280px;" value="'.lang("Request withdrawal").'" onClick=\'withdrawal("'.lang("Confirm your PayPal").'");\' /><br/><br/>';
-            }$this->content .=  '<input type="button" class="btn" style="width: 280px;" value="'.lang("Deposit money").'" onClick=\'deposit("'.lang("Amount to deposit").'");\' /><br/><br/>';
-            $this->content .= '<a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn" style="width: 280px;" value="'.lang("Back to account").'"  /></a><br/><br/>';
+                $this->content .= '<input type="button" class="btn w280" value="'.lang("Request withdrawal").'" onClick=\'withdrawal("'.lang("Confirm your PayPal").'");\' /><br/><br/>';
+            }$this->content .=  '<input type="button" class="btn w280" value="'.lang("Deposit money").'" onClick=\'deposit("'.lang("Amount to deposit").'");\' /><br/><br/>';
+            $this->content .= '<a href="'.$_SERVER["DIR"].'/account"><input type="button" class="btn w280" value="'.lang("Back to account").'"  /></a><br/><br/>';
             
         }else{
             $this->content = engine::error();
@@ -570,8 +567,8 @@ $this->content .= '<br/>
         if($fcount[0]>0) $finance_count = ' ('.$fcount[0].')';
         $purcases_count = '';
         if($pcount>0) $purcases_count = ' ('.$pcount.')';
-        $button = '<a href="'.$_SERVER["DIR"].'/account/finances"><input type="button" class="btn" style="width: 280px;" value="'.lang("Finances").$finance_count.'" /></a><br/><br/>'
-                . '<a href="'.$_SERVER["DIR"].'/account/purchases"><input type="button" class="btn" style="width: 280px;" value="'.lang("Purchases").$purcases_count.'" /></a><br/><br/>';
+        $button = '<a href="'.$_SERVER["DIR"].'/account/finances"><input type="button" class="btn w280" value="'.lang("Finances").$finance_count.'" /></a><br/><br/>'
+                . '<a href="'.$_SERVER["DIR"].'/account/purchases"><input type="button" class="btn w280" value="'.lang("Purchases").$purcases_count.'" /></a><br/><br/>';
 
         $query = 'SELECT COUNT(*) FROM `nodes_message` WHERE `to` = "'.$_SESSION["user"]["id"].'" AND `readed` = 0';
         $res = engine::mysql($query);
@@ -582,13 +579,13 @@ $this->content .= '<br/>
         $this->content = '<h1>'.lang("My Account").'</h1><br/><br/>';
         if($_SESSION["user"]["id"]=="1"){
             $this->content .= '
-                <a href="'.$_SERVER["DIR"].'/admin"><input type="button" class="btn" style="width: 280px;" value="'.lang("Admin").'" /></a><br/><br/>
-                <a href="http://nodes-studio.com" target="_blank"><input type="button" class="btn" style="width: 280px;" value="'.lang("About").'" /></a><br/><br/>';
+                <a href="'.$_SERVER["DIR"].'/admin"><input type="button" class="btn w280" value="'.lang("Admin").'" /></a><br/><br/>
+                <a href="http://nodes-studio.com" target="_blank"><input type="button" class="btn w280" value="'.lang("About").'" /></a><br/><br/>';
         }else{
             $this->content .= $button;
-        }$this->content .= '<a href="'.$_SERVER["DIR"].'/account/inbox"><input type="button" class="btn" style="width: 280px;" value="'.lang("Messages").$count.'" /></a><br/><br/>'
-        . '<a href="'.$_SERVER["DIR"].'/account/settings"><input type="button" class="btn" style="width: 280px;" value="'.lang("Settings").'" /></a><br/><br/>'
-        . '<input type="button" class="btn" style="width: 280px;" value="'.lang("Logout").'" onClick="logout();"  /><br/><br/>';
+        }$this->content .= '<a href="'.$_SERVER["DIR"].'/account/inbox"><input type="button" class="btn w280" value="'.lang("Messages").$count.'" /></a><br/><br/>'
+        . '<a href="'.$_SERVER["DIR"].'/account/settings"><input type="button" class="btn w280" value="'.lang("Settings").'" /></a><br/><br/>'
+        . '<input type="button" class="btn w280" value="'.lang("Logout").'" onClick="logout();"  /><br/><br/>';
     }
 }else{
     $this->title = lang("Access denied").' - '.$this->title;

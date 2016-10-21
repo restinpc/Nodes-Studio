@@ -27,5 +27,5 @@ $this->content = '
     <p>'.$this->configs["description"].'</p><br/>
 </section>
 <div id="mainSection">
-    <img src="'.$_SERVER["DIR"].'/img/cms/nodes_studio.png" style="width: 100%; max-width: 395px; min-width: 280px;" />
+    <img src="'.$_SERVER["DIR"].'/img/cms/nodes_studio.png" class="nodes_image" />
 </div>';

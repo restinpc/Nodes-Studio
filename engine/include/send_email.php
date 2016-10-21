@@ -64,7 +64,7 @@ body{
 }
 .document p{
     text-align:left;
-    line-height: 2.0;
+    line-height: 1.8;
 }
 </style>
 </head>
@@ -73,7 +73,7 @@ body{
     <img width=100% src="data:image/png;base64,'.$image.'" /><br/><br/>
     <p>'.$text.'</p>
     <br/><br/><hr/><br/>
-    <span><a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/" target="_blank">'.$_SERVER["HTTP_HOST"].'</a>, '.date("Y").'. '.lang("All rights reserved").'.</span></center><br/>
+    <span><a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/" target="_blank">'.$_SERVER["HTTP_HOST"].'</a>, '.date("Y").'.</span></center><br/>
 </div>
 </body>
 </html>';
@@ -88,8 +88,17 @@ body{
     }
     //----------------------------------------------------
     static function new_comment($user_id, $url){
-        /*
-         */
+        $query = 'SELECT * FROM `nodes_users` WHERE `id` = "'.$user_id.'"';
+        $res = engine::mysql($query);
+        $user = mysql_fetch_array($res);
+        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"'; 
+        $r_email = engine::mysql($query);
+        $d_email = mysql_fetch_array($r_email);
+        $message = lang("User").' '.$_SESSION["user"]["name"].' '.lang("add new comment").'!<br/>'
+                . '<a href="//'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].$url.'" target="_blank">'.$url.'</a><br/>'
+                . '<br/>'.lang("Comment").'<br/>-----------------------------<br/>'.$text;
+        engine::send_mail($d_email["value"], "no-reply@".$_SERVER["HTTP_HOST"], 
+                lang("New comment at")." ".$_SERVER["HTTP_HOST"], send_email::email_template($message));
     }
     //----------------------------------------------------
     static function new_message($user_id, $sender_id){

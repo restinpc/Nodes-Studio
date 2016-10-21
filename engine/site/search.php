@@ -21,7 +21,7 @@ if(!empty($_GET[2])){
     $this->content = engine::error();
     return; 
 }else if(empty($_GET[1])){
-    $this->content = '<div style="padding-top: 70px; padding-bottom: 70px;">'.lang("Empty search query").'</div>';
+    $this->content = '<div class="clear_block">'.lang("Empty search query").'</div>';
     return;
 }
 
@@ -46,7 +46,7 @@ $query = 'SELECT * FROM `nodes_catch` WHERE (`content` LIKE "%'.urldecode($_GET[
 . ' ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"];
 $requery = 'SELECT * FROM `nodes_catch` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2';
 
-$fout = '<div style="width: 100%; max-width:600px; margin: auto;">';
+$fout = '<div class="document">';
 $res = engine::mysql($query);
 while($data = mysql_fetch_array($res)){
     if(!strpos($data["url"], "search")){
@@ -94,19 +94,19 @@ if($arr_count){
     <div class="total-entry">';
     if($to > $count) $to = $count;
     if($count>0){
-        $this->content .= '<p style="padding: 5px;">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' entries, 
+        $this->content .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
             <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
              <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
              <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
              <option'; if($_SESSION["count"]=="100") $this->content .= ' selected'; $this->content .= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$this->content .= '
-    </div><div style="clear:right;">';
+    </div><div class="cr">';
     if($count>$_SESSION["count"]){
        $this->content .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
            if($_SESSION["page"]>1){
-                $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="en" href="#">'.lang("Previous").'</a></span>';
+                $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$this->content .= '<ul>';
            $a = $b = $c = $d = $e = $f = 0;
            for($i = 1; $i <= $pages; $i++){
@@ -119,7 +119,7 @@ if($arr_count){
                        $b = 1; $e = 0;
                       $this->content .= '<li class="active-page">'.$i.'</li>';
                    }else{
-                       $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="en" href="#">'.$i.'</a></li>';
+                       $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                    }
                }else if((!$c||!$b) && !$f && $i<$pages){
                    $f = 1; $e = 0;
@@ -128,11 +128,11 @@ if($arr_count){
                    $this->content .= '<li class="dots">. . .</li>';
                }
            }if($_SESSION["page"]<$pages){
-               $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="en" href="#">'.lang("Next").'</a></li>';
+               $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
            }$this->content .= '
      </ul>
     </div>';
-         }$this->content .= '<div style="clear:both;"></div>';
+         }$this->content .= '<div class="clear"></div>';
 }else{
-    $this->content .= lang("Sorry, no results found");
+    $this->content .= '<div class="clear_block">'.lang("Sorry, no results found").'</div>';
 }

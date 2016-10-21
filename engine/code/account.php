@@ -28,32 +28,32 @@ function print_login_details(){
     $res = engine::mysql($query);
     $gp_id = mysql_fetch_array($res);
     
-    $fout = '<div style="text-align:left;width: 200px;">'
+    $fout = '<div class="left w200">'
     . '<script>parent.document.getElementById("nodes_iframe").style.height="290px";'
     . '</script>'
-    . '<center><h3 style="color: #555;">'.lang("Login").'</h3></center><br/>'
-    . '<div style="text-align:center; white-space: nowrap;">';
+    . '<center><h3 class="c555">'.lang("Login").'</h3></center><br/>'
+    . '<div class="center nowrap">';
     
     if(!empty($fb_id["value"])){ $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" style="margin: 10px; margin-left: 0px;"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
+        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" class="m10 ml0"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
     }if(!empty($tw_key["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" style="margin: 9px;"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
+        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" class="m9"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
     }if(!empty($gp_id["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" style="margin: 9px;"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
+        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" class="m9"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
     }if(!empty($vk["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" style="margin: 10px; margin-right: 0px;"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="Vkontakte"/></a>';
+        $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="m10 mr0"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="Vkontakte"/></a>';
     }if(!$flag){
         $fout .= '<br/>';
     }
     
     $fout .= '</div><br/>'
     . '<form method="POST" action="'.$_SERVER["DIR"].'/account.php?mode=login">'
-    . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input" style="width: 200px; padding: 5px;" placeHolder="Email" /><br/><br/>'
-    . '<input type="password" required name="pass" class="input" style="width: 200px; padding: 5px;" value="'.$_POST["pass"].'" placeHolder="'.lang("Password").'" /><br/>'
-    . '<div style="white-space: nowrap; padding-top: 17px; padding-bottom: 20px; text-align: center; font-size: 14px;">'
+    . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w200 p5" placeHolder="Email" /><br/><br/>'
+    . '<input type="password" required name="pass" class="input" class="w200 p5" value="'.$_POST["pass"].'" placeHolder="'.lang("Password").'" /><br/>'
+    . '<div class="nowrap pt17 pb20 center fs14">'
     . '<a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a> | <a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=remember">'.lang("Lost password").'?</a>'
     . '</div>'
-    . '<input type="submit" class="btn" value="'.lang("Submit").'" style="width: 200px;" /></form>'
+    . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form>'
     . '</div>';   
     return $fout;
 }
@@ -77,7 +77,7 @@ if($_GET["mode"] == "login"){
         $data= mysql_fetch_array($res);
         $date = $data["date"];
         if(date("U")-$date<180){
-            $fout .= '<div style="text-align:center; padding-top: 100px; width: 200px;">'.lang("Too many failed attempts").'.'
+            $fout .= '<div class="center pt100 w200">'.lang("Too many failed attempts").'.'
                     . '<br/><br/>'.lang("Try again after").' <a id="tick">'.(180-(date("U")-$date)).'</a> '.lang("seconds").'.</div>'
                     . '<script>var sec = '.(181-(date("U")-$date)).'; function tick(){sec--; document.getElementById("tick").innerHTML=sec;} setInterval(tick, 1000);'
                     . 'function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, '.((180-(date("U")-$date))*1000).');</script>';
@@ -87,7 +87,7 @@ if($_GET["mode"] == "login"){
             $data = mysql_fetch_array($res);
             if(!empty($data)){
                 if($data["ban"]=="1"){
-                    $fout .= '<div style="text-align:center; padding-top: 100px; width: 200px;">'.lang("Access denied").'.</div>'
+                    $fout .= '<div class="center pt100 w200">'.lang("Access denied").'.</div>'
                             . '<script>function redirect(){parent.js_hide_wnd();}setTimeout(redirect, 3000);</script>';
                     $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
                             . 'VALUES("4", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Ban")';
@@ -120,7 +120,7 @@ if($_GET["mode"] == "login"){
                             . 'VALUES("4", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
                 }engine::mysql($query);
 
-                $fout .= '<div style="text-align:center; padding-top: 100px; width: 200px;">'.lang("Incorrect email of password").'.</div>'
+                $fout .= '<div class="center pt100 w200">'.lang("Incorrect email of password").'.</div>'
                         . '<script>function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, 3000);</script>';
             }
         }
@@ -157,14 +157,14 @@ if($_GET["mode"] == "login"){
                 engine::mysql($query);
                 engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], lang("New password for")." ".$_SERVER["HTTP_HOST"], 
                         lang("New password is").": ".$new_pass.'<br/><br/><a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'">'.$_SERVER["HTTP_HOST"].'</a>');
-                $fout .= '<div style="text-align:center; padding-top: 100px;">'.lang("Message with new password is sended to email").'.</div>
+                $fout .= '<div class="center pt100">'.lang("Message with new password is sended to email").'.</div>
                         <script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/";}setTimeout(redirect, 3000);</script>';
             }else{
-                $fout .= '<div style="text-align:center; padding-top: 100px;">'.lang("Invalid confirmation code").'.</div>'
+                $fout .= '<div class="center pt100">'.lang("Invalid confirmation code").'.</div>'
                  . '<script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/";}setTimeout(redirect, 3000);</script>';  
             }
         }else{
-           $fout .= '<div style="text-align:center; padding-top: 100px;">Email '.lang("not found").'.</div>'
+           $fout .= '<div class="center pt100">Email '.lang("not found").'.</div>'
             . '<script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/";}setTimeout(redirect, 3000);</script>';  
         }
     }else if(!empty($_POST["email"])){
@@ -176,21 +176,24 @@ if($_GET["mode"] == "login"){
             $code = substr(md5($email.date("Y-m-d")), 0, 6);
             engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], lang("Restore your password")." ".$_SERVER["HTTP_HOST"], 
             lang("To restore your password, use this code").': <a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=remember&email='.$email.'&code='.$code.'">'.$code.'</a><br/><br/><a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'">'.$_SERVER["HTTP_HOST"].'</a>');
-            $fout .= '<div style="text-align:left;width: 200px;"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script><center><h3 style="color: #555;">'.lang("Confirmation code").'</h3></center><br/>'
+            $fout .= '<div class="left w200"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script>'
+            . '<center><h3 class="c555">'.lang("Confirmation code").'</h3></center><br/>'
             . '<form method="GET"><input type="hidden" name="mode" value="remember" /><input  type="hidden" name="email" value="'.$_POST["email"].'" />'
-            . '<input type="text" required name="code" class="input" style="width: 200px; padding: 5px; margin-top: 5px;" placeHolder="'.lang("Code").'" /><br/>'
-            . '<div style="padding-top: 17px; padding-bottom: 20px; margin: auto; text-align: center;  font-size: 12px;"><a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=login">'.lang("Login").'</a></div>'
-            . '<input type="submit" class="btn" value="'.lang("Submit").'" style="width: 200px;" /></form></div>'
+            . '<input type="text" required name="code" class="input" class="w200 p5 mt5" placeHolder="'.lang("Code").'" /><br/>'
+            . '<div class="login_links">'
+            . '<a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=login">'.lang("Login").'</a></div>'
+            . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form></div>'
             . '<script>alert("'.lang("Message with confirmation code is sended to email").'.");</script>';   
         }else{
-            $fout .= '<div style="text-align:center; padding-top: 100px; width: 200px;">Email '.lang("not found").'.</div>'
+            $fout .= '<div class="center pt100 w200">Email '.lang("not found").'.</div>'
             . '<script>function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=remember";}setTimeout(redirect, 3000);</script>';   
         }
     }else{
-        $fout .= '<div style="text-align:left;width: 200px;"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script><center><h3 style="color: #555;">'.lang("Restore password").'</h3></center><br/><form method="POST">'
-        . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input" style="width: 200px; padding: 5px; margin-top: 5px;" placeHolder="Email" /><br/>'
-        . '<div style="padding-top: 17px; padding-bottom: 20px; margin: auto; text-align: center;  font-size: 12px;"><a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=login">'.lang("Login").'</a></div>'
-        . '<input type="submit" class="btn" value="'.lang("Submit").'" style="width: 200px;" /></form></div>';   
+        $fout .= '<div class="left w200"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script>'
+        . '<center><h3 class="c555">'.lang("Restore password").'</h3></center><br/><form method="POST">'
+        . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w200 p5 mt5" placeHolder="Email" /><br/>'
+        . '<div class="login_links"><a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=login">'.lang("Login").'</a></div>'
+        . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form></div>';   
     }
     $fout .= '</body></html>';
 }else if($_GET["mode"] == "social"&&!empty($_GET["method"])){ 

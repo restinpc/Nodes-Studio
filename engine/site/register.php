@@ -81,15 +81,14 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
         }
     }
 }
-$this->content .= '<h1>'.lang("Sign Up").'.</h1>'
-. '<br/>'
+$this->content .= '<h1>'.lang("Sign Up").'.</h1><br/>'
 . '<a target="_parent" href="'.$_SERVER["DIR"].'/login" onClick="event.preventDefault(); show_login_form();">'.lang("Already have an account?").'</a><br/><br/>'
 . '<form method="POST">'
-. '<input required type="text" name="email" value="'.$_POST["email"].'" class="input" style="padding: 5px; width: 100%;max-width: 265px; margin-top: 0px;" placeHolder="'.lang("Email").'" title="'.lang("Email").'" /><br/>'
-. '<input required type="text" name="name" value="'.$_POST["name"].'" class="input" style="padding: 5px;width: 100%;max-width: 265px; margin-top: 10px;" placeHolder="'.lang("Name").'" title="'.lang("Name").'"  /><br/>'
-. '<input required type="password" name="pass" class="input" style="width: 100%;padding: 5px;max-width: 265px; margin-top: 10px;" placeHolder="'.lang("Password").'" title="'.lang("Password").'"  value="'.$_POST["pass"].'" /><br/>'
+. '<input required type="text" name="email" value="'.$_POST["email"].'" class="input reg_email" placeHolder="'.lang("Email").'" title="'.lang("Email").'" /><br/>'
+. '<input required type="text" name="name" value="'.$_POST["name"].'" class="input reg_name" placeHolder="'.lang("Name").'" title="'.lang("Name").'"  /><br/>'
+. '<input required type="password" name="pass" class="input reg_name" placeHolder="'.lang("Password").'" title="'.lang("Password").'"  value="'.$_POST["pass"].'" /><br/>'
 . '<br/>'
 . '<center><img src="'.$_SERVER["DIR"].'/captcha.php?'.md5(date("U")).'" /></center>'
-. '<input required type="text" name="captcha" class="input" style="width: 100%;padding: 5px;max-width: 265px; margin-top: 5px;" placeHolder="'.lang("Confirmation code").'" title="'.lang("Confirmation code").'" />'
-. '<br/><input type="submit" class="btn" value="'.lang("Submit").'" style="width: 100%;max-width: 265px;margin-top: 10px;"  /></form>'
+. '<input required type="text" name="captcha" class="input reg_captcha" placeHolder="'.lang("Confirmation code").'" title="'.lang("Confirmation code").'" />'
+. '<br/><input type="submit" class="btn reg_submit" value="'.lang("Submit").'" /></form>'
 . '<br/><br/>';

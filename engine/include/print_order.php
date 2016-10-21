@@ -45,7 +45,7 @@ function print_order($order_id){
                 $status = lang('Finished');
             }
             $fout .= '<div class="print_order">
-            <div class="print_order_image" style="background: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].') center no-repeat; background-size: cover;">&nbsp;</div>
+            <div class="print_order_image" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
             <div>
                 <div class="print_order_date">'.date("d/m/Y", $d["date"]).'<br/>
                 <strong>'.$status.'</strong></div>
@@ -54,11 +54,11 @@ function print_order($order_id){
                 '.lang("Purchaser").': <a href="'.$_SERVER["DIR"].'/account/inbox/'.$order["user_id"].'" target="_blank">'.$user["name"].'</a><br/><br/>
                 '.lang("Shipping address").': '.$addresstr.'
             </div>
-            <div style="clear:both;"></div>
+            <div class="clear"></div>
             <div class="print_order_buttons">
                 <form method="POST">'.$buttons.' </form>
             </div>
-            <div style="clear:both;"></div>
+            <div class="clear"></div>
             </div>';
         }
     }return $fout;

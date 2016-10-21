@@ -11,7 +11,7 @@ function print_chat($user_id){
     while( $data = mysql_fetch_array($res)){
         if($data["from"] == $_SESSION["user"]["id"]){
             if($data["readed"]=="0"){
-                $fout .= '<tr><td style="background: #dfdfdf;">';
+                $fout .= '<tr><td class="chat_unreaded">';
             }else{
                 $fout .= '<tr><td>';
             }
@@ -37,11 +37,11 @@ function print_chat($user_id){
             if(!$data["system"]){
                 $fout .= '<div class="chat_right_text">'
                         . lang("Received").' '.date("d.m", $data["date"]).' '.lang("at").' '.date("H:i", $data["date"]).'</div>'
-                    . '<div style="clear:both;"></div>'.$data["text"];
+                    . '<div class="clear"></div>'.$data["text"];
             }else{
                 $fout .= '<div class="chat_right_text">'
                         . lang("System message").' '.date("d.m", $data["date"]).' '.lang("at").' '.date("H:i", $data["date"]).'</div>'
-                    . '<div style="clear:both;"></div>'.'<i>'.lang($data["text"]).'</i>';
+                    . '<div class="clear"></div>'.'<i>'.lang($data["text"]).'</i>';
             }     
 
             $fout .= '</td>'

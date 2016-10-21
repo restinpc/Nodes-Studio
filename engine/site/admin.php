@@ -29,7 +29,7 @@ $this->menu .= '<a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/admin/
 */
 
 function admin_main_page(){
-    return '<div style="width: 100%; margin: auto; max-width: 610px; min-width: 280px;">'
+    return '<div class="admin_block">'
     . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=content"><img src="'.$_SERVER["DIR"].'/img/cms/content.jpg" /><br/>'.lang("Content").'</a></div>'
     . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=products"><img src="'.$_SERVER["DIR"].'/img/cms/products.jpg" /><br/>'.lang("Products").'</a></div>'
     . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=users"><img src="'.$_SERVER["DIR"].'/img/cms/users.jpg" /><br/>'.lang("Users").'</a></div>'
@@ -46,7 +46,7 @@ function admin_main_page(){
     . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=updates"><img src="'.$_SERVER["DIR"].'/img/cms/updates.jpg" /><br/>'.lang("Updates").'</a></div>'
     . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=catch"><img src="'.$_SERVER["DIR"].'/img/cms/catch.jpg" /><br/>'.lang("Catch").'</a></div>'
     . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=errors"><img src="'.$_SERVER["DIR"].'/img/cms/errors.jpg" /><br/>'.lang("Errors").'</a></div>'
-    . '</div><div style="clear:both; height: 10px;"></div>';
+    . '</div><div class="clear"><br/></div>';
 }
 /*  
 TODO - Your code here
