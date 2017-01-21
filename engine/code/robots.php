@@ -1,20 +1,20 @@
 <?php
+/**
+* Robots.txt generator.
+* @path /engine/code/robots.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 echo 'User-agent: *
 Host: '.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'
 Disallow: /engine/
 Disallow: /res/
 Disallow: /script/
-Disallow: /fonts/
+Disallow: /font/
 Disallow: /admin$
 Disallow: /account$
-Disallow: /install.php
-Disallow: /account.php
-Disallow: /captcha.php
-Disallow: /cron.php
-Disallow: /edit.php
-Disallow: /graph.php
-Disallow: /messages.php
-Disallow: /paypal.php
-Disallow: /update.php
-Disallow: /uploader.php
-Sitemap: http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/sitemap.xml';
+Disallow: *.php
+Allow: /sitemap.php
+Sitemap: //'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/sitemap.xml';

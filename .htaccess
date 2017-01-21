@@ -1,9 +1,10 @@
 RewriteEngine on
 AddDefaultCharset UTF-8
-SetOutputFilter DEFLATE
-php_value upload_max_filesize 10M
 RewriteCond %{HTTP_HOST} ^www\.(.*)
 RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
+<IfModule mod_deflate.c>
+    SetOutputFilter DEFLATE
+</IfModule>
 <ifModule mod_headers.c>
     ExpiresActive On
     FileETag None
@@ -17,20 +18,17 @@ RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
     <FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|ttf|svg|woff2|FLV|GIF|JPG|JPEG|PNG|ICO|SWF|JS|CSS|PDF|TTF|SVG|WOFF2)$">
         Header unset Cache-Control
         Header unset Expires
-        Header set Cache-Control "max-age=2592000"
+        Header set Cache-Control "max-age=604800"
     </FilesMatch>
 </ifModule>
 RewriteRule ^favicon/(.*)$ favicon/$1 [L]
-RewriteRule ^files/(.*)$ files/$1 [L]
-RewriteRule ^fonts/(.*)$ fonts/$1 [L]
+RewriteRule ^file/(.*)$ file/$1 [L]
+RewriteRule ^font/(.*)$ font/$1 [L]
 RewriteRule ^img/(.*)$ img/$1 [L] 
 RewriteRule ^res/(.*)$ res/$1 [L]
 RewriteRule ^script/(.*)$ script/$1 [L]
-RewriteRule ^templates/(.*)$ templates/$1 [L]
+RewriteRule ^template/(.*)$ template/$1 [L]
 RewriteRule ^apple-touch-icon.png$ apple-touch-icon.png [L]
-RewriteRule ^apple-touch-icon-precomposed.png$ apple-touch-icon-precomposed.png [L]
-RewriteRule ^browserconfig.xml$ browserconfig.xml [L]
 RewriteRule ^favicon.ico$ favicon.ico [L]
-RewriteRule ^favicon.png$ favicon.png [L]
-RewriteRule ^cron.php$ index.php [L]
+RewriteRule ^cron.php$ cron.php [L]
 RewriteRule ^(.*)$ index.php?$1 [L]

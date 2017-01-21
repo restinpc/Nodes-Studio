@@ -1,7 +1,15 @@
 <?php
+/** 
+* Backend file.
+* @path /engine/code/images.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/language.php");
-if($_SESSION["user"]["id"] != "1") die(lang("Access denied"));
+if($_SESSION["user"]["id"] != "1") die(engine::error(401));
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
 $res = engine::mysql($query);
 $data = mysql_fetch_array($res);
@@ -11,14 +19,14 @@ $fout = '<!DOCTYPE html>
 <head>
 <meta charset="UTF-8" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link href="'.$_SERVER["DIR"].'/templates/style.css" rel="stylesheet" type="text/css">
-<link href="'.$_SERVER["DIR"].'/templates/'.$template.'/template.css" rel="stylesheet" type="text/css">
+<link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
+<link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">
 </head>
-<body style="padding: 0px; margin: 0px; overflow:visible; opacity: 1; min-height: 50px;">';
+<body class="body_images nodes">';
 if(!empty($_GET['id']) && !empty($_GET["pos"])){
     if(!empty($_POST)){
         if(file_exists('img/data/thumb/'.$_POST["file1"])){
-            $query = 'SELECT * FROM `nodes_products` WHERE `id` = "'.intval($_GET["id"]).'"';
+            $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.intval($_GET["id"]).'"';
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
             $images = explode(";", $data["img"]);
@@ -42,16 +50,15 @@ if(!empty($_GET['id']) && !empty($_GET["pos"])){
             }if($_GET["pos"]>$i){
                 $files .= $_POST["file1"].';';
             }
-            $query = 'UPDATE `nodes_products` SET `img` = "'.$files.'" WHERE `id` = "'.$_GET["id"].'"';
+            $query = 'UPDATE `nodes_product` SET `img` = "'.$files.'" WHERE `id` = "'.$_GET["id"].'"';
             engine::mysql($query);
-            $fout = '<script>parent.hide_photo_editor();</script>';
+            $fout = '<script>top.document.getElementById("edit_product_form").submit();</script>';
         }else{
             $fout = "Error. ".$_SERVER["DIR"].'/img/data/thumb/'.$_POST["file1"].' not found';
         }
     }else{
         $fout .= '<form method="POST" id="edit_photos_form"><center>';
-        require_once("engine/include/print_uploader.php");
-        $fout .= print_uploder(1);
+        $fout .= engine::print_uploader(1);
         $fout .= '<script> 
                 document.getElementById("uploading_button1").style.display="none"; 
                 document.getElementById("new_img1").style.display="block"; 
@@ -62,13 +69,18 @@ if(!empty($_GET['id']) && !empty($_GET["pos"])){
 }else{
     if(!empty($_POST)){
         $fout .= '<script>
-            try{ parent.document.getElementById("delete_image_block").style.display="none"; }catch(e){ };
-            parent.hide_photo_editor();
+            try{ 
+                parent.document.getElementById("delete_image_block").style.display="none"; 
+            }catch(e){ };
+            try{ 
+                parent.document.getElementById("new_profile_picture").value="'.$_POST["file1"].'"; 
+                parent.document.getElementById("edit_profile_form").submit();
+            }catch(e){ };
+            top.js_hide_wnd();
             </script>';
     }else{
         $fout .= '<form method="POST" id="edit_photos_form"><center>';
-        require_once("engine/include/print_uploader.php");
-        $fout .= print_uploder(1);
+        $fout .= engine::print_uploader(1);
         $fout .= '<script> 
         document.getElementById("uploading_button1").style.display="none"; 
         document.getElementById("new_img1").style.display="block"; 

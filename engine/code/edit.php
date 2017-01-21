@@ -1,7 +1,15 @@
 <?php
+/**
+* Source code viewer.
+* @path /engine/code/edit.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once ("engine/nodes/language.php");
+require_once("engine/nodes/language.php");
 if(!empty($_GET["file"])&&$_SESSION["user"]["id"]=="1"){
     $file = '';
     $name = explode('.', $_GET["file"]);

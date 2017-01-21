@@ -1,78 +1,35 @@
 <?php
+/**
+* User login window.
+* @path /engine/code/account.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/language.php");
-
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
 $res = engine::mysql($query);
 $data = mysql_fetch_array($res);
 $template = $data["value"];
-
-function print_login_details(){
-    
-    $flag = 0;
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "vk_id"';
-    $res = engine::mysql($query);
-    $vk = mysql_fetch_array($res);
-
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "fb_id"';
-    $res = engine::mysql($query);
-    $fb_id = mysql_fetch_array($res);
-
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "tw_key"';
-    $res = engine::mysql($query);
-    $tw_key = mysql_fetch_array($res);
-
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "gp_id"';
-    $res = engine::mysql($query);
-    $gp_id = mysql_fetch_array($res);
-    
-    $fout = '<div class="left w200">'
-    . '<script>parent.document.getElementById("nodes_iframe").style.height="290px";'
-    . '</script>'
-    . '<center><h3 class="c555">'.lang("Login").'</h3></center><br/>'
-    . '<div class="center nowrap">';
-    
-    if(!empty($fb_id["value"])){ $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" class="m10 ml0"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
-    }if(!empty($tw_key["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" class="m9"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
-    }if(!empty($gp_id["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" class="m9"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
-    }if(!empty($vk["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="m10 mr0"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="Vkontakte"/></a>';
-    }if(!$flag){
-        $fout .= '<br/>';
-    }
-    
-    $fout .= '</div><br/>'
-    . '<form method="POST" action="'.$_SERVER["DIR"].'/account.php?mode=login">'
-    . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w200 p5" placeHolder="Email" /><br/><br/>'
-    . '<input type="password" required name="pass" class="input" class="w200 p5" value="'.$_POST["pass"].'" placeHolder="'.lang("Password").'" /><br/>'
-    . '<div class="nowrap pt17 pb20 center fs14">'
-    . '<a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a> | <a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=remember">'.lang("Lost password").'?</a>'
-    . '</div>'
-    . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form>'
-    . '</div>';   
-    return $fout;
-}
-
 if($_GET["mode"] == "login"){
     $fout = '<!DOCTYPE html>
     <html>
     <head>
     <meta charset="UTF-8" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <link href="'.$_SERVER["DIR"].'/templates/style.css" rel="stylesheet" type="text/css">
-    <link href="'.$_SERVER["DIR"].'/templates/'.$template.'/template.css" rel="stylesheet" type="text/css">';
-    require_once ("templates/meta.php");
+    <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
+    <link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">';
+    require_once("template/meta.php");
     $fout .= '
     </head>
-    <body style="background: #fff; opacity: 1; ">';
+    <body style="background: #fff; opacity: 1; min-width: 200px;" class="nodes">';
     if(!empty($_POST["email"]) && !empty($_POST["pass"])){
         $email = strtolower(str_replace('"', "'", $_POST["email"]));
-        $query = 'SELECT * FROM `nodes_logs` WHERE `details` = "'.$_POST["email"].'" AND `action` = 4 ORDER BY `date` DESC LIMIT 2, 1';
+        $query = 'SELECT * FROM `nodes_log` WHERE `details` = "'.$_POST["email"].'" AND `action` = 4 ORDER BY `date` DESC LIMIT 2, 1';
         $res = engine::mysql($query);
         $data= mysql_fetch_array($res);
         $date = $data["date"];
@@ -82,18 +39,18 @@ if($_GET["mode"] == "login"){
                     . '<script>var sec = '.(181-(date("U")-$date)).'; function tick(){sec--; document.getElementById("tick").innerHTML=sec;} setInterval(tick, 1000);'
                     . 'function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, '.((180-(date("U")-$date))*1000).');</script>';
         }else{
-            $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(strtolower($_POST["pass"])).'"';
+            $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(strtolower($_POST["pass"])).'"';
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
             if(!empty($data)){
                 if($data["ban"]=="1"){
                     $fout .= '<div class="center pt100 w200">'.lang("Access denied").'.</div>'
                             . '<script>function redirect(){parent.js_hide_wnd();}setTimeout(redirect, 3000);</script>';
-                    $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
+                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
                             . 'VALUES("4", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Ban")';
                     engine::mysql($query);
                 }else{
-                    $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
+                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
                             . 'VALUES("3", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
                     engine::mysql($query);
                     unset($data["pass"]);
@@ -105,18 +62,18 @@ if($_GET["mode"] == "login"){
                         $fout .= '<script language="JavaScript">parent.window.location = "'.($_SESSION["redirect"]).'";</script>';
                         unset($_SESSION["redirect"]);
                     }else{
-                        $fout .= '<script language="JavaScript">parent.window.location = "'.$_SERVER["DIR"].'/account#'.$_SESSION['user']['id'].'";</script>';
+                        $fout .= '<script language="JavaScript">parent.window.location = "'.$_SERVER["DIR"].'/account";</script>';
                     }
                 }
             }else{
-                $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$email.'"';
+                $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
                 $res = engine::mysql($query);
                 $data = mysql_fetch_array($res);
                 if(!empty($data)){
-                    $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
+                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
                             . 'VALUES("4", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
                 }else{
-                    $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
+                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
                             . 'VALUES("4", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
                 }engine::mysql($query);
 
@@ -128,7 +85,7 @@ if($_GET["mode"] == "login"){
         if(intval($_SESSION["user"]['id'])>0){
             $fout .= '<script language="JavaScript">parent.history.go(0);</script>';
         }else{
-            $fout .= print_login_details();
+            $fout .= engine::print_login_form();
         }
     }
     $fout .= '</body></html>';
@@ -138,76 +95,69 @@ if($_GET["mode"] == "login"){
     <head>
     <meta charset="UTF-8" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <link href="'.$_SERVER["DIR"].'/templates/style.css" rel="stylesheet" type="text/css">
-    <link href="'.$_SERVER["DIR"].'/templates/'.$template.'/template.css" rel="stylesheet" type="text/css">';
-    require_once ("templates/meta.php");
+    <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
+    <link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">';
+    require_once("template/meta.php");
     $fout .= '
     </head>
-    <body style="background: #fff;  opacity: 1;">';
+    <body style="background: #fff;  opacity: 1; min-width: 200px;" class="nodes">';
     if(!empty($_GET["email"])&&!empty($_GET["code"])){
         $email = urldecode($_GET["email"]);
-        $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$email.'"';
+        $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
         $res = engine::mysql($query);
         $data = mysql_num_rows($res);
         if($data){
             $code = substr(md5($email.date("Y-m-d")), 0, 6);
             if($code == $_GET["code"]){
-                $new_pass = substr(md5($email.date("U")), 0, 6);
-                $query = 'UPDATE `nodes_users` SET `pass` = "'.md5($new_pass).'" WHERE `email` = "'.$email.'"';   
+                $new_pass = substr(md5($email.date("Y-m-d")), 0, 8);
+                $query = 'UPDATE `nodes_user` SET `pass` = "'.md5($new_pass).'" WHERE `email` = "'.$email.'"';   
                 engine::mysql($query);
-                engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], lang("New password for")." ".$_SERVER["HTTP_HOST"], 
-                        lang("New password is").": ".$new_pass.'<br/><br/><a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'">'.$_SERVER["HTTP_HOST"].'</a>');
-                $fout .= '<div class="center pt100">'.lang("Message with new password is sended to email").'.</div>
-                        <script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/";}setTimeout(redirect, 3000);</script>';
+                $fout .= '<div class="center pt100">'.lang("New password activated!").'</div>
+                        <script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/login";}setTimeout(redirect, 3000);</script>';
             }else{
                 $fout .= '<div class="center pt100">'.lang("Invalid confirmation code").'.</div>'
-                 . '<script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/";}setTimeout(redirect, 3000);</script>';  
+                 . '<script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/login";}setTimeout(redirect, 3000);</script>';  
             }
         }else{
            $fout .= '<div class="center pt100">Email '.lang("not found").'.</div>'
-            . '<script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/";}setTimeout(redirect, 3000);</script>';  
+            . '<script>function redirect(){parent.window.location="'.$_SERVER["DIR"].'/login";}setTimeout(redirect, 3000);</script>';  
         }
     }else if(!empty($_POST["email"])){
         $email = str_replace('"', "'", $_POST["email"]);
-        $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$email.'"';
+        $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
         $res = engine::mysql($query);
         $data = mysql_fetch_array($res);
         if(!empty($data)){
             $code = substr(md5($email.date("Y-m-d")), 0, 6);
-            engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], lang("Restore your password")." ".$_SERVER["HTTP_HOST"], 
-            lang("To restore your password, use this code").': <a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=remember&email='.$email.'&code='.$code.'">'.$code.'</a><br/><br/><a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'">'.$_SERVER["HTTP_HOST"].'</a>');
-            $fout .= '<div class="left w200"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script>'
-            . '<center><h3 class="c555">'.lang("Confirmation code").'</h3></center><br/>'
-            . '<form method="GET"><input type="hidden" name="mode" value="remember" /><input  type="hidden" name="email" value="'.$_POST["email"].'" />'
-            . '<input type="text" required name="code" class="input" class="w200 p5 mt5" placeHolder="'.lang("Code").'" /><br/>'
-            . '<div class="login_links">'
-            . '<a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=login">'.lang("Login").'</a></div>'
-            . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form></div>'
-            . '<script>alert("'.lang("Message with confirmation code is sended to email").'.");</script>';   
+            $new_pass = substr(md5($email.date("Y-m-d")), 0, 8);
+            require_once("engine/include/send_email.php");
+            send_email::restore_password($data["email"], $new_pass, $code);
+            $fout .= '<div class="center pt100">'.lang("Message with new password is sended to email").'</div><script>'
+                    . 'function redirect(){this.location = "'.$_SERVER["DIR"].'/account.php?mode=login";}setTimeout(redirect, 3000); </script>';   
         }else{
             $fout .= '<div class="center pt100 w200">Email '.lang("not found").'.</div>'
             . '<script>function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=remember";}setTimeout(redirect, 3000);</script>';   
         }
     }else{
         $fout .= '<div class="left w200"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script>'
-        . '<center><h3 class="c555">'.lang("Restore password").'</h3></center><br/><form method="POST">'
-        . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w200 p5 mt5" placeHolder="Email" /><br/>'
-        . '<div class="login_links"><a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=login">'.lang("Login").'</a></div>'
+        . '<center><h4 class="c555 m5">'.lang("Restore password").'</h4></center><br/><form method="POST">'
+        . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w180 p5 mt5" placeHolder="Email" /><br/>'
+        . '<div class="login_links"><a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php">'.lang("Login").'</a></div>'
         . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form></div>';   
     }
     $fout .= '</body></html>';
 }else if($_GET["mode"] == "social"&&!empty($_GET["method"])){ 
     if($_GET["method"]=="fb"){
-        require_once 'engine/api/oauth/fb_auth.php';
+        require_once("engine/api/oauth/fb_auth.php");
     }else if($_GET["method"]=="vk"){
-        require_once 'engine/api/oauth/vk_auth.php';
+        require_once("engine/api/oauth/vk_auth.php");
     }else if($_GET["method"]=="tw"){
-        require_once 'engine/api/oauth/twitter_auth.php';
+        require_once("engine/api/oauth/twitter_auth.php");
     }else if($_GET["method"]=="gp"){
-        require_once 'engine/api/oauth/google_auth.php';
+        require_once("engine/api/oauth/google_auth.php");
     }
 }else if($_GET["mode"] == "logout"){  
-    $query = 'INSERT INTO `nodes_logs`(action, user_id, ip, date, details) '
+    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
     . 'VALUES("5", "'.$_SESSION["user"]["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "")';
     engine::mysql($query);
     unset($_SESSION["user"]);
@@ -221,13 +171,13 @@ if($_GET["mode"] == "login"){
         <head>
         <meta charset="UTF-8" />
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <link href="'.$_SERVER["DIR"].'/templates/style.css" rel="stylesheet" type="text/css">
-        <link href="'.$_SERVER["DIR"].'/templates/'.$template.'/template.css" rel="stylesheet" type="text/css">';
-    require_once ("templates/meta.php");
+        <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
+        <link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">';
+    require_once("template/meta.php");
     $fout .= '
         </head>
-        <body style="background: #fff;  opacity: 1;">'
-            .print_login_details().'
+        <body style="background: #fff;  opacity: 1; min-width: 200px;" class="nodes">'
+            .engine::print_login_form().'
         </body>
         </html>';
     }

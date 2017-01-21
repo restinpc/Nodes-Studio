@@ -1,4 +1,12 @@
 <?php
+/**
+* Captcha generator.
+* @path /engine/code/captcha.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 ob_start();
@@ -7,11 +15,11 @@ $height = 70;
 $font_size = 21;
 $let_amount = 6;
 $fon_let_amount = 30;
-$font = "fonts/Open-Sans-regular/Open-Sans-regular.ttf";
+$font = "font/Open-Sans-regular/Open-Sans-regular.ttf";
 $letters = array("1", "2", "3", "4", "5", "6", "7", "8", "9", "0");		
 $colors = array("90","110","130","150","170","190","210");	 
 $src = imagecreatetruecolor($width,$height);
-$fon = imagecolorallocate($src,255,255,255);
+$fon = imagecolorallocatealpha($src,255,255,255,0);
 imagefill($src,0,0,$fon);
 for($i=0;$i < $fon_let_amount;$i++){
     $color = imagecolorallocatealpha($src,rand(0,255),rand(0,255),rand(0,255),100);	
@@ -34,5 +42,5 @@ for($i=0;$i < $let_amount;$i++){
 }
 $cod = implode("",$cod);
 $_SESSION["captcha"] = $cod;
-header ("Content-type: image/gif");
-imagegif($src);
+header ("Content-type: image/png");
+imagepng($src);

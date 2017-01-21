@@ -1,4 +1,12 @@
 <?php
+/**
+* Error file.
+* @path /engine/code/error.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/language.php");
 $fout .= '
 <style>
@@ -7,10 +15,17 @@ $fout .= '
     color: #2e3137;  
     width: 100%; 
     border: 0px solid; 
-    padding-top: 150px; 
-    height: 100%;
+    padding-top: 150px;
     font-family: Sans-Serif;
-}    
+    line-height: 1.0;
+}  
+#caption{
+    z-index: 0; 
+    height: 40px; 
+    z-index: 0;  
+    padding-top: 10px;
+    min-width: 100px;
+}
 #robot{
     float:right;
     margin-right: 15%;
@@ -28,6 +43,7 @@ $fout .= '
 }
 .clear{
     clear:both;
+    height: 100px;
 }
 @media (max-width: 680px) {
     #robot{
@@ -43,21 +59,42 @@ $fout .= '
     <div id="caption">';
         if(isset($_GET["504"])){
             $fout .= '
-        <span class="error_code">504</span><br/>
-        <span class="error_text">'.lang("Gateway Timeout").'</span><br/><br/><br/>
+        <span class="error_code">504</span><br/><br/>
+        <span class="error_text">'.lang("Gateway Timeout").'</span>
+                ';  
+        }else if(isset($_GET["204"])){
+            if(empty($_POST["jQuery"])){
+                header("HTTP/1.0 204 No Content");
+            }
+            $fout .= '
+        <span class="error_code">204</span><br/><br/>
+        <span class="error_text">'.lang("Under construction").'</span>
+                ';  
+        }else if(isset($_GET["401"])){
+            if(empty($_POST["jQuery"])){
+                header("HTTP/1.0 401 No Content");
+            }
+            $fout .= '
+        <span class="error_code">401</span><br/><br/>
+        <span class="error_text">'.lang("Access denied").'</span>
+        <br/><br/><br/>
+        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
                 ';  
         }else{
+            if(empty($_POST["jQuery"])){
+                header("HTTP/1.0 404 Not Found");
+            }
             $fout .= '
-        <span class="error_code">404</span><br/>
-        <span class="error_text">'.lang("Page not found").'</span><br/><br/><br/>
+        <span class="error_code">404</span><br/><br/>
+        <span class="error_text">'.lang("Page not found").'</span>
+        <br/><br/><br/>
+        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
                 ';
         }
-        
         $fout .= '
-        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
     </div>
 </div>
-<div class="clear"></div>';
+<div class="clear">&nbsp;</div>';
 echo str_replace("  ", " ", str_replace("
 ", "", $fout));
 

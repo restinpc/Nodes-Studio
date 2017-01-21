@@ -1,24 +1,23 @@
 <?php
-/*
-$this->title - Page title
-$this->content - Page HTML data
-$this->menu - Page HTML navigation
-$this->keywords - Page meta keywords
-$this->description - Page meta description
-$this->img - Page meta image
-$this->js - Page JavaScript code
-$this->activejs - Page executable JavaScript code
-$this->css - Page CSS data
-$this->configs - Array MySQL configs
+/**
+* Backend login page file.
+* @path /engine/site/login.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*
+* @var $this->title - Page title.
+* @var $this->content - Page HTML data.
+* @var $this->keywords - Array meta keywords.
+* @var $this->description - Page meta description.
+* @var $this->img - Page meta image.
+* @var $this->onload - Page executable JavaScript code.
+* @var $this->configs - Array MySQL configs.
 */
-
-// TODO - Your code here
-//----------------------------
-
 if(!empty($_GET[1])){
     $this->content = engine::error();
     return; 
 }
-
 $this->title = lang("Login").' - '.$this->title;
-$this->content = '<iframe frameborder=0 width=200 height=260 class="login_frame" src="'.$_SERVER["DIR"].'/account.php"></iframe><br/><br/>';
+$this->content = '<iframe frameborder=0 width=200 height=260 class="login_frame" src="'.$_SERVER["DIR"].'/account.php"></iframe>';

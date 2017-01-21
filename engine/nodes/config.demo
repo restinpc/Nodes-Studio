@@ -1,0 +1,12 @@
+<?php
+/**
+* Framework config file example.
+*/
+global $config; 
+$config = array(
+    "name" => "",
+    "sql_server" => "",
+    "sql_login" => "",
+    "sql_pass" => "",
+    "sql_db" => ""
+);

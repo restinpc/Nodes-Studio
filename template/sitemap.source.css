@@ -1,0 +1,41 @@
+/**
+* Sitemap stylesheets source file.
+* Do not edit directly.
+* @path /template/sitemap.source.css
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
+@charset "UTF-8";
+.sitemap{
+    background: #2e3137; 
+    font-family: Sans-Serif;
+}
+.caption{
+    text-align:center; 
+    color: #fff; 
+    padding-top: 0px;
+}
+.content{
+    width: 100%; 
+    min-width: 280px; 
+    max-width: 400px; 
+    margin: auto;
+}
+.white{
+    color: #fff; 
+    text-decoration: none;
+}
+.hidden{
+    display: none;
+}
+.list{
+    list-style: none; 
+    padding-left: 10px; 
+    line-height: 2.0;
+}
+.list a{
+    color: #fff; 
+    text-decoration: none;
+}

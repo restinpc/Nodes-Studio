@@ -1,22 +1,20 @@
 <?php
-/*
-$this->title - Page title
-$this->content - Page HTML data
-$this->menu - Page HTML navigation
-$this->keywords - Page meta keywords
-$this->description - Page meta description
-$this->img - Page meta image
-$this->js - Page JavaScript code
-$this->activejs - Page executable JavaScript code
-$this->css - Page CSS data
-$this->configs - Array MySQL configs
+/**
+* Backend search page file.
+* @path /engine/site/search.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*
+* @var $this->title - Page title.
+* @var $this->content - Page HTML data.
+* @var $this->keywords - Array meta keywords.
+* @var $this->description - Page meta description.
+* @var $this->img - Page meta image.
+* @var $this->onload - Page executable JavaScript code.
+* @var $this->configs - Array MySQL configs.
 */
-
-// TODO - Your code here
-//----------------------------
-
-require_once("engine/include/print_search_result.php");
-
 if(!empty($_GET[2])){
     $this->content = engine::error();
     return; 
@@ -24,28 +22,24 @@ if(!empty($_GET[2])){
     $this->content = '<div class="clear_block">'.lang("Empty search query").'</div>';
     return;
 }
-
 $this->title = lang("Search").' - '.$this->title;
 $this->description = lang("Search results for").' '.urldecode($_GET[1]);
 $this->content .= lang("Search results for").'<br/><br/><h1> "'.urldecode($_GET[1]).'"</h1><br/><br/>';
-
 if(!empty($_POST["from"])) $_SESSION["from"] = $_POST["from"];
 if(!empty($_POST["to"])) $_SESSION["to"] = $_POST["to"];
 if(!empty($_POST["count"])) $_SESSION["count"] = intval($_POST["count"]);
 if(!empty($_POST["page"])) $_SESSION["page"] = intval($_POST["page"]);
 if(!empty($_POST["method"])) $_SESSION["method"] = $_POST["method"];
 if(!empty($_POST["order"])) $_SESSION["order"] = $_POST["order"];
-if($_SESSION["order"]=="id") $_SESSION["order"] = "date";
-    
+if($_SESSION["order"]=="id") $_SESSION["order"] = "date";   
 $arr_count = 0;
 $count = 0;
 $uncount = 1;
 $from = ($_SESSION["page"]-1)*$_SESSION["count"]+1;
 $to = ($_SESSION["page"]-1)*$_SESSION["count"]+$_SESSION["count"];
-$query = 'SELECT * FROM `nodes_catch` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2'
+$query = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2'
 . ' ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"];
-$requery = 'SELECT * FROM `nodes_catch` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2';
-
+$requery = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2';
 $fout = '<div class="document">';
 $res = engine::mysql($query);
 while($data = mysql_fetch_array($res)){
@@ -56,7 +50,7 @@ while($data = mysql_fetch_array($res)){
         if(!empty($data["content"])) $content = $data["content"];
         else $content = $data["html"];
         if(!empty($data["html"])){
-            $result = print_search_result($title, $content, $data["url"]);
+            $result = print_search_result($this, $title, $content, $data["url"]);
             if($result){
                 if($uncount<$from){
                     $uncount++;
@@ -70,7 +64,6 @@ while($data = mysql_fetch_array($res)){
         }
     }
 }$fout .= '</div>';
-
 $res = engine::mysql($requery);
 while($data = mysql_fetch_array($res)){
     if(empty($data["url"])) $data["url"] = "/";
@@ -79,10 +72,9 @@ while($data = mysql_fetch_array($res)){
     if(!empty($data["content"])) $content = $data["content"];
     else $content = $data["html"];
     if(!empty($data["html"])){
-        if(print_search_result($title, $content, $data["url"])) $count++;
+        if(engine::print_search_result($this, $title, $content, $data["url"])) $count++;
     }
 }
-
 if($arr_count){
     $this->content .= $fout.'
     <form method="POST"  id="query_form"  onSubmit="submit_search();">

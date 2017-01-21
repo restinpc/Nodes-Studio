@@ -1,5 +1,12 @@
 <?php
-/* Nodes Studio system file. Do not edit! */
+/**
+* Google OAuth script.
+* @path /engine/api/oauth/google_auth.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
@@ -60,8 +67,8 @@ $apiConfig = array(
       'urlshortener' => array('scope' => 'https://www.googleapis.com/auth/urlshortener')
     )
 );
-require_once 'engine/api/gplus/Google_Client.php';
-require_once 'engine/api/gplus/contrib/Google_Oauth2Service.php';
+require_once("engine/api/gplus/Google_Client.php");
+require_once("engine/api/gplus/contrib/Google_Oauth2Service.php");
 $client = new Google_Client();
 $oauth2 = new Google_Oauth2Service($client);
 if (!empty($_GET["code"])) {
@@ -79,13 +86,13 @@ if (!empty($_GET["code"])) {
     $user = $oauth2->userinfo->get();
     if(!empty($user->name)&&!empty($user->link)){
         if(!empty($_SESSION["email"])){
-            $query = 'UPDATE `nodes_users` SET `url` = "'.$user->link.'" WHERE `email` = "'.$_SESSION["email"].'"';
+            $query = 'UPDATE `nodes_user` SET `url` = "'.$user->link.'" WHERE `email` = "'.$_SESSION["email"].'"';
             engine::mysql($query);
-            $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$_SESSION["email"].'"';
+            $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["email"].'"';
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
         }else{
-            $query = 'SELECT * FROM `nodes_users` WHERE `url` = "'.$user->link.'"'; 
+            $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$user->link.'"'; 
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
             if(empty($data)){
@@ -95,10 +102,10 @@ if (!empty($_GET["code"])) {
                 if(!empty($_SERVER["DIR"])) $path = substr ($_SERVER["DIR"], 1)."/";
                 $path .= 'img/pic/';
                 try{ copy($user->picture, $path.$pic); }catch(Exception $e){ copy($user->picture, $_SERVER["DOCUMENT_ROOT"].'/'.$path.$pic); }
-                $query = 'INSERT INTO `nodes_users`(name, photo, url, online, confirm) '
+                $query = 'INSERT INTO `nodes_user`(name, photo, url, online, confirm) '
                 . 'VALUES("'.$user->name.'", "'.$pic.'", "'.$user->link.'", "'.date("U").'", "1")';
                 $res = engine::mysql($query);
-                $query = 'SELECT * FROM `nodes_users` WHERE `url` = "'.$user->link.'"';
+                $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$user->link.'"';
                 $res = engine::mysql($query);
                 $data = mysql_fetch_array($res);
             }

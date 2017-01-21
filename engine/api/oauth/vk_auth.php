@@ -1,5 +1,12 @@
 <?php
-/* Nodes Studio system file. Do not edit! */
+/**
+* VK OAuth script.
+* @path /engine/api/oauth/vk_auth.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
@@ -8,13 +15,13 @@ if(!empty($_REQUEST["name"])){
         if($_SESSION["request"]>date("U")-60){
             $_SESSION["request"] = '';
             if(!empty($_SESSION["user"]["email"])){
-                $query = 'UPDATE `nodes_users` SET `url` = "'.$_REQUEST["url"].'" WHERE `email` = "'.$_SESSION["user"]["email"].'"';
+                $query = 'UPDATE `nodes_user` SET `url` = "'.$_REQUEST["url"].'" WHERE `email` = "'.$_SESSION["user"]["email"].'"';
                 engine::mysql($query);
-                $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
+                $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
                 $res = engine::mysql($query);
                 $data = mysql_fetch_array($res);
             }else{
-                $query = 'SELECT * FROM `nodes_users` WHERE `url` = "'.$_REQUEST["url"].'"'; 
+                $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$_REQUEST["url"].'"'; 
                 $res = engine::mysql($query);
                 $data = mysql_fetch_array($res);
                 if(empty($data)){
@@ -24,9 +31,9 @@ if(!empty($_REQUEST["name"])){
                     if(!empty($_SERVER["DIR"])) $path = substr ($_SERVER["DIR"], 1)."/";
                     $path .= 'img/pic/';
                     try{ copy($_REQUEST["photo"], $path.$pic); }catch(Exception $e){ copy($_REQUEST["photo"], $_SERVER["DOCUMENT_ROOT"].'/'.$path.$pic); }
-                    $query = 'INSERT INTO `nodes_users`(name, photo, url, online, confirm) VALUES("'.$_REQUEST["name"].'", "'.$pic.'", "'.$_REQUEST["url"].'", "'.date("U").'", "1")';
+                    $query = 'INSERT INTO `nodes_user`(name, photo, url, online, confirm) VALUES("'.$_REQUEST["name"].'", "'.$pic.'", "'.$_REQUEST["url"].'", "'.date("U").'", "1")';
                     $res = engine::mysql($query);
-                    $query = 'SELECT * FROM `nodes_users` WHERE `url` = "'.$_REQUEST["url"].'"';
+                    $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$_REQUEST["url"].'"';
                     $res = engine::mysql($query);
                     $data = mysql_fetch_array($res);
                 }

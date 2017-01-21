@@ -1,5 +1,12 @@
 <?php
-/* Nodes Studio system file. Do not edit! */
+/**
+* Facebook OAuth script.
+* @path /engine/api/oauth/fb_auth.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
@@ -26,19 +33,19 @@ if(empty($code)){
         $_SESSION["request"] = '';
         if(!empty($oUser->name)&&!empty($oUser->id)){
             if(!empty($_SESSION["user"]["email"])){
-                $query = 'UPDATE `nodes_users` SET `url` = "'.$link.'" WHERE `email` = "'.$_SESSION["user"]["email"].'"';
+                $query = 'UPDATE `nodes_user` SET `url` = "'.$link.'" WHERE `email` = "'.$_SESSION["user"]["email"].'"';
                 engine::mysql($query);
-                $query = 'SELECT * FROM `nodes_users` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
+                $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
                 $res = engine::mysql($query);
                 $data = mysql_fetch_array($res);
             }else{
-                $query = 'SELECT * FROM `nodes_users` WHERE `url` = "'.$link.'"'; 
+                $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$link.'"'; 
                 $res = engine::mysql($query);
                 $data = mysql_fetch_array($res);
                 if(empty($data)){
-                    $query = 'INSERT INTO `nodes_users`(name, photo, url, online, confirm) VALUES("'.$oUser->name.'", "anon.jpg", "'.$link.'", "'.date("U").'", "1")';
+                    $query = 'INSERT INTO `nodes_user`(name, photo, url, online, confirm) VALUES("'.$oUser->name.'", "anon.jpg", "'.$link.'", "'.date("U").'", "1")';
                     $res = engine::mysql($query);
-                    $query = 'SELECT * FROM `nodes_users` WHERE `url` = "'.$link.'"';
+                    $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$link.'"';
                     $res = engine::mysql($query);
                     $data = mysql_fetch_array($res);
                 }

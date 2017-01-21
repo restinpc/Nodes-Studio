@@ -1,0 +1,44 @@
+/**
+* Email stylesheets source file.
+* Do not edit directly.
+* @path /template/email.source.css
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
+@charset "UTF-8";
+.document{
+    width: 100%; 
+    min-width: 280px;
+    max-width: 700px; 
+    text-align:center; 
+    font-size: 18px; 
+    margin: 0px auto;
+    color: #111;
+    line-height: 1.0;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    font-family: Tahoma;
+}
+.document a{
+    text-decoration: none; 
+    color: #4473ba;
+}
+.document img{
+    margin: 10px;
+    max-width: 600px;
+}
+.document hr{
+    color: #eee; 
+    border-top: #eee 1px solid;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+.document center{
+    font-size: 18px;
+}
+.document p{
+    text-align:left;
+    line-height: 1.8;
+}

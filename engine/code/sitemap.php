@@ -1,8 +1,16 @@
 <?php
-require_once ("engine/nodes/headers.php");
-require_once ("engine/nodes/session.php");
-require_once ("engine/nodes/mysql.php");
-require_once ("engine/nodes/language.php");
+/** 
+* Sitemap generator.
+* @path /engine/code/sitemap.php
+*
+* @name    Nodes Studio    @version 2.0.2
+* @author  Alexandr Virtual    <developing@nodes-tech.ru>
+* @license http://nodes-studio.com/license.txt GNU Public License
+*/
+require_once("engine/nodes/headers.php");
+require_once("engine/nodes/session.php");
+require_once("engine/nodes/mysql.php");
+require_once("engine/nodes/language.php");
 if(!strpos($_SERVER["REQUEST_URI"], ".xml")){
     header('Content-Type: text/html; charset=utf-8');
 echo '<!DOCTYPE html>
@@ -11,40 +19,8 @@ echo '<!DOCTYPE html>
 <meta charset="UTF-8" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>'.lang("Sitemap").' '.$_SERVER["HTTP_HOST"].'</title>
-<style>
-.sitemap{
-    background: #2e3137; 
-    font-family: Sans-Serif;
-}
-.caption{
-    text-align:center; 
-    color: #fff; 
-    padding-top: 0px;
-}
-.content{
-    width: 100%; 
-    min-width: 280px; 
-    max-width: 400px; 
-    margin: auto;
-}
-.white{
-    color: #fff; 
-    text-decoration: none;
-}
-.hidden{
-    display: none;
-}
-.list{
-    list-style: none; 
-    padding-left: 10px; 
-    line-height: 2.0;
-}
-.list a{
-    color: #fff; 
-    text-decoration: none;
-}
-</style>';
-require_once ("templates/meta.php");
+<link href="'.$_SERVER["DIR"].'/template/sitemap.css" rel="stylesheet" type="text/css" />';
+require_once("template/meta.php");
 echo $fout;
 echo '
 </head>
@@ -73,7 +49,7 @@ echo '
     echo '</select></form></center>
     <ul class="list">
 ';
-$query = 'SELECT * FROM `nodes_catch` WHERE `interval` > -2 AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `url` ASC';
+$query = 'SELECT * FROM `nodes_cache` WHERE `interval` > -2 AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `url` ASC';
 $res = engine::mysql($query);
 while($data = mysql_fetch_array($res)){
     if(empty($data["url"])) $data["url"] = "/";
@@ -110,7 +86,7 @@ echo '
 </html>';
 
 }else{
-    $query = 'SELECT * FROM `nodes_catch` WHERE `interval` > -2 ORDER BY `url` ASC';
+    $query = 'SELECT * FROM `nodes_cache` WHERE `interval` > -2 ORDER BY `url` ASC';
     $res = engine::mysql($query);
     header('Content-Type: application/rss+xml; charset=utf-8');
     echo '<?xml version="1.0" encoding="UTF-8"?>
