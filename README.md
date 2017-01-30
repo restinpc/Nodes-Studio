@@ -3,7 +3,6 @@
 Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 ![](https://github.com/restinpc/Nodes-Studio/blob/master/nodes.jpg?raw=true)
-
 #### Faster than Wordpress, smarter than Joomla, easier than Drupal. And it's Freeware!
 
 [Complete technical description][en].
