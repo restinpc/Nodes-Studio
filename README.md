@@ -7,7 +7,9 @@ based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 [![](http://nodes-studio.com/img/cms/nodes_studio.png)][url]
 
+> 
 > Faster than Wordpress, smarter than Joomla, easier than Drupal, and it's Free!
+> 
 
 Nodes Studio is a library of interface elements (framework) with integrated content management system (CMS), which is one of the most successful solutions for web development today.
 
