@@ -2,7 +2,7 @@
 
 Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
-[![](http://nodes-studio.com/img/cms/nodes_studio.png)][url]
+[![](https://github.com/restinpc/Nodes-Studio/blob/master/favicon.ico?raw=true)][url]
 
 #### Faster than Wordpress, Smarter than Joomla, Easier than Drupal. And it's Freeware!
 
