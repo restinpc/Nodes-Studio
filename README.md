@@ -1,18 +1,9 @@
-# Nodes Studio
-### Web 2.0 Framework
+# Nodes Studio - Web 2.0 Framework
+#### Faster than Wordpress, Smarter than Joomla, Easier than Drupal. And it's Freeware!
 
-Software platform for the building Premium Web-Sites, 
-based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
+Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 [![](http://nodes-studio.com/img/cms/nodes_studio.png)][url]
-
-> Faster than Wordpress.
-
-> Smarter than Joomla. 
-
-> Easier than Drupal.
-
-> And it's Freeware! 
 
 Nodes Studio is a library of interface elements (framework) with integrated content management system (CMS), which is one of the most successful solutions for web development today.
 
