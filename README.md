@@ -1,8 +1,8 @@
 # Nodes Studio - Web 2.0 Framework
 
-[Full technical description - English version][en]
+[Complete technical description][en]
 
-[Полное техническое описание - Русская версия][ru]
+[Полное техническое описание][ru]
 
 Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
