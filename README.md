@@ -20,7 +20,7 @@ Integrated CMS allows to fully manage both the content of the site and its softw
 
 Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
-1. Download and extract the [Nodes Studio][download] [ [Mirror 1][mirror] | [Mirror 2][github] ]
+1. Download and extract the [Nodes Studio][download]. [Mirror 1][mirror] | [Mirror 2][github].
 
 2. Copy the contents of the folder /public_html to the root directory of the site.
 
@@ -40,7 +40,7 @@ Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
 If there are any questions or you need more information, please contact us via:
 
-[ [Facebook][fb] | [Vkontakte][vk] | [Twitter][tw] | [Google+][gp] | [Freelancer][fl] | [Github][gh] | [Email][email] ]
+[Facebook][fb] | [Vkontakte][vk] | [Twitter][tw] | [Google+][gp] | [Freelancer][fl] | [LinkedIn][li] | [Github][gh] | [Email][email]
 
 [en]: <http://nodes-studio.com>
 [ru]: <http://nodes-tech.ru>
@@ -53,4 +53,5 @@ If there are any questions or you need more information, please contact us via:
 [tw]: <https://twitter.com/nodes_studio>
 [gp]: <https://plus.google.com/110848129975428000891>
 [gh]: <https://github.com/restinpc>
+[li]: <https://www.linkedin.com/in/nodes-studio>
 [email]: <mailto:developing@nodes-tech.ru>
