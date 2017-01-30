@@ -20,7 +20,7 @@ Integrated CMS allows to fully manage both the content of the site and its softw
 
 Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
-1. Download and extract the [Nodes Studio][download] | [Mirror 1][mirror] | [Mirror 2][github].
+1. Download and extract the Nodes Studio [Archive][download] | [Mirror 1][mirror] | [Mirror 2][github].
 
 2. Copy the contents of the folder /public_html to the root directory of the site.
 
