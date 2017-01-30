@@ -3,17 +3,18 @@
 Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 ![](https://github.com/restinpc/Nodes-Studio/blob/master/nodes.jpg?raw=true)
+
 #### Faster than Wordpress, smarter than Joomla, easier than Drupal. And it's Freeware!
-
-[Complete technical description][en].
-
-[Полное техническое описание][ru].
 
 Nodes Studio is a library of interface elements (framework) with integrated content management system (CMS), which is one of the most successful solutions for web development today.
 
 Framework provides developers with an object-oriented representation of the site and a library of functions to work with it.
 
 Integrated CMS allows to fully manage both the content of the site and its software-functional component.
+
+[Complete technical description][en].
+
+[Полное техническое описание][ru].
 
 ## Installation
 
