@@ -89,8 +89,7 @@ function print_comments($url){
             $r_conf = engine::mysql($query);
             $d_conf = mysql_fetch_array($r_conf);
             if(intval($d_conf["value"])){
-                require_once("engine/core/send_email.php");
-                send_email::new_comment($_SESSION["user"]["id"], $url);     
+                email::new_comment($_SESSION["user"]["id"], $url);     
             }
             $fout .= '
             <script>alert("'.lang("Comment submited!").'");</script>

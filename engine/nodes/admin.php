@@ -11,7 +11,6 @@ class admin{
 public $site;           // Primary Site object.
 public $title;          // Page title.
 public $content;        // Page HTML data.
-public $menu;           // Page HTML navigation.
 public $onload;         // Page executable JavaScript code.
 public $statistic;      // Array CMS statistic.
 //------------------------------------------------------------------------------
@@ -87,11 +86,10 @@ function admin($site){
                 $this->title = lang("Admin");
                 $function = 'print_admin';
             }
-            $this->menu = engine::print_admin_navigation($this);
             $this->content = engine::$function($this);
             $site->title = $this->title." - ".$site->title;
             $site->content = '<div class="profile_menu fs10">
-                <div class="container">'.$this->menu.'</div>
+                <div class="container">'.engine::print_admin_navigation($this).'</div>
             </div>
             <div class="admin_content">
                 '.$this->content.'

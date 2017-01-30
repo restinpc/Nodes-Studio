@@ -31,7 +31,7 @@ function print_admin_backend($cms){
         $mode = trim(htmlspecialchars($_POST["mode"]));
         $mode = str_replace('/', '', $mode);
         $file = trim(htmlspecialchars($_POST["file"]));
-        if(strpos($file, ".php")===FALSE) $file .= '.php';
+        if(mb_strpos($file, ".php")===FALSE) $file .= '.php';
         $fname = "engine/site/".$file;
         $fname = fopen($fname, 'w') or die("can't open file");
         $code = "<?php

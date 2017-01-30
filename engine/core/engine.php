@@ -1,7 +1,7 @@
 <?php
 /**
 * Framework engine class.
-* @path /engine/nodes/engine.php
+* @path /engine/core/engine.php
 *
 * @name    Nodes Studio    @version 2.0.2
 * @author  Alexandr Virtual    <developing@nodes-tech.ru>

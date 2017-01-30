@@ -69,26 +69,6 @@ function getViewportWidth(){
         document.documentElement.clientWidth:document.body.clientWidth:
         (document.parentWindow||document.defaultView).innerWidth;
 }
-
-//------------------------------------------------------------------------------
-/**
-* Creates a new XMLHttpRequest object.
-*/
-function getXmlHttp(){
-  var xmlhttp;
-  try {
-    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-  } catch (e) {
-    try {
-      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    } catch (E) {
-      xmlhttp = false;
-    }
-  }
-  if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
-    xmlhttp = new XMLHttpRequest();
-  }return xmlhttp;
-}
 //------------------------------------------------------------------------------
 /**
 * Attaches an event handler to the specified element.
@@ -196,7 +176,7 @@ function show_editor(file){
 }
 //------------------------------------------------------------------------------
 /**
-* Displays source code viewer.
+* Displays photo editor.
 */
 function show_photo_editor(id, pos){
     show_window('<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/images.php?id='+id+'&pos='+pos+'" scrolling="yes" style="margin-top: 10px;" />');
@@ -255,7 +235,7 @@ function is_array( mixed_var ) {
 }
 //------------------------------------------------------------------------------
 /**
-* Checking if variable are empty.
+* Checking if variable is empty.
 */
 function empty( mixed_var ) {	 
     return( mixed_var === "" || mixed_var === 0 || mixed_var === "0" 
@@ -535,6 +515,9 @@ function tinymce_init(){
     });}
 }
 //------------------------------------------------------------------------------
+/**
+* Submits search form.
+*/
 function submit_search_form(){
     document.getElementById("page_field").value=1;
     refresh_page();
@@ -559,7 +542,7 @@ function removeSiteFade() {
 }
 //------------------------------------------------------------------------------
 /**
-* Converts date in Unixtime foramt to current Local time format.
+* Converts dates in Unixtime format to current Local time format.
 */
 function browser_time(){
     jQuery('.utc_date').each(function (i) {
@@ -642,7 +625,7 @@ function process_payment(id, price){
 }
 //------------------------------------------------------------------------------
 /**
-* Submits new a chat message.
+* Submits a new message to chat.
 */
 function post_message(id){
     var txt = jQuery("#nodes_message_text").val();
@@ -675,8 +658,8 @@ function refresh_chat(id){
 /**
 * Displays 1-to-5 stars vote form.
 */
-function star_rating(total_reiting){
-    var star_widht = total_reiting * 17 ;
+function star_rating(total_rating){
+    var star_widht = total_rating * 17 ;
     jQuery('.rating_votes').width(star_widht);
     jQuery('.rating_stars').hover(function() {
       jQuery('.rating_votes, .rating_hover').toggle();

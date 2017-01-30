@@ -23,7 +23,7 @@ function print_admin_products($cms){
         if(!empty($_POST["file1"]) && !empty($_SESSION["user"]["id"])){
             $_SESSION["photos"] = '';
             foreach($_POST as $key=>$file){
-                if(!empty($file) && strpos(" ".$key, "file")){
+                if(!empty($file) && mb_strpos(" ".$key, "file")){
                     $_SESSION["photos"] .= trim($file).';';
                 }
             }
@@ -41,7 +41,7 @@ function print_admin_products($cms){
             $data = mysql_fetch_array($res);
             $_SESSION["product"] = $data["id"];
             foreach($_POST as $key=>$value){
-                if(strpos($key, 'property_')!=="false"){
+                if(mb_strpos($key, 'property_')!=="false"){
                     $key = str_replace('property_', '', $key);
                 }if(intval($key) > 0){
                     $value = intval($_POST["property_".$key]);
@@ -193,7 +193,7 @@ function print_admin_products($cms){
                 $query = 'DELETE FROM `nodes_property_data` WHERE `product_id` = "'.$_GET["id"].'"';
                 engine::mysql($query);
                 foreach($_POST as $key=>$value){
-                    if(strpos(' '.$key, 'property_')){
+                    if(mb_strpos(' '.$key, 'property_')){
                         $key = str_replace('property_', '', $key);
                     }if(intval($key) > 0){
                         $value = intval($_POST["property_".$key]);

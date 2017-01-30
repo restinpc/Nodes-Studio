@@ -43,7 +43,7 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             . 'VALUES("2", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Email '.$_POST["email"].' allready exist")';
             engine::mysql($query);
             unset($_POST["email"]);
-        }else if(strpos($email, "@")){
+        }else if(mb_strpos($email, "@")){
             $query = 'INSERT INTO `nodes_user` (`name`, `photo`, `email`, `pass`, `online`, `confirm`, `code`) 
                 VALUES ("'.$name.'", "anon.jpg", "'.$email.'", "'.md5(trim($_POST["pass"])).'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
             engine::mysql($query);
@@ -59,11 +59,9 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             . 'VALUES("1", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Sucsessful registration")';
             engine::mysql($query);
             if($this->configs["confirm_signup_email"]){
-                require_once("engine/core/send_email.php");
-                send_email::confirmation($email, $name, $code);  
+                email::confirmation($email, $name, $code);  
             }else if($this->configs["send_registration_email"]){
-                require_once("engine/core/send_email.php");
-                send_email::registration($email, $name);  
+                email::registration($email, $name);  
             }
             if(empty($_SESSION["redirect"])){
                 die('<script language="JavaScript">window.location = "'.$_SERVER["DIR"].'/";</script>');

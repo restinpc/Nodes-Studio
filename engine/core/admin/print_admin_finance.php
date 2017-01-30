@@ -31,8 +31,7 @@ function print_admin_finance($cms){
             engine::mysql($query);
             $query = 'UPDATE `nodes_transaction` SET `status` = "2" WHERE `id` = "'.$data["id"].'"';
             engine::mysql($query);
-            require_once("engine/core/send_email.php");
-            send_email::finish_withdrawal($data["user_id"]);
+            email::finish_withdrawal($data["user_id"]);
         }else if($_POST["submit_btn"]=="Delete"){
             $query = 'DELETE FROM `nodes_transaction` WHERE `id` = "'.intval($_POST["id"]).'"';
             engine::mysql($query);

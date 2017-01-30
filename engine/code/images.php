@@ -9,18 +9,14 @@
 */
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/language.php");
-if($_SESSION["user"]["id"] != "1") die(engine::error(401));
-$query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
-$res = engine::mysql($query);
-$data = mysql_fetch_array($res);
-$template = $data["value"];
+if(empty($_SESSION["user"]["id"])) die(engine::error(401));
 $fout = '<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
-<link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">
+<link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css">
 </head>
 <body class="body_images nodes">';
 if(!empty($_GET['id']) && !empty($_GET["pos"])){

@@ -31,14 +31,16 @@ if(!empty($_POST["admin_email"])){
 * @license http://nodes-studio.com/license.txt GNU Public License
 */
 ';
-                    $source = 'global $config; 
-$config = array(
-    "name" => "'. mysql_real_escape_string($_POST["name"]).'",
-    "sql_server" => "'. mysql_real_escape_string($_POST["mysql_server"]).'",
-    "sql_login" => "'. mysql_real_escape_string($_POST["mysql_login"]).'",
-    "sql_pass" => "'. mysql_real_escape_string($_POST["mysql_pass"]).'",
-    "sql_db" => "'. mysql_real_escape_string($_POST["mysql_db"]).'"
-);';    
+$source = '/**'."\n".'
+* Framework config file'."\n".'
+*/'."\n".'
+$_SERVER["config"] = array('."\n".'
+    "name" => "'. mysql_real_escape_string($_POST["name"]).'",'."\n".'
+    "sql_server" => "'. mysql_real_escape_string($_POST["mysql_server"]).'",'."\n".'
+    "sql_login" => "'. mysql_real_escape_string($_POST["mysql_login"]).'",'."\n".'
+    "sql_pass" => "'. mysql_real_escape_string($_POST["mysql_pass"]).'",'."\n".'
+    "sql_db" => "'. mysql_real_escape_string($_POST["mysql_db"]).'"'."\n".'
+);';     
                     if(intval($_POST["encoding"])){
                         $encode = base64_encode($source);
                         $code .= 'eval(base64_decode("'.$encode.'"));';

@@ -31,8 +31,7 @@ function print_admin_files($cms){
                     $arr[count($arr)-1] == "js"){
                     die("Unable to upload *.exe, *.bat, *.php, *.cgi, *.js files");
                 }
-                require_once("engine/core/manage_files.php");
-                $f1 = manage_files::upload("photo_".$i, 'file/', 1);
+                $f1 = file::upload("photo_".$i, 'file/', 1);
                 if($f1=="error"){ 
                     $fout .= '<script>alert("'.lang("Error").'");</script>';
                 }

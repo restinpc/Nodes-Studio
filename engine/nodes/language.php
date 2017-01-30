@@ -7,6 +7,7 @@
 * @author  Alexandr Virtual    <developing@nodes-tech.ru>
 * @license http://nodes-studio.com/license.txt GNU Public License
 */
+require_once("engine/nodes/session.php");
 if(empty($_SESSION["Lang"])){ 
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "language"';
     $res = engine::mysql($query);

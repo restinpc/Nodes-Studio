@@ -2,18 +2,18 @@
 /**
 * Dump MySQL database.
 * Should be required before using.
-* @path /engine/core/mysql_dump.php
+* @path /engine/core/dump.php
 * 
 * @name    MySQLDump    @version 2.20 - 02/11/2007
 * @author  Daniele Viganň - CreativeFactory.it <daniele.vigano@creativefactory.it>
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 * 
 * @example <code>
-*  $dumper = new mysql_dump($dbname,'filename.sql',false,false);
+*  $dumper = new dump($dbname,'filename.sql',false,false);
 *  $dumper->doDump();
 * </code>
 */
-class mysql_dump {
+class dump {
 protected $database = null;
 var $compress = false;
 var $hexValue = false;
@@ -29,7 +29,7 @@ protected  $isWritten = false;
 * @param boolean $compress It defines if the output file is compress (gzip) or not
 * @param boolean $hexValue It defines if the outup values are base-16 or not
 */
-function mysql_dump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
+function dump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
     $this->compress = $compress;
     if ( !$this->setOutputFile($filepath) )
         return false;

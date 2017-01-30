@@ -224,15 +224,12 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
     }
     $fout .= '</div>';
 }
-$query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
-$res = engine::mysql($query);
-$data = mysql_fetch_array($res);
 $fout .= '<link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />
-<link href="'.$_SERVER["DIR"].'/template/'.$data["value"].'/template.css" rel="stylesheet" type="text/css" />
+<link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'";</script>
 <script src="'.$_SERVER["DIR"].'/script/jquery-1.11.1.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript"></script>
-<script src="'.$_SERVER["DIR"].'/template/'.$data["value"].'/template.js" type="text/javascript"></script>
+<script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript"></script>
 <script>jQuery("#country_selector").countrySelect({  defaultCountry: "us" })</script>
 </body><script>document.body.style.opacity = "1";</script></html>';
 echo $fout;

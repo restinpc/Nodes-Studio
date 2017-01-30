@@ -9,15 +9,11 @@
 */
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
-require_once("engine/core/send_email.php");
 if(!empty($_GET["deposit"]) || !empty($_POST["payment_gross"])){
     $amount = $_POST["payment_gross"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$_GET["deposit"].'"';
     $res = engine::mysql($query);
     $user = mysql_fetch_array($res);
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "sandbox"';
-    $res = engine::mysql($query);
-    $send_email = mysql_fetch_array($res);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "sandbox"';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
@@ -29,7 +25,7 @@ if(!empty($_GET["deposit"]) || !empty($_POST["payment_gross"])){
         engine::mysql($query);
         $query = 'UPDATE `nodes_user` SET `balance` = "'.$balance.'" WHERE `id` = "'.$_GET["deposit"].'"';
         engine::mysql($query);
-        send_email::new_transaction($_GET["deposit"], $amount);
+        email::new_transaction($_GET["deposit"], $amount);
     }else{
         $postdata = ""; 
         foreach ($_POST as $key=>$value) $postdata .= $key."=".urlencode($value)."&"; 
@@ -51,7 +47,7 @@ if(!empty($_GET["deposit"]) || !empty($_POST["payment_gross"])){
             $query = 'UPDATE `nodes_user` SET `balance` = "'.$balance.'" WHERE `id` = "'.$_GET["deposit"].'"';
             engine::mysql($query);
             $_SESSION["user"]["balance"] = $balance;
-            send_email::new_transaction($_GET["deposit"], $amount);
+            email::new_transaction($_GET["deposit"], $amount);
         }
     }  
 }
@@ -72,7 +68,7 @@ if(!empty($_GET["order_id"])){
         engine::mysql($query);
         $query = 'UPDATE `nodes_order` SET `status` = "1" WHERE `id` = "'.intval($_GET["order_id"]).'"';
         engine::mysql($query);
-        send_email::new_purchase($_GET["order_id"]);
+        email::new_purchase($_GET["order_id"]);
         unset($_SESSION["order_confirm"]);
         unset($_SESSION["shipping_confirm"]);
         unset($_SESSION["products"]); 
@@ -98,7 +94,7 @@ if(!empty($_GET["order_id"])){
                 engine::mysql($query);
                 $query = 'UPDATE `nodes_order` SET `status` = "1" WHERE `id` = "'.intval($_GET["order_id"]).'"';
                 engine::mysql($query);
-                send_email::new_purchase($_GET["order_id"]);
+                email::new_purchase($_GET["order_id"]);
             } 
         }else{
             $query = 'UPDATE `nodes_transaction` SET `amount` = "'.($data["amount"]+$_POST["payment_gross"]).'", '
@@ -110,7 +106,7 @@ if(!empty($_GET["order_id"])){
             engine::mysql($query); 
             $query = 'UPDATE `nodes_order` SET `status` = "1" WHERE `id` = "'.intval($_GET["order_id"]).'"';
             engine::mysql($query);
-            send_email::new_purchase($_GET["order_id"]);
+            email::new_purchase($_GET["order_id"]);
         }
     }
 }else engine::error();

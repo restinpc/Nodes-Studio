@@ -11,10 +11,6 @@ require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/language.php");
-$query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
-$res = engine::mysql($query);
-$data = mysql_fetch_array($res);
-$template = $data["value"];
 if($_GET["mode"] == "login"){
     $fout = '<!DOCTYPE html>
     <html>
@@ -22,7 +18,7 @@ if($_GET["mode"] == "login"){
     <meta charset="UTF-8" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
-    <link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">';
+    <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css">';
     require_once("template/meta.php");
     $fout .= '
     </head>
@@ -96,7 +92,7 @@ if($_GET["mode"] == "login"){
     <meta charset="UTF-8" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
-    <link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">';
+    <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css">';
     require_once("template/meta.php");
     $fout .= '
     </head>
@@ -130,8 +126,7 @@ if($_GET["mode"] == "login"){
         if(!empty($data)){
             $code = substr(md5($email.date("Y-m-d")), 0, 6);
             $new_pass = substr(md5($email.date("Y-m-d")), 0, 8);
-            require_once("engine/include/send_email.php");
-            send_email::restore_password($data["email"], $new_pass, $code);
+            email::restore_password($data["email"], $new_pass, $code);
             $fout .= '<div class="center pt100">'.lang("Message with new password is sended to email").'</div><script>'
                     . 'function redirect(){this.location = "'.$_SERVER["DIR"].'/account.php?mode=login";}setTimeout(redirect, 3000); </script>';   
         }else{
@@ -172,7 +167,7 @@ if($_GET["mode"] == "login"){
         <meta charset="UTF-8" />
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
-        <link href="'.$_SERVER["DIR"].'/template/'.$template.'/template.css" rel="stylesheet" type="text/css">';
+        <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css">';
     require_once("template/meta.php");
     $fout .= '
         </head>

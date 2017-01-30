@@ -56,8 +56,7 @@ if(!empty($_POST["id"])){
                 $d_sign = mysql_fetch_array($r_sign);
                 if($d_conf["value"]){
                     if($target["online"] < date("U")-300){
-                        require_once("engine/core/send_email.php");
-                        send_email::new_message($target["id"], $_SESSION["user"]["id"]);
+                        email::new_message($target["id"], $_SESSION["user"]["id"]);
                     }
                 }
             }
@@ -76,8 +75,7 @@ if(!empty($_POST["id"])){
         $query = 'INSERT INTO `nodes_transaction`(user_id, order_id, amount, status, date, comment)'
                 . 'VALUES("'.$_SESSION["user"]["id"].'", "0", "'.$user["balance"].'", "1", "'.date("U").'", "'.$paypal.'" )';
         engine::mysql($query);
-        require_once("engine/core/send_email.php");
-        send_email::new_withdrawal($user["id"], $user["balance"], $paypal);
+        email::new_withdrawal($user["id"], $user["balance"], $paypal);
         die(lang("Withdrawal request accepted"));
     }else if(!empty($_POST["transaction"]) && !empty($_POST["user_id"])){
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.intval($_POST["user_id"]).'"';
@@ -103,8 +101,7 @@ if(!empty($_POST["id"])){
             engine::mysql($query);
             $query = 'UPDATE `nodes_product_order` SET `status` = "1", `track` = "'.$track.'" WHERE `id` = "'.$data["id"].'"';
             engine::mysql($query);
-            require_once('engine/core/send_email.php');
-            send_email::shipping_confirmation($data["order_id"]);
+            email::shipping_confirmation($data["order_id"]);
         }
     }else if(!empty($_POST["product_id"]) && !empty($_POST["pos"])){
         $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.intval($_POST["product_id"]).'"';

@@ -10,7 +10,6 @@
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/language.php");
-require_once("engine/core/image_resize.php");
 if(empty($_SESSION["user"]["id"])) die(engine::error(401));
 define("MAX_IMG_WIDTH", 1000);
 define("MAX_IMG_HEIGHT", 1000);
@@ -85,7 +84,7 @@ if(!empty($_POST["name"])){
     if(!empty($_POST["url"])){
         $ext = strtolower(array_pop(explode(".", $_POST["url"])));
         $name = md5($_POST["filename"]+date("U"));
-        $img = new image_resize($_POST["url"]); 
+        $img = new image($_POST["url"]); 
         $img->save($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/big/', $name, $ext, true, 100);
         unlink($_POST["url"]);
         $img->crop($_POST["l"], $_POST["t"], $_POST["w"], $_POST["h"]); 
@@ -160,11 +159,11 @@ if(!empty($_POST["name"])){
                 if($size[0]/MAX_IMG_WIDTH > $size[1]/MAX_IMG_HEIGHT){
                     $width = MAX_IMG_WIDTH;
                     $height = $size[1]*(MAX_IMG_WIDTH/$size[0]);
-                    image_resize::resize_image($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $width, $height);
+                    image::resize_image($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $width, $height);
                 }else{
                     $height = MAX_IMG_HEIGHT;
                     $width = $size[0]*(MAX_IMG_HEIGHT/$size[1]);
-                    image_resize::resize_image($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $width, $height);
+                    image::resize_image($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name, $width, $height);
                 }
             }
             $size = getimagesize($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name);

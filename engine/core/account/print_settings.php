@@ -40,8 +40,7 @@ function print_settings($site){
         $_SESSION["user"]["email"] = $email;
         $_SESSION["user"]["bulk_ignore"] = $bulk_ignore;
         if(!empty($_POST["new_profile_picture"])){
-            require_once("engine/core/image_resize.php");
-            image_resize::resize_image('img/data/thumb/'.$_POST["new_profile_picture"], 'img/pic/'.$_POST["new_profile_picture"], 100, 100, 1);
+            image::resize_image('img/data/thumb/'.$_POST["new_profile_picture"], 'img/pic/'.$_POST["new_profile_picture"], 100, 100, 1);
             $query = 'UPDATE `nodes_user` SET `photo` = "'.$_POST["new_profile_picture"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
             engine::mysql($query);
             $_SESSION["user"]["photo"] = $_POST["new_profile_picture"];
@@ -128,7 +127,7 @@ if(empty($_SESSION["user"]["url"])){
         if(!empty($fb_id["value"])) $fout .= '<a rel="nofollow" target="_parent"  href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" class="settings_fb"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
         if(!empty($tw_key["value"])) $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" class="m15"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
         if(!empty($gp_id["value"])) $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" class="m15"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
-        if(!empty($vk["value"])) $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="settings_vk"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="VK"/></a>';
+        if(!empty($vk["value"])) $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode($_SERVER["PUBLIC_URL"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="settings_vk"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="VK"/></a>';
         $fout .= '</div>';
     }
 }else{

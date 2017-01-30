@@ -8,7 +8,7 @@
 * @license http://nodes-studio.com/license.txt GNU Public License
 */
 require_once ("engine/nodes/config.php");
-mysql_connect($config["sql_server"], $config["sql_login"], $config["sql_pass"]);
+mysql_connect($_SERVER["config"]["sql_server"], $_SERVER["config"]["sql_login"], $_SERVER["config"]["sql_pass"]);
 if(function_exists(mb_internal_encoding)) mb_internal_encoding("utf8");
-mysql_select_db($config["sql_db"]);
+mysql_select_db($_SERVER["config"]["sql_db"]);
 mysql_query("SET SESSION wait_timeout = 4000");

@@ -2,20 +2,18 @@
 /**
 * Cache library.
 * Should be required before using.
-* @path /engine/core/data_cache.php
+* @path /engine/core/cache.php
 *
 * @name    Nodes Studio    @version 2.0.2
 * @author  Alexandr Virtual    <developing@nodes-tech.ru>
 * @license http://nodes-studio.com/license.txt GNU Public License
 * 
 * @example <code>
-*  $cache = new data_cache();
+*  $cache = new cache();
 *  $cache_id = $cache->page_id();
 * </code>
 */
-require_once("engine/nodes/language.php");
-require_once("engine/nodes/session.php");
-class data_cache{
+class cache{
 //------------------------------------------------------------------------------
 /*
 * Update a cache data in DB.
@@ -24,17 +22,17 @@ class data_cache{
 * @param bool $jQuery jQuery mode.
 * @param string $lang Request language.
 * @return string Returns HTML contents of page.
-* $usage <code> data_cache::update_cache("/", TRUE); </code>
+* $usage <code> cache::update_cache("/", TRUE); </code>
 */
 public static function update_cache($url, $jQuery = 0, $lang="en"){
-    if(strpos($url, "http://".$_SERVER["HTTP_HOST"])===FALSE) 
+    if(mb_strpos($url, "http://".$_SERVER["HTTP_HOST"])===FALSE) 
         $path = "http://".$_SERVER["HTTP_HOST"].$url;
     else $path = $url;
     $current = doubleval(microtime(1));
     $html = engine::curl_post_query($path, "nocache=1&lang=".$lang);
     $load_time = doubleval(microtime(1)-$current);
     $c = explode('<!DOCTYPE', $html);
-    preg_match('/<title>(.*?)<\/title>.*?"description" content="(.*?)".*?"keywords" '
+    preg_match('/<title>(.*?)<\/title>.*?itemprop="description" content="(.*?)".*?itemprop="keywords" '
             . 'content="(.*?)".*?<\!-- content -->(.*?)<\!-- \/content -->/sim', $html, $m);
     $title = trim($m[1]);
     $description = trim($m[2]);
@@ -75,9 +73,9 @@ public static function update_cache($url, $jQuery = 0, $lang="en"){
 * Output requested page from cache DB.
 * 
 * @return string Returns HTML contents of requested page.
-* $usage <code> $cache = new data_cache(); </code>
+* $usage <code> $cache = new cache(); </code>
 */
-public function data_cache(){
+public function cache(){
     $fout = ''; 
     if( empty($_POST) || !empty($_POST["cache"]) ){
         $query = 'SELECT * FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
@@ -145,7 +143,7 @@ public function data_cache(){
 * 
 * @return string Returns id of page in MySQL DB.
 * $usage <code> 
-*  $cache = new data_cache(); 
+*  $cache = new cache(); 
 *  $id = $cache->page_id();
 * </code>
 */

@@ -64,7 +64,7 @@ $header .= \'</ul>
 $footer = \'
 <!-- /content -->
 <footer>
-    <p><nobr>\'.lang("Copyright").\' <a href="http://\'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].\'">\'
+    <p><nobr>\'.lang("Copyright").\' <a href="\'.$_SERVER["PUBLIC_URL"].\'">\'
     .$_SERVER["HTTP_HOST"].\'</a>, 2016.</nobr> <nobr>\'.lang("All rights reserved").\'</nobr>.</p>
 </footer>\';
 //  Footer End
@@ -158,8 +158,7 @@ html {
         fwrite($file, $js);
         fclose($file);
     }else if(!empty($_POST["name"])){
-        require_once("engine/core/manage_files.php");
-        manage_files::delete('template/'.$_POST["name"]);
+        file::delete('template/'.$_POST["name"]);
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';   
     $res = engine::mysql($query);

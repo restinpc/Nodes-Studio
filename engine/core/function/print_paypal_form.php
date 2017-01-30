@@ -50,7 +50,7 @@ function print_paypal_form($site, $sum, $return, $autopay=0){
         <input type="hidden" name="cancel_return" value="'.$return.'">
         <input type="hidden" name="return" value="'.$return.'">
         <input type="hidden" name="no_shipping" value="1">
-        <input type="hidden" name="notify_url" value="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/paypal.php?deposit='.$_SESSION["user"]["id"].'">
+        <input type="hidden" name="notify_url" value="'.$_SERVER["PUBLIC_URL"].'/paypal.php?deposit='.$_SESSION["user"]["id"].'">
         <button type="submit" class="btn w280">'.lang("Make a payment").'</button>
     </form>';
     if($autopay){

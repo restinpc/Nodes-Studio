@@ -11,7 +11,7 @@ require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/language.php");
-if(!strpos($_SERVER["REQUEST_URI"], ".xml")){
+if(!mb_strpos($_SERVER["REQUEST_URI"], ".xml")){
     header('Content-Type: text/html; charset=utf-8');
 echo '<!DOCTYPE html>
 <html>
@@ -64,11 +64,11 @@ while($data = mysql_fetch_array($res)){
         $desc = substr($html,0,50)."..";
     }else $title = $data["url"];
     
-    if(!strpos(" ".$data["url"], "/img/")&&
-            !strpos(" ".$data["url"], "/register")&&
-            !strpos(" ".$data["url"], "/account")&&
-            !strpos(" ".$data["url"], "/admin")&&
-            !strpos(" ".$data["url"], "/search")){
+    if(!mb_strpos(" ".$data["url"], "/img/")&&
+            !mb_strpos(" ".$data["url"], "/register")&&
+            !mb_strpos(" ".$data["url"], "/account")&&
+            !mb_strpos(" ".$data["url"], "/admin")&&
+            !mb_strpos(" ".$data["url"], "/search")){
         if($data["lang"]=="en"||empty($data["lang"])){
     echo '<li><a href="'.$data["url"].'" target="_blank" hreflang="'.$data["lang"].'" title="'.$desc.'">'.$title.'</a></li>
         ';
@@ -88,7 +88,7 @@ echo '
 }else{
     $query = 'SELECT * FROM `nodes_cache` WHERE `interval` > -2 ORDER BY `url` ASC';
     $res = engine::mysql($query);
-    header('Content-Type: application/rss+xml; charset=utf-8');
+    header('Content-Type: application/xml; charset=utf-8');
     echo '<?xml version="1.0" encoding="UTF-8"?>
 <urlset
       xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -98,11 +98,11 @@ echo '
 ';
     
 while($data = mysql_fetch_array($res)){
-    if(!strpos(" ".$data["url"], "/img/")&&
-            !strpos(" ".$data["url"], "/register")&&
-            !strpos(" ".$data["url"], "/account")&&
-            !strpos(" ".$data["url"], "/admin")&&
-            !strpos(" ".$data["url"], "/search")){
+    if(!mb_strpos(" ".$data["url"], "/img/")&&
+            !mb_strpos(" ".$data["url"], "/register")&&
+            !mb_strpos(" ".$data["url"], "/account")&&
+            !mb_strpos(" ".$data["url"], "/admin")&&
+            !mb_strpos(" ".$data["url"], "/search")){
         if($data["lang"]=="en"||empty($data["lang"])){
     echo '<url> 
   <loc>'.$data["url"].'</loc>

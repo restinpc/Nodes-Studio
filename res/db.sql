@@ -395,10 +395,16 @@ INSERT INTO `nodes_agent` (`id`, `name`, `bot`) VALUES
 (82, 'Who.is Bot', 1),
 (83, 'Y!J-ASR/0.1 crawler (http://www.yahoo-help.jp/app/answers/detail/p/595/a_id/42716/)', 1),
 (84, 'Yandex/1.01.001 (compatible; Win16; I)', 1),
-(85, 'Nodes Studio', 1),
-(86, 'Nodes Studio 2.0', 1),
-(88, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393', 0),
-(89, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36', 0);
+(85, 'Nodes Studio 2.0', 1),
+(86, 'Mozilla/5.0 (compatible; AhrefsBot/5.2; +http://ahrefs.com/robot/)', 1),
+(87, 'Googlebot/2.1 (+http://www.google.com/bot.html)', 1),
+(88, 'CRAZYWEBCRAWLER 0.9.10, http://www.crazywebcrawler.com', 1),
+(89, 'C-T bot', 1),
+(90, 'Mozilla/5.0 (compatible; Uptimebot/1.0; +http://www.uptime.com/uptimebot)', 1),
+(91, 'Virusdie crawler/2.1', 1),
+(92, 'Mozilla/5.0 (compatible; Google-Structured-Data-Testing-Tool +https://search.google.com/structured-data/testing-tool)', 1),
+(93, 'Mozilla/5.0 (compatible; YandexPagechecker/2.0; +http://yandex.com/bots)', 1),
+(94, 'GuzzleHttp/6.1.0 curl/7.38.0 PHP/7.0.13-1~dotdeb+8.1', 1);
 
 CREATE TABLE IF NOT EXISTS `nodes_language` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1355,4 +1361,7 @@ INSERT INTO `nodes_language` (`name`, `lang`, `value`) VALUES
 ('Cache', 'en', 'Cache'),
 ('List articles', 'en', 'List articles'),
 ('Edit catalog', 'en', 'Edit catalog'),
-('Delete catalog', 'en', 'Delete catalog');
+('Delete catalog', 'en', 'Delete catalog'),
+('New bulk message', 'ru', 'Новая рассылка'),
+('Resolution', 'en', 'Resolution'),
+('Resolution', 'ru', 'Разрешение');

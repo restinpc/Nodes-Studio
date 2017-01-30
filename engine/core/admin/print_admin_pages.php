@@ -61,6 +61,7 @@ function print_admin_pages($cms){
             . ' ON (`catch`.`url` = `seo`.`url`'
             . '     AND `catch`.`lang` = `seo`.`lang`)'
             . ' WHERE `catch`.`url` NOT LIKE "%/admin%"'
+            . '     AND `catch`.`url` LIKE "%'.$_SERVER["HTTP_HOST"].'%"'
             . '     AND `catch`.`lang` = "'.$_SESSION["Lang"].'"'
             . ' ORDER BY `catch`.`'.$_SESSION["order"].'` '.$_SESSION["method"].''
             . ' LIMIT '.($from-1).', '.$_SESSION["count"];
@@ -70,6 +71,7 @@ function print_admin_pages($cms){
             . ' ON (`catch`.`url` = `seo`.`url`'
             . '     AND `catch`.`lang` = `seo`.`lang`)'
             . ' WHERE `catch`.`url` NOT LIKE "%/admin%"'
+            . '     AND `catch`.`url` LIKE "%'.$_SERVER["HTTP_HOST"].'%"'
             . '     AND `catch`.`lang` = "'.$_SESSION["Lang"].'"';
     $table = '
         <div class="table">

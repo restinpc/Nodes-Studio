@@ -46,12 +46,24 @@ function site($compact=0){
         $this->title = $this->configs["name"];
     }else $this->title = $config["name"];
     if(!empty($this->configs['image'])){
-        $this->img = $this->configs["image"];
+        if(mb_strpos($this->configs["image"], "http://")!==FALSE){
+            $this->img = $this->configs["image"];
+        }else{
+            if(mb_strpos($this->configs["image"], $_SERVER["DIR"])!==FALSE){ 
+                $this->img = 'http://'.$_SERVER["HTTP_HOST"].$this->configs["image"];
+            }else{ 
+                if($this->configs["image"][0]=="/"){
+                    $this->img = $_SERVER["PUBLIC_URL"].$this->configs["image"];
+                }else{
+                    $this->img = $_SERVER["PUBLIC_URL"].'/'.$this->configs["image"];
+                }
+            }
+        }
     }else{
-        $this->img = $_SERVER["DIR"].'/img/favicon.png';
+        $this->img = $_SERVER["PUBLIC_URL"].'/img/cms/nodes_studio.png';
     }
-    if(empty($_SESSION["Lang"])) $_SESSION["Lang"] = $config["lang"];
     if(empty($_SESSION["REQUEST_URI"])) $_SESSION["REQUEST_URI"] = $_SERVER["REQUEST_URI"];
+    if(empty($_SESSION["Lang"])) $_SESSION["Lang"] = $config["lang"];
     if(!empty($_POST["from"])) $_SESSION["from"] = $_POST["from"];
     if(!empty($_POST["to"])) $_SESSION["to"] = $_POST["to"];
     if(!empty($_POST["count"])) $_SESSION["count"] = intval($_POST["count"]);
@@ -67,7 +79,7 @@ function site($compact=0){
         $_SESSION["count"] = 20;
         $_SESSION["page"] = 1;
         $_SESSION["method"] = "ASC";
-        $_SESSION["order"] ="id";
+        $_SESSION["order"] = "id";
     }
     if(!$_POST["jQuery"]) unset($_SESSION["redirect"]);
     if(!empty($_SESSION["user"]["id"])&&
@@ -105,10 +117,7 @@ function site($compact=0){
                 }
             }
         }
-        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
-        $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
-        require_once("template/".$data["value"]."/template.php");
+        require_once("template/".$_SESSION["template"]."/template.php");
     }
     if(!isset($_POST["jQuery"])){
         $query = 'SELECT * FROM `nodes_meta` WHERE `url` LIKE "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
@@ -116,53 +125,44 @@ function site($compact=0){
         $data = mysql_fetch_array($res);
         $this->description = trim(strip_tags($this->description));
         if(!empty($data)){ 
-            if(!$data["mode"]){
-                $this->description .= $data["description"];
-            }else{
-                $this->description = $data["description"];
-            }
+            if(!$data["mode"]) $this->description .= $data["description"];
+            else $this->description = $data["description"];
         }
-        if(mb_strlen($this->description) > 200)
-            $this->description = mb_substr($this->description, 0, 200).'..';
+        if(mb_strlen($this->description) > 200) $this->description = mb_substr($this->description, 0, 200).'..';
         $this->title = trim(strip_tags($this->title));
         if(!empty($data)){ 
-            if(!$data["mode"]){
-                $this->title .= $data["title"];
-            }else{
-                $this->title = $data["title"];
-            }
+            if(!$data["mode"]) $this->title .= $data["title"];
+            else $this->title = $data["title"];
         }
-        if(mb_strlen($this->title) > 100)
-            $this->title = mb_substr($this->title, 0, 100).'..';
-        foreach($this->keywords as $keyword){
-            $keywords .= $keyword.', ';   
-        }
+        if(mb_strlen($this->title) > 100) $this->title = mb_substr($this->title, 0, 100).'..';
+        foreach($this->keywords as $keyword) $keywords .= $keyword.', ';   
         $keywords = mb_substr($keywords,0,mb_strlen($keywords)-2);
-        if(empty($keywords)){ 
-            $keywords = str_replace (' ', ', ', $this->description);
-        }
+        if(empty($keywords)) $keywords = str_replace (' ', ', ', $this->description);
         $keywords = trim(strip_tags($keywords));
         if(!empty($data)){ 
-            if(!$data["mode"]){
-                $this->keywords .= $data["keywords"];
-            }else{
-                $this->keywords = $data["keywords"];
-            }
+            if(!$data["mode"]) $keywords .= $data["keywords"];
+            else $keywords = $data["keywords"];
         }
         if(mb_strlen($keywords) > 300)
             $keywords = mb_substr($keywords, 0, 300).'..';
         $fout = '<!DOCTYPE html> <!-- Powered by Nodes Studio -->
-<html lang="'.$_SESSION["Lang"].'" style="background: url('.$_SERVER["DIR"].'/img/load.gif) no-repeat center center fixed; min-heigth: 400px;">
+<html itemscope itemtype="http://schema.org/WebSite" lang="'.$_SESSION["Lang"].'" style="background: url('.$_SERVER["DIR"].'/img/load.gif) no-repeat center center fixed; min-heigth: 400px;">
 <head>
 <title>'.$this->title.'</title>
-<meta charset="UTF-8" />
 <meta http-equiv="content-type" content="text/html" />
-<meta name="description" content="'.$this->description.'" />
+<meta charset="UTF-8" property="og:type" content="website" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-control" content="no-cache" />
+<meta name="robots" content="index, follow" />
+<meta name="description" itemprop="description" content="'.$this->description.'" />
+<meta property="og:title" itemprop="name" content="'.$this->title.'" />
+<meta property="og:image" itemprop="image" content="'.$this->img.'" />
 <meta property="og:description" content="'.$this->description.'" />
-<meta property="og:image" content="'.$this->img.'" />
-<meta name="keywords" content="'.$keywords.'" />
-<meta name="apple-mobile-web-app-title" content="'.$this->configs["name"].'">
-<meta name="application-name" content="'.$this->configs["name"].'">';
+<meta property="og:url" content="'.$_SERVER["SCRIPT_URI"].'" />
+<meta name="keywords" itemprop="keywords" content="'.$keywords.'" />
+<meta name="apple-mobile-web-app-title" content="'.$this->configs["name"].'" />
+<meta name="application-name" content="'.$this->configs["name"].'" />
+<link rel="canonical" itemprop="url" href="'.$_SERVER["SCRIPT_URI"].'" />';
         require_once("template/meta.php");
         $fout .= '
 </head>
@@ -173,11 +173,11 @@ function site($compact=0){
     }
     $fout .= $this->content.'
 <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />
-<link href="'.$_SERVER["DIR"].'/template/'.$this->configs["template"].'/template.css" rel="stylesheet" type="text/css" />
+<link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'";</script>
 <script src="'.$_SERVER["DIR"].'/script/jquery-1.11.1.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript"></script>
-<script src="'.$_SERVER["DIR"].'/template/'.$this->configs["template"].'/template.js" type="text/javascript"></script>';
+<script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript"></script>';
     if(!empty($_SESSION["user"]["id"])){
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = '.intval($_SESSION["user"]["id"]);
         $res = engine::mysql($query);
@@ -198,22 +198,18 @@ function site($compact=0){
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
     if($data["value"]=="1"){
-    $fout .= '  <script type="text/javascript">
-        if(window.jQuery){jQuery.ajax({url: "'.$_SERVER["DIR"].'/cron.php", async: true, type: "GET"});}
-    </script>';
+        $fout .= '<script type="text/javascript"> if(window.jQuery){jQuery.ajax({url: "'.$_SERVER["DIR"].'/cron.php", async: true, type: "GET"});}</script>';
     }
     if(!isset($_POST["jQuery"])){
         $fout .= '
     <script type="text/javascript">
-        function display(){ if(!window.jQuery) setTimeout(function(){ document.body.style.opacity = "1";}, 1000); else jQuery("html, body").animate({opacity: 1}, 1000); }var tm = setTimeout(display, 5000); window.onload = function(){ try{ preload(); }catch(e){}; clearTimeout(tm); display(); }; function preload(){ '.$this->onload.' }
+        function display(){ if(!window.jQuery) setTimeout(function(){ document.body.style.opacity = "1";}, 1000); else jQuery("html, body").animate({opacity: 1}, 1000); }'.
+        'var tm = setTimeout(display, 5000); window.onload = function(){ try{ preload(); }catch(e){}; clearTimeout(tm); display(); }; function preload(){ '.$this->onload.'; return 0; }
     </script>
 </body>
 </html>';
     }else if(!empty($this->onload)){
-    $fout .= '
-    <script type="text/javascript">
-        '.$this->onload.'
-    </script>';
+        $fout .= '<script type="text/javascript">'.$this->onload.'</script>';
     }
     if($this->configs["compress"] || $_POST["nocache"]){
         $search = array('#>[\s]+<#si', '#>[\s]+([^\s]+)#si', '#([^\s]+)[\s]+<#si');

@@ -12,7 +12,9 @@ ini_set('session.save_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/session
 ini_set('session.gc_maxlifetime', 604800);
 ini_set('session.entropy_file', '/dev/urandom');
 ini_set('session.entropy_length', '512');
-session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
+if(empty($_SERVER["DIR"])){
+    session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
+}
 session_name('token');
 session_start();
 require_once("engine/nodes/mysql.php");
@@ -41,6 +43,14 @@ if(!empty($_COOKIE["token"])){
             . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
         engine::mysql($query);
     }
+}
+if(!empty($_POST["template"])){
+    $_SESSION["template"] = $_POST["template"];
+}else if(empty($_SESSION["template"])){
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    $_SESSION["template"] = $template = $data["value"];
 }
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "token_limit"';
 $res = engine::mysql($query);
@@ -80,26 +90,27 @@ if(date("U")-$date<60){
         if(!empty($agent)){ 
             $ref_id = $ref["id"];
         }else if(!empty($_SERVER["HTTP_REFERER"])){
-            if(strpos($_SERVER["HTTP_REFERER"], $_SERVER["HTTP_HOST"]) === false){
+            if(mb_strpos($_SERVER["HTTP_REFERER"], $_SERVER["HTTP_HOST"]) === false){
                 $query = 'INSERT INTO `nodes_referrer`(name) VALUES("'.$_SERVER["HTTP_REFERER"].'")';
                 engine::mysql($query);
                 $ref_id = mysql_insert_id();
             }else $ref_id = -1;
         }else $ref_id = 0;
-        if(strpos($_SERVER["SCRIPT_URI"], "/search")===false
-            && strpos($_SERVER["SCRIPT_URI"], "/account")===false
-            && strpos($_SERVER["SCRIPT_URI"], "/admin")===false
-            && strpos($_SERVER["SCRIPT_URI"], ".php")===false){
+        if(mb_strpos($_SERVER["SCRIPT_URI"], "/search")===false
+            && mb_strpos($_SERVER["SCRIPT_URI"], "/account")===false
+            && mb_strpos($_SERVER["SCRIPT_URI"], "/admin")===false
+            && mb_strpos($_SERVER["SCRIPT_URI"], ".php")===false
+            && mb_strpos($_SERVER["SCRIPT_URI"], ".xml")===false
+            && mb_strpos($_SERVER["SCRIPT_URI"], ".txt")===false){
             if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]='/';
-            require_once("engine/core/data_cache.php");
-            $cache = new data_cache();
+            $cache = new cache();
             $cache_id = $cache->page_id();
             if($cache_id && !$is_bot){
                 $query = 'INSERT INTO `nodes_attendance`(cache_id, user_id, token, ref_id, ip, agent_id, date, display) '
                         . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.$_COOKIE["token"].'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "1")';
             }else if($cache_id){
-                $query = 'INSERT INTO `nodes_attendance`(url, user_id, token, ref_id, ip, agent_id, date, display) '
-                . 'VALUES("'.$_SERVER["REQUEST_URI"].'", "'.intval($_SESSION["user"]["id"]).'", "'.$_COOKIE["token"].'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "0")';     
+                $query = 'INSERT INTO `nodes_attendance`(cache_id, user_id, token, ref_id, ip, agent_id, date, display) '
+                . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.$_COOKIE["token"].'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "0")';     
             }
             engine::mysql($query);
         }  

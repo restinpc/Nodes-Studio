@@ -57,8 +57,7 @@ function print_order_confirm($site){
             $query = 'UPDATE `nodes_product` SET `rating` = "'.($product["rating"]+$_POST["rating"]).'", '
                     . '`votes` = "'.($product["votes"]+1).'" WHERE `id` = "'.$product["id"].'"';
             engine::mysql($query);
-            require_once("engine/core/send_email.php");
-            send_email::delivery_confirmation($data["id"]);
+            email::delivery_confirmation($data["id"]);
             $query = 'UPDATE `nodes_product_order` SET `status` = "2" WHERE `id` = "'.$data["id"].'"';
             engine::mysql($query);
             $query = 'UPDATE `nodes_user` SET `balance` = "'.($seller["balance"]+doubleval($data["price"])).'" WHERE `id` = "'.$seller["id"].'"';

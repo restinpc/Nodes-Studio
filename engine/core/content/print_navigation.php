@@ -23,21 +23,23 @@
 function print_navigation($site, $title){
     $fout = '<div class="profile_menu">
         <div class="container">
-            <span class="profile_menu_item show_all selected" ><a>'.$title.'</a>
+            <span class="profile_menu_item show_all selected"><a>'.$title.'</a>
                 <div class="fr nav_button" alt="'.lang("Show navigation").'">&nbsp;</div>    
+            </span>
+            <span class="profile_menu_item '.($title == lang("Content")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>
+                <a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/content">'. lang("Content").'</a>
             </span>';
-        $fout .= '
-        <span class="profile_menu_item '.($title == lang("Content")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
-        . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/content">'. lang("Content").'</a></span>';
-    $query = 'SELECT * FROM `nodes_catalog` WHERE `visible` = "1" AND `lang` = "'.$_SESSION["Lang"].'"';
+    $query = 'SELECT * FROM `nodes_catalog` WHERE `visible` = "1" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `id` ASC';
     $res = engine::mysql($query);
     $i = 0;
     while($data = mysql_fetch_array($res)){
-        $fout .= '
-        <span class="profile_menu_item '.($title == $data["caption"]?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
-        . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/content/'.$data["url"].'">'.$data["caption"].'</a></span>';
+        $fout .= '<span class="profile_menu_item '
+        . ($title == $data["caption"]?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\' >'
+        . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["PUBLIC_URL"].'/'.$data["url"].'" class="nowrap">'
+        . str_replace(' ', '&nbsp;', $data["caption"])
+        . '</a></span>';
     }
-        $fout .= '</div>'
-    . '</div>';
+    $fout .= '</div>
+    </div>';
     if($i) return $fout;
 }   

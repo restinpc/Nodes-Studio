@@ -24,7 +24,7 @@ $this->content = '<div class="lh2">
     <p class="fs18">'.$this->configs["description"].'</p><br/>
 </div>
 <div class="document980">';
-$query = 'SELECT * FROM `nodes_content` WHERE `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND() DESC LIMIT 0, 3';
+$query = 'SELECT * FROM `nodes_content` WHERE `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND() DESC LIMIT 0, 6';
 $res = engine::mysql($query);
 $flag = 0;
 $content = '<div class="preview_blocks">';
@@ -39,7 +39,7 @@ $content .= '</div>'
 if($flag){
     $this->content .= $content;
 }
-$query = 'SELECT * FROM `nodes_product` ORDER BY RAND() DESC LIMIT 0, 3';
+$query = 'SELECT * FROM `nodes_product` ORDER BY RAND() DESC LIMIT 0, 6';
 $res = engine::mysql($query);
 $products = '<div class="preview_blocks">';
 while($data = mysql_fetch_array($res)){

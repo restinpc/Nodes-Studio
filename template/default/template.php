@@ -106,34 +106,39 @@ $footer = '
 <!-- /content -->
 </div>
 <div class="clear"></div>
-<section id="footer">
+<section id="footer" itemscope itemtype="http://schema.org/Organization">
+<span class="hidden" itemprop="name">'.$this->configs["name"].'</span>
+<div class="hidden" itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+    <img class="hidden" itemprop="image" src="'.$this->img.'"/>
+</div>
 <div class="container">
     <div class="footer_left">
         <div class="footer_contacts">
             <span>'.lang("Get in Touch").'</span>
             <div class="clear h20"> </div>';
         if(!empty($this->configs["tw_link"]))
-            $footer .= '<a href="'.$this->configs["tw_link"].'" target="_blank">
+            $footer .= '<a itemprop="sameAs" href="'.$this->configs["tw_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" alt="Twitter"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Twitter">Twitter</div>
             </a><div class="clear h5"></div>';
         if(!empty($this->configs["fb_link"]))
-            $footer .= '<a href="'.$this->configs["fb_link"].'" target="_blank">
+            $footer .= '<a itemprop="sameAs" href="'.$this->configs["fb_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" alt="Facebook"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Facebook</div>
             </a><div class="clear h5"></div>';
         if(!empty($this->configs["gp_link"]))  
-            $footer .= '<a href="'.$this->configs["gp_link"].'" target="_blank">
+            $footer .= '<a itemprop="sameAs" href="'.$this->configs["gp_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" alt="Google+"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Google+</div>
             </a><div class="clear h5"></div>';  
         if(!empty($this->configs["vk_link"]))    
-            $footer .= '<a href="'.$this->configs["vk_link"].'" target="_blank">
+            $footer .= '<a itemprop="sameAs" href="'.$this->configs["vk_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" alt="Vkontakte"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Vkontakte</div>
             </a><div class="clear h5"></div>';  
         $footer .= '
         </div>
+        
     </div>
     <div class="footer_right left-center" id="contact_us">
     <span>'.lang("Contact Us").'</span>
@@ -153,7 +158,7 @@ $footer = '
     <div id="copyright">
         <div class="line">
             <span class="text">
-                <nobr>'.lang("Copyright").' <a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'" title="'.$this->configs["description"].'">'.$_SERVER["HTTP_HOST"].'</a>, 2017.</nobr>
+                <nobr>'.lang("Copyright").' <a itemprop="url" href="'.$_SERVER["PUBLIC_URL"].'" title="'.$this->configs["description"].'">'.$_SERVER["HTTP_HOST"].'</a>, 2017.</nobr>
                 <nobr>'.lang("All rights reserved").'.</nobr>
             </span>
             <span><a href="'.$_SERVER["DIR"].'/">'.lang("Home").'</a></span>

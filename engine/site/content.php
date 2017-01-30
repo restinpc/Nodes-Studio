@@ -38,7 +38,7 @@ if(!empty($_POST["count"])) $_SESSION["count"] = intval($_POST["count"]);
 if(!empty($_POST["page"])) $_SESSION["page"] = intval($_POST["page"]);
 if($_SESSION["order"]!="order") $_SESSION["order"] = "order";
 if($_SESSION["method"]!="DESC") $_SESSION["method"] = "DESC";
-if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){            
+if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){      
     $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$link.'" AND `lang` = "'.$_SESSION["Lang"].'"';
     $res = engine::mysql($query); 
     $data = mysql_fetch_array($res);

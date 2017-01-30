@@ -20,10 +20,10 @@ $_SESSION["request"] = date("U");
 preg_match('#code=(.*+)#six',$_SERVER["REQUEST_URI"], $m);
 $code = $m[1];
 if(empty($code)){
-    header('Location: https://www.facebook.com/dialog/oauth?client_id='.$id["value"].'&redirect_uri='.urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"]."/account.php?mode=social&method=fb").'&response_type=code');
-    die('<script>parent.window.location = "https://www.facebook.com/dialog/oauth?client_id='.$id["value"].'&redirect_uri='.urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"]."/account.php?mode=social&method=fb").'&response_type=code";</script>');
+    header('Location: https://www.facebook.com/dialog/oauth?client_id='.$id["value"].'&redirect_uri='.urlencode($_SERVER["PUBLIC_URL"]."/account.php?mode=social&method=fb").'&response_type=code');
+    die('<script>parent.window.location = "https://www.facebook.com/dialog/oauth?client_id='.$id["value"].'&redirect_uri='.urlencode($_SERVER["PUBLIC_URL"]."/account.php?mode=social&method=fb").'&response_type=code";</script>');
 }else{
-    $path = "https://graph.facebook.com/oauth/access_token?client_id=".$id["value"]."&redirect_uri=".urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"]."/account.php?mode=social&method=fb")."&client_secret=".$secret["value"]."&code=".$code;
+    $path = "https://graph.facebook.com/oauth/access_token?client_id=".$id["value"]."&redirect_uri=".urlencode($_SERVER["PUBLIC_URL"]."/account.php?mode=social&method=fb")."&client_secret=".$secret["value"]."&code=".$code;
     $var = file_get_contents($path);
     preg_match_all('/access_token=(.*?)&/', $var, $m);
     $graphUrl = "https://graph.facebook.com/me?access_token=".$m[1][0];

@@ -21,25 +21,26 @@
 * @usage <code> engine::print_catalog($site, $data); </code>
 */
 function print_catalog($site, $data){
-    $fout = '<div class="article">';
+    $fout = '<div class="article" itemscope  itemtype="http://schema.org/Article">
+        <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+            <img class="hidden" itemprop="logo" src="'.$site->img.'" />
+            <meta itemprop="name" content="'.$site->configs["name"].'" />
+        </div>
+        <meta itemprop="datePublished" content="2017-01-27" />
+        <meta itemprop="dateModified" content="2017-01-27" />
+        <meta itemprop="author" content="'.$site->configs["email"].'" />
+          ';
     if(!empty($data["img"])){
-        $fout = '<div class="article">
-            <div class="article_image">
-                <img src="'.$_SERVER["DIR"].'/img/data/big/'.$data["img"].'" class="img" />
-            </div>';
-        if(!$data["visible"]){
-            $fout .= '<h1>'.$data["caption"].'</h1><br/>';
-        }
-        $fout .= '<div class="text">'.$data["text"].'</div>
+        $fout .= '<div class="article_image">
+            <img itemprop="image" src="'.$_SERVER["PUBLIC_URL"].'/img/data/big/'.$data["img"].'" class="img" />
         </div>';
     }else{
-        if(!$data["visible"]){
-            $fout .= '<h1>'.$data["caption"].'</h1><br/>';
-        }
-        $fout .= '<div class="text">'.$data["text"].'</div>
-        </div>';
+        $fout .= '<img class="hidden" itemprop="image" src="'.$site->img.'" />';    
     }
-    $fout .= '<div class="clear"></div>';
+    $fout .= '<h1 itemprop="headline" '.($data["visible"]?'class="hidden"':'').'>'.$data["caption"].'</h1><br/>
+        <div itemprop="articleBody" class="text">'.$data["text"].'</div>
+    </div>
+    <div class="clear"></div>';
     if($_SESSION["user"]["id"]=="1"){
         $fout .= '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn w280" value="'.lang("Add article").'" /></a>'
             . '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit directory").'" /></a><br/><br/>';

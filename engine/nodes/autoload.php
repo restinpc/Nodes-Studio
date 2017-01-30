@@ -12,17 +12,27 @@ date_default_timezone_set('UTC');
 $GLOBALS["time"] = doubleval(microtime(1)); 
 $_SERVER["DIR"] = str_replace("/cron.php", "", str_replace("/index.php", "", 
     str_replace($_SERVER["DOCUMENT_ROOT"], "", $_SERVER["SCRIPT_FILENAME"])));
+$_SERVER["PUBLIC_URL"] = "http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"];
 ini_set('include_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]);
+require_once('engine/core/engine.php');
 if(!file_exists($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/engine/nodes/config.php")){ 
     die(require_once("engine/code/install.php")); 
+} 
+$skip = array('.', '..', 'engine.php');
+$files = scandir($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/engine/core/');
+foreach($files as $file) {
+    if(!in_array($file, $skip)){
+        if(is_file($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/engine/core/'.$file)){
+            require_once('engine/core/'.$file); 
+        }
+    }
 }
-require_once("engine/nodes/engine.php");
 $request = str_replace("index.php", "", str_replace("index.php?", "", 
-    mb_substr($_SERVER["REQUEST_URI"], strpos($_SERVER["SCRIPT_NAME"], "index.php"),
+    mb_substr($_SERVER["REQUEST_URI"], mb_strpos($_SERVER["SCRIPT_NAME"], "index.php"),
     mb_strlen($_SERVER["REQUEST_URI"]))));
-if(strpos($request, "?")!==FALSE){ 
-    $args = mb_substr($request, strpos($request, "?"));
-    $request = mb_substr($request, 0, strpos($request, "?"));
+if(mb_strpos($request, "?")!==FALSE){ 
+    $args = mb_substr($request, mb_strpos($request, "?"));
+    $request = mb_substr($request, 0, mb_strpos($request, "?"));
 }else{ 
     $args = '';
 }
@@ -39,7 +49,7 @@ $_REQUEST = array_merge($_GET, $_POST);
 if(empty($_SERVER["SCRIPT_URI"])){
     $_SERVER["SCRIPT_URI"] = $_SERVER["REQUEST_URI"];
 }
-if(strpos($_SERVER["SCRIPT_URI"], "http://")===FALSE){
+if(mb_strpos($_SERVER["SCRIPT_URI"], "http://")===FALSE){
     if($_SERVER["SCRIPT_URI"][0] == "/"){
         $_SERVER["SCRIPT_URI"] = "http://".$_SERVER["HTTP_HOST"].
             $_SERVER["DIR"].$_SERVER["SCRIPT_URI"];
@@ -54,17 +64,20 @@ while($_SERVER["SCRIPT_URI"][mb_strlen($_SERVER["SCRIPT_URI"])-1]=="/"){
     mb_strlen($_SERVER["SCRIPT_URI"])-1);
 }
 $_SERVER["SCRIPT_URI"] = str_replace("\$h", "http://", $_SERVER["SCRIPT_URI"]);
+if($_SERVER["SCRIPT_URI"] == $_SERVER["PUBLIC_URL"]){
+    $_SERVER["SCRIPT_URI"] .= '/';
+}
 if(empty($_GET[0])){ 
     unset($_GET); 
 }else{
-    if(strpos($_GET[0], "robots.txt")!==FALSE) 
+    if(mb_strpos($_GET[0], "robots.txt")!==FALSE) 
         $_GET[0] = str_replace("robots.txt", "robots.php", $_GET[0]);
-    if(strpos($_GET[0], "rss.xml")!==FALSE) 
+    if(mb_strpos($_GET[0], "rss.xml")!==FALSE) 
         $_GET[0] = str_replace("rss.xml", "rss.php", $_GET[0]);
-    if(strpos($_GET[0], "sitemap.xml")!==FALSE) 
+    if(mb_strpos($_GET[0], "sitemap.xml")!==FALSE) 
         $_GET[0] = str_replace("sitemap.xml", "sitemap.php", $_GET[0]);
 }
-if(!empty($_GET[0]) && strpos($_GET[0], ".php") && 
+if(!empty($_GET[0]) && mb_strpos($_GET[0], ".php") && 
 file_exists($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/engine/code/".$_GET[0])){
     die(require_once ("engine/code/".$_GET[0]));
 }else{ 

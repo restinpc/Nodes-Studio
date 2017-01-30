@@ -38,7 +38,7 @@ function print_login_form(){
     }if(!empty($gp_id["value"])){  $flag++;
         $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" class="m9"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
     }if(!empty($vk["value"])){  $flag++;
-        $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode("http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="m10 mr0"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="Vkontakte"/></a>';
+        $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode($_SERVER["PUBLIC_URL"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="m10 mr0"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="Vkontakte"/></a>';
     }if(!$flag){
         $fout .= '<br/>';
     }

@@ -23,9 +23,10 @@
 * @usage <code> engine::print_search_result($site, "Result 1", "Value 1", "/"); </code>
 */
 function print_search_result($site, $caption, $html, $url){
+    $request = mysql_real_escape_string(urldecode($_GET[1]));
     $html = preg_replace('#<[^>]+>#', " ", $html);
     $html = trim(preg_replace('#[\s]+#', ' ', $html));
-    $pos = mb_strpos($html, $_GET[1]);
+    $pos = mb_strpos($html, $request);
     if($pos){
         if(strlen($html)>180){
             if($pos<90){

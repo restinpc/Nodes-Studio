@@ -199,7 +199,7 @@ function print_admin_attendance($cms){
     }else if($_GET["action"]=="pages"){
         $query = 'SELECT `cache`.`url` FROM `nodes_attendance` AS `att` '
                 . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
-                . 'WHERE `att`.`date` >= "'.$from.'" AND `att`.`date` <= "'.$to.'" AND `att`.`display` = "1"';
+                . 'WHERE `att`.`date` >= "'.$from.'" AND `att`.`date` <= "'.$to.'" AND `att`.`display` = "1" AND `cache`.`url` <> ""';
         $res = engine::mysql($query);
         $pages = array();
         while($data = mysql_fetch_array($res)){
@@ -213,25 +213,17 @@ function print_admin_attendance($cms){
             <th>URL</th>
             <th>'.lang("Amount").'</th>
         </tr>';
-        $max_val = 0;
         $table = '';
         foreach($pages as $page=>$count){
-            if($count > $max_val){
-                $table = '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
-                        . '<td>'.$count.'</td></tr>'.$table;
-                $max_val=$count;
-            }else if($count < $min_val){
-                $table .= '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
-                        . '<td>'.$count.'</td></tr>';  
-                $min_val = $count;
-            }
+            $table = '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
+                . '<td>'.$count.'</td></tr>'.$table;
         }$fout .= $table.'</table></div>';
     }else if($_GET["action"]=="ref"){
-        $query = 'SELECT * FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
+        $query = 'SELECT *, `ref`.`name` as `ref` FROM `nodes_attendance` LEFT JOIN `nodes_referrer` AS `ref` ON `ref`.`id` = `ref_id` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
         $res = engine::mysql($query);
         $ref = array();
         while($data = mysql_fetch_array($res)){
-            if(!empty($data['ref'])){
+            if(intval($data['ref_id'])>0){
                 $url = parse_url($data["ref"]);
                 if($url["host"]==$_SERVER["HTTP_HOST"])
                     continue;
@@ -251,30 +243,27 @@ function print_admin_attendance($cms){
         foreach($ref as $data=>$value){
             if(!is_array($value)){
                 if(!empty($data)){
-                    $fout .= '<tr><td align=left>'.$data.'" target="_blank">'.$data.'</a></td>';
+                    $fout .= '<tr><td align=left width=100%>'.$data.'" target="_blank">'.$data.'</a></td>';
                 }else{
                     $fout .= '<tr><td align=left>'.lang("Blank").'</td>';
                 }
-                $fout .= '<td>'.$value.'</td></tr>'; 
+                $fout .= '<td align=center>'.$value.'</td></tr>'; 
             }else{
                 $f = '';
                 $count = 0;
                 foreach($value as $d=>$v){
                     if(!empty($d)){
                         $url = parse_url($d);
-                        $f .= '<tr><td align=left class="pl10">'
-                                . '<a href="'.$d.'" target="_blank">'.$url["path"].'</a>'
+                        $f .= '<tr class="'.$data.' hidden"><td align=left class="pl10">'
+                                . '<a href="'.$d.'" target="_blank">'.mb_substr($url["path"],0,40).'</a>'
                             . '</td>';
                     }else{
                         $f .= '<tr><td align=left class="pl10">'.lang("Blank").'</td>';
                     }$count += $v;
-                    $f .= '<td width=50>'.$v.'</td></tr>';  
+                    $f .= '<td width=50 align=center style="color: #c0c0c0;">'.$v.'</td></tr>';  
                 }                
-                $fout .= '<tr><td align=left class="pointer" onClick=\'document.getElementById("'.$data.'").style.display="block";\'>'.$data.'</td>'
-                        . '<td align=left>'.$count.'</td></tr>'
-                        . '<tr><td colspan=2>'
-                            . '<table id="'.$data.'" class="hidden">'.$f.'</table>'
-                        . '</td></tr>';
+                $fout .= '<tr><td width=100% align=left class="pointer" onClick=\'var elems = document.getElementsByClassName("'.$data.'"); for(var i = 0; i < elems.length; i++) { elems[i].style.display="table-row"; }\'>'.$data.'</td>'
+                        . '<td align=center width=50>'.$count.'</td></tr>'.$f;
             }
         }$fout .= '</table></div>';
     }$fout .= '</div><br/>';

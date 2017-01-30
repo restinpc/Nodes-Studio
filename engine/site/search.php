@@ -22,9 +22,12 @@ if(!empty($_GET[2])){
     $this->content = '<div class="clear_block">'.lang("Empty search query").'</div>';
     return;
 }
+$request = mysql_real_escape_string(urldecode($_GET[1]));
 $this->title = lang("Search").' - '.$this->title;
-$this->description = lang("Search results for").' '.urldecode($_GET[1]);
-$this->content .= lang("Search results for").'<br/><br/><h1> "'.urldecode($_GET[1]).'"</h1><br/><br/>';
+$this->description = lang("Search results for").' '.$request;
+$this->content .= '<div class="document">'.
+    lang("Search results for").'<br/><br/>'
+    . '<h1> "'.$request.'"</h1><br/><br/>';
 if(!empty($_POST["from"])) $_SESSION["from"] = $_POST["from"];
 if(!empty($_POST["to"])) $_SESSION["to"] = $_POST["to"];
 if(!empty($_POST["count"])) $_SESSION["count"] = intval($_POST["count"]);
@@ -37,20 +40,19 @@ $count = 0;
 $uncount = 1;
 $from = ($_SESSION["page"]-1)*$_SESSION["count"]+1;
 $to = ($_SESSION["page"]-1)*$_SESSION["count"]+$_SESSION["count"];
-$query = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2'
-. ' ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"];
-$requery = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.urldecode($_GET[1]).'%" or `title` LIKE "%'.urldecode($_GET[1]).'%") AND `interval` > -2';
-$fout = '<div class="document">';
+$query = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.  $request.'%" or `title` LIKE "%'.$request.'%") AND `interval` > -2'
+. ' AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"];
+$requery = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.$request.'%" or `title` LIKE "%'.$request.'%") AND `interval` > -2  AND `lang` = "'.$_SESSION["Lang"].'"';
 $res = engine::mysql($query);
 while($data = mysql_fetch_array($res)){
-    if(!strpos($data["url"], "search")){
+    if(mb_strpos($data["url"], "search")===FALSE){
         if(empty($data["url"])) $data["url"] = "/";
         if(!empty($data["title"])) $title = $data["title"];
         else $title = $data["url"];
         if(!empty($data["content"])) $content = $data["content"];
         else $content = $data["html"];
         if(!empty($data["html"])){
-            $result = print_search_result($this, $title, $content, $data["url"]);
+            $result = engine::print_search_result($this, $title, $content, $data["url"]);
             if($result){
                 if($uncount<$from){
                     $uncount++;
@@ -63,7 +65,7 @@ while($data = mysql_fetch_array($res)){
             }
         }
     }
-}$fout .= '</div>';
+}
 $res = engine::mysql($requery);
 while($data = mysql_fetch_array($res)){
     if(empty($data["url"])) $data["url"] = "/";
@@ -124,7 +126,9 @@ if($arr_count){
            }$this->content .= '
      </ul>
     </div>';
-         }$this->content .= '<div class="clear"></div>';
+         }$this->content .= '<div class="clear"></div>'
+                . '</div>'
+            . '</div>';
 }else{
     $this->content .= '<div class="clear_block">'.lang("Sorry, no results found").'</div>';
-}
+}$this->content .= '</div>';

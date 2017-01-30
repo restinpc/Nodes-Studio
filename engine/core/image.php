@@ -2,20 +2,20 @@
 /**
 * Image resize library.
 * Should be required before using.
-* @path /engine/core/image_resize.php
+* @path /engine/core/image.php
 *
 * @name    Nodes Studio    @version 2.0.2
 * @author  Alexandr Virtual    <developing@nodes-tech.ru>
 * @license http://nodes-studio.com/license.txt GNU Public License
 * 
 * @example <code>
-*  $img = new image_resize("/img/1.jpg"); 
+*  $img = new image("/img/1.jpg"); 
 *  $img->crop(10,10,200,200); 
 *  $img->resize(100, 100); 
 *  $img->save("/img/", "1", "jpg", true, 100); 
 * </code> crops /img/1.jpg and saves selection.
 */
-class image_resize{
+class image{
 private $image;
 private $width; 
 private $height;
@@ -81,7 +81,7 @@ private function cropSave($x0, $y0, $w, $h){
 * Saves image to file.
 * 
 * @usage <code>
-*  $img = new image_resize("/img/1.jpg");  
+*  $img = new image("/img/1.jpg");  
 *  $img->save("/img/", "2", "jpg", true, 100);
 * </code> copies /img/1.jpg to /img/2.jpg
 */
@@ -114,7 +114,7 @@ function save($path = '', $fileName, $type = false, $rewrite = false, $quality =
 */
 private function setType($file){
     $size = getimagesize($file);
-    $mime = strtolower(substr($size['mime'], strpos($size['mime'], '/')+1));
+    $mime = strtolower(substr($size['mime'], mb_strpos($size['mime'], '/')+1));
     switch($mime){
         case 'jpg':
             $this->type = "jpg";
@@ -187,14 +187,14 @@ private function getSizeByHeight($height){
 * @param bool $proportions Flag to save image proportions while resizing.
 * @return bool Returns TRUE on success, FALSE on failure.
 * @usage <code> 
-*  image_resize::resize_image('img/1.jpg', 'img/2.jpg', 800, 600, 0xfff, 100, 0); 
+*  image::resize_image('img/1.jpg', 'img/2.jpg', 800, 600, 0xfff, 100, 0); 
 * </code>
 */
 static function resize_image($src, $dest, $width, $height, $rgb=0x1d1d1d, $quality=80, $proportions=0){
     if (!file_exists($src)) return false;
     $size = getimagesize($src);
     if ($size === false) return false;
-    $format = strtolower(substr($size['mime'], strpos($size['mime'], '/')+1));
+    $format = strtolower(substr($size['mime'], mb_strpos($size['mime'], '/')+1));
     $icfunc = "imagecreatefrom" . $format;
     if (!function_exists($icfunc)) return false;
     $isrc = $icfunc($src);

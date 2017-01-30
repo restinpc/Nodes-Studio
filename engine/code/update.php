@@ -7,7 +7,6 @@
 * @author  Alexandr Virtual    <developing@nodes-tech.ru>
 * @license http://nodes-studio.com/license.txt GNU Public License
 */
-require_once("engine/nodes/engine.php");
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/language.php");
 $echo_to = 0;
@@ -50,7 +49,7 @@ function update(){
                     $fullpath = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/temp/';
                     foreach($dirs as $d){
                         $d = trim($d);
-                        if(!empty($d)&&!strpos($d, ".")&&$d!="temp"){
+                        if(!empty($d)&&!mb_strpos($d, ".")&&$d!="temp"){
                             mkdir($fullpath.$d);
                             $fullpath .= $d."/";
                         }
@@ -84,7 +83,7 @@ function update(){
                     $fullpath = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/temp/';
                     foreach($dirs as $d){
                         $d = trim($d);
-                        if(!empty($d)&&!strpos($d, ".")&&$d!="temp"){
+                        if(!empty($d)&&!mb_strpos($d, ".")&&$d!="temp"){
                             mkdir($fullpath.$d);
                             $fullpath .= $d."/";
                         }
@@ -109,7 +108,7 @@ function update(){
         $fullpath = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/';
         foreach($dirs as $d){
             $d = trim($d);
-            if(!empty($d)&&!strpos($d, ".")){
+            if(!empty($d)&&!mb_strpos($d, ".")){
                 mkdir($fullpath.$d);
                 $fullpath .= $d."/";
             }
@@ -165,8 +164,7 @@ if($echo_to){
 }else{ 
     echo update();
 }
-require_once('engine/core/manage_files.php');
 $path = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/temp/';
-if(manage_files::delete($path)){
+if(file::delete($path)){
     mkdir($path, 0755);
 }

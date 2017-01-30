@@ -2,8 +2,7 @@
 /**
 * Framework config file example.
 */
-global $config; 
-$config = array(
+$_SERVER["config"] = array(
     "name" => "",
     "sql_server" => "",
     "sql_login" => "",

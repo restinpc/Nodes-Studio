@@ -2,19 +2,19 @@
 /**
 * File managment library.
 * Should be required before using.
-* @path /engine/core/manage_files.php
+* @path /engine/core/file.php
 *
 * @name    Nodes Studio    @version 2.0.2
 * @author  Alexandr Virtual    <developing@nodes-tech.ru>
 * @license http://nodes-studio.com/license.txt GNU Public License
 * 
 * @example <code>
-*  if(manage_files::zip('/temp', '/temp/files.zip')){
-*      manage_files::delete('/temp');
+*  if(file::zip('/temp', '/temp/files.zip')){
+*      file::delete('/temp');
 *  }
 * </code>
 */
-class manage_files{
+class file{
 //------------------------------------------------------------------------------
 /**
 * Backup a file, or recursively copy a folder and its contents.
@@ -23,7 +23,7 @@ class manage_files{
 * @param string $dest Destination path.
 * @param int $permissions New folder creation permissions.
 * @return bool Returns TRUE on success, FALSE on failure.
-* $usage <code> manage_files::copy("/img", "/temp"); </code>
+* @usage <code> file::copy("/img", "/temp"); </code>
 */
 static function copy($source, $dest, $permissions = 0755){
     if (is_link($source)) return symlink(readlink($source), $dest);
@@ -47,11 +47,11 @@ static function copy($source, $dest, $permissions = 0755){
 }
 //------------------------------------------------------------------------------
 /**
-* Backup a file, or recursively copy a folder and its contents.
+* Recursively delete a directory.
 * 
 * @param string $dir Destination path.
 * @return bool Returns TRUE on success, FALSE on failure.
-* @usage <code> manage_files::delete("/temp"); </code>
+* @usage <code> file::delete("/temp"); </code>
 */
 static function delete($dir) {
     foreach(scandir($dir) as $file) {
@@ -70,7 +70,7 @@ static function delete($dir) {
 * @param string $path Destination path.
 * @param bool $md5 MD5 name modification.
 * @return string Returns filename on success, 'error' on failure.
-* @usage <code> manage_files::upload("new_image", "/img", true); </code>
+* @usage <code> file::upload("new_image", "/img", true); </code>
 */
 static function upload($filename, $path, $md5=0){
     if (is_uploaded_file($_FILES[$filename]['tmp_name'])){
@@ -114,7 +114,7 @@ private static function zip_folder($folder, &$zipFile, $exclusiveLength) {
 * 
 * @param string $sourcePath Path of directory to be zip. 
 * @param string $outZipPath Path of output zip file. 
-* @usage <code> zip_archive::exec('/img', '/backup/img.zip'); </code> 
+* @usage <code> file::zip('/img', '/backup/img.zip'); </code> 
 */ 
 static function zip($sourcePath, $outZipPath) { 
     $pathInfo = pathInfo($sourcePath); 

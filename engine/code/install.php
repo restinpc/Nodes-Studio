@@ -85,8 +85,8 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('email', '".mysql_real_escape_string($_POST["admin_email"])."', 'Site email', 'string'),
 ('language', '".mysql_real_escape_string($_POST["language"])."', 'Site language', 'string'),
 ('languages', '".mysql_real_escape_string(str_replace("'", "\'", $_POST["languages"]))."', 'Available languages', 'string'),
-('image', '".$_SERVER["DIR"]."/img/cms/nodes_studio.png', 'Site image', 'string'),
-('email_image', '".$_SERVER["DIR"]."/img/logo.png', 'Email header image', 'string');
+('image', '".$_SERVER["PUBLIC_URL"]."/img/cms/nodes_studio.png', 'Site image', 'string'),
+('email_image', '".$_SERVER["PUBLIC_URL"]."/img/logo.png', 'Email header image', 'string');
 
 INSERT INTO `nodes_user` (`name`, `photo`, `url`, `email`, `pass`, `balance`, `ip`, `ban`, `online`, `token`, `confirm`, `code`, `bulk_ignore`) VALUES
 ('".mysql_real_escape_string(str_replace("'", "\'", $_POST["admin_name"]))."', 'admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".md5(strtolower($_POST["admin_pass"]))."', 0, '', -1, 0, '', 1, 0, 0);
@@ -102,7 +102,7 @@ INSERT INTO `nodes_user` (`name`, `photo`, `url`, `email`, `pass`, `balance`, `i
             }
         }
         $output .= "Receiving MySQL data.. ";
-        $sql = file_get_contents("http://nodes-studio.com/setup.php?host=".$_SERVER["HTTP_HOST"]);
+        $sql = file_get_contents("http://nodes-studio.com/setup.php?host=".$_SERVER["HTTP_HOST"].'&email='.urlencode(mysql_real_escape_string($_POST["admin_email"])));
         if(empty($sql)){
             $sql = file_get_contents ("res/db.sql");
         }
@@ -125,8 +125,7 @@ INSERT INTO `nodes_user` (`name`, `photo`, `url`, `email`, `pass`, `balance`, `i
         $source = '/**'."\n".'
 * Framework config file'."\n".'
 */'."\n".'
-global $config;'."\n".'
-$config = array('."\n".'
+$_SERVER["config"] = array('."\n".'
     "name" => "'. mysql_real_escape_string($_POST["name"]).'",'."\n".'
     "sql_server" => "'. mysql_real_escape_string($_POST["mysql_server"]).'",'."\n".'
     "sql_login" => "'. mysql_real_escape_string($_POST["mysql_login"]).'",'."\n".'
@@ -142,27 +141,27 @@ $config = array('."\n".'
         fwrite($fname, $code);
         fclose($fname);
         $output .= 'Ok.<br/>Generation cron.php.. ';
-        $fname = "cron.php";
-        $fname = fopen($fname, 'w') or die("Error. Can't open file cron.php");
-        $code = '#!/usr/bin/php
-<?php 
-/**
-* Executable crontab file.
-* Should be configured on autoexec every 1 minute.
-*
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
-*/
-$_SERVER["HTTP_HOST"] = "'.$_SERVER["HTTP_HOST"].'";
-$_SERVER["DOCUMENT_ROOT"] = "'.$_SERVER["DOCUMENT_ROOT"].'";
-$_SERVER["REQUEST_URI"] = "/cron.php";
-ini_set(\'include_path\', $_SERVER["DOCUMENT_ROOT"]);
-require_once("engine/nodes/engine.php");
-require_once("engine/nodes/autoload.php");';
+        $name = "cron.php";
+        $fname = fopen($name, 'w') or die("Error. Can't open file cron.php");
+        $code = '#!/usr/bin/php'."\n".
+'<?php'."\n".
+'/**'."\n".
+'* Executable crontab file.'."\n".
+'* Should be configured on autoexec every 1 minute.'."\n".
+'*'."\n".
+'* @name    Nodes Studio    @version 2.0.2'."\n".
+'* @author  Alexandr Virtual    <developing@nodes-tech.ru>'."\n".
+'* @license http://nodes-studio.com/license.txt GNU Public License'."\n".
+'*/'."\n".
+'if(isset($argv[1])) $_SERVER["HTTP_HOST"] = $argv[1];'."\n".
+'else $_SERVER["HTTP_HOST"] = "'.$_SERVER["HTTP_HOST"].'";'."\n".
+'$_SERVER["DOCUMENT_ROOT"] = "'.$_SERVER["DOCUMENT_ROOT"].'";'."\n".
+'$_SERVER["REQUEST_URI"] = "/cron.php";'."\n".
+'ini_set(\'include_path\', $_SERVER["DOCUMENT_ROOT"]);'."\n".
+'require_once("engine/nodes/autoload.php");';
         fwrite($fname, $code);
         fclose($fname);
-        chmod($file, 0705);
+        chmod($name, 0705);
         $output .= 'Ok.<br/>';
         if(!empty($_POST["temp"])){
             $output .= 'Replacing temp data.. ';
@@ -268,8 +267,8 @@ INSERT INTO `nodes_property_data` (`id`, `product_id`, `property_id`, `data_id`)
                     $flag++;
                 }
             }
-            require_once("engine/core/manage_files.php");
-            manage_files::copy("res/data", "img/data");
+            require_once("engine/core/file.php");
+            file::copy($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/res/data", $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/img/data");
                 $output .= 'Ok.<br/>';
         }
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "1"';
