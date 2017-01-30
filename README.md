@@ -36,19 +36,7 @@ Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
 If there are any questions or you need more information, please contact us via:
 
-> [Facebook][fb]
-
-> [Vkontakte][vk]
-
-> [Twitter][tw]
-
-> [Google+][gp]
-
-> [Freelancer][fl]
-
-> [Github][gh]
-
-> [Email][email]
+> [Facebook][fb] | [Vkontakte][vk] | [Twitter][tw] | [Google+][gp] | [Freelancer][fl] | [Github][gh] | [Email][email]
 
 [url]: <http://nodes-studio.com>
 [github]: <https://github.com/restinpc/Nodes-Studio>
