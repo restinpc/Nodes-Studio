@@ -1,12 +1,11 @@
 <?php
 /**
 * Email library.
-* Should be required before using.
 * @path /engine/core/email.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code> email::daily_report(); </code>
 */

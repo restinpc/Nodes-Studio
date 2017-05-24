@@ -3,9 +3,9 @@
 * Print content perview block.
 * @path /engine/core/content/print_preview.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -22,7 +22,7 @@
 */
 function print_preview($site, $data){
     $text = strip_tags($data["text"]);
-    if(mb_strlen($text)>70) $text = mb_substr($text, 0 ,70).'..';
+    if(strlen($text)>70) $text = mb_substr($text, 0 ,70).'..';
     $fout = '
         <div class="content_block">
         ';
@@ -40,7 +40,7 @@ function print_preview($site, $data){
         </div>';
     }
     $fout .= '
-            <a id="'.$data["url"].'" href="'.$_SERVER["DIR"].'/content/'.$data["url"].'"><h2>'.substr(strip_tags($data["caption"]),0,100).'</h2></a>
+            <a id="'.$data["url"].'" href="'.$_SERVER["DIR"].'/content/'.$data["url"].'"><h2>'.mb_substr(strip_tags($data["caption"]),0,100).'</h2></a>
             <p class="content_block_text">
             '.$text.'
             </p>

@@ -3,9 +3,9 @@
 * Facebook OAuth script.
 * @path /engine/api/oauth/fb_auth.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -25,7 +25,7 @@ if(empty($code)){
 }else{
     $path = "https://graph.facebook.com/oauth/access_token?client_id=".$id["value"]."&redirect_uri=".urlencode($_SERVER["PUBLIC_URL"]."/account.php?mode=social&method=fb")."&client_secret=".$secret["value"]."&code=".$code;
     $var = file_get_contents($path);
-    preg_match_all('/access_token=(.*?)&/', $var, $m);
+    preg_match_all('/access_token":"(.*?)"/', $var, $m);
     $graphUrl = "https://graph.facebook.com/me?access_token=".$m[1][0];
     $oUser = json_decode(file_get_contents($graphUrl));
     $link = 'https://www.facebook.com/'.$oUser->id;

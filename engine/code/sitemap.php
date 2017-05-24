@@ -3,15 +3,15 @@
 * Sitemap generator.
 * @path /engine/code/sitemap.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/language.php");
-if(!mb_strpos($_SERVER["REQUEST_URI"], ".xml")){
+if(!strpos($_SERVER["REQUEST_URI"], ".xml")){
     header('Content-Type: text/html; charset=utf-8');
 echo '<!DOCTYPE html>
 <html>
@@ -61,14 +61,14 @@ while($data = mysql_fetch_array($res)){
         $html = preg_replace('#<script>.*?</script>#', '', $data["content"]);
         $html = preg_replace('#<[^>]+>#', " ", $html);
         $html = trim(preg_replace('#[\s]+#', ' ', $html));
-        $desc = substr($html,0,50)."..";
+        $desc = mb_substr($html,0,50)."..";
     }else $title = $data["url"];
     
-    if(!mb_strpos(" ".$data["url"], "/img/")&&
-            !mb_strpos(" ".$data["url"], "/register")&&
-            !mb_strpos(" ".$data["url"], "/account")&&
-            !mb_strpos(" ".$data["url"], "/admin")&&
-            !mb_strpos(" ".$data["url"], "/search")){
+    if(!strpos(" ".$data["url"], "/img/")&&
+            !strpos(" ".$data["url"], "/register")&&
+            !strpos(" ".$data["url"], "/account")&&
+            !strpos(" ".$data["url"], "/admin")&&
+            !strpos(" ".$data["url"], "/search")){
         if($data["lang"]=="en"||empty($data["lang"])){
     echo '<li><a href="'.$data["url"].'" target="_blank" hreflang="'.$data["lang"].'" title="'.$desc.'">'.$title.'</a></li>
         ';
@@ -98,11 +98,11 @@ echo '
 ';
     
 while($data = mysql_fetch_array($res)){
-    if(!mb_strpos(" ".$data["url"], "/img/")&&
-            !mb_strpos(" ".$data["url"], "/register")&&
-            !mb_strpos(" ".$data["url"], "/account")&&
-            !mb_strpos(" ".$data["url"], "/admin")&&
-            !mb_strpos(" ".$data["url"], "/search")){
+    if(!strpos(" ".$data["url"], "/img/")&&
+            !strpos(" ".$data["url"], "/register")&&
+            !strpos(" ".$data["url"], "/account")&&
+            !strpos(" ".$data["url"], "/admin")&&
+            !strpos(" ".$data["url"], "/search")){
         if($data["lang"]=="en"||empty($data["lang"])){
     echo '<url> 
   <loc>'.$data["url"].'</loc>

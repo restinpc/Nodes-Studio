@@ -3,9 +3,9 @@
 * Do not edit directly.
 * @path /template/default/template.source.css
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 @charset "UTF-8";
 @font-face {
@@ -96,11 +96,6 @@ textarea{
 .nodes .btn, .alertify-button {
     border-radius: 2px;
 }
-.nodes .btn:hover, 
-.alertify-button:hover{
-    background-color: #c0c0c0;
-    color: #333;
-}
 .nodes .small{
     padding: 6px;
     min-width: 20px;
@@ -115,23 +110,10 @@ textarea{
     color: #fff; 
     cursor: default;
 }
-.nodes .buy_now{
-    border: #4473ba 1px solid;   
+.nodes .buy_now{  
     background-color: #4473ba;
     border-radius: 2px;
     text-transform: none;
-}
-.nodes .buy_now .label_1{
-    font-weight: normal;
-}
-.nodes .buy_now:hover,
-.nodes .detail_buy_now:hover{
-    color: #fff !important;
-    background-color: #c0c0c0 !important;
-    border-color: #eaeaea !important;
-}
-.nodes .detail_buy_now{
-    color: #fff !important;
 }
 #nodes_login, #nodes_window{
     border-radius: 2px;
@@ -221,8 +203,8 @@ textarea{
     margin-right: 10px;
 }
 #mainHead ul li .btn:hover{
-    background-color: #fff;
-    color: #4473ba;
+    background-color: #c0c0c0;
+    color: #fff;
 }
 #mainHead ul li:not(.last):hover {
     text-shadow: #2e3137 1px 1px 2px;

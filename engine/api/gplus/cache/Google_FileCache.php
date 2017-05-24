@@ -78,7 +78,7 @@ class Google_FileCache extends Google_Cache {
     // use the first 2 characters of the hash as a directory prefix
     // this should prevent slowdowns due to huge directory listings
     // and thus give some basic amount of scalability
-    return $this->path . '/' . substr($hash, 0, 2);
+    return $this->path . '/' . mb_substr($hash, 0, 2);
   }
 
   private function getCacheFile($hash) {

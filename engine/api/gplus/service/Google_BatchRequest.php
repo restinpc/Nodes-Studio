@@ -86,7 +86,7 @@ class Google_BatchRequest {
           list($metaHeaders, $part) = explode("\r\n\r\n", $part, 2);
           $metaHeaders = Google_CurlIO::parseResponseHeaders($metaHeaders);
 
-          $status = substr($part, 0, strpos($part, "\n"));
+          $status = mb_substr($part, 0, strpos($part, "\n"));
           $status = explode(" ", $status);
           $status = $status[1];
 

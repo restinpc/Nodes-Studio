@@ -3,9 +3,9 @@
 * Backend search page file.
 * @path /engine/site/search.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -45,7 +45,7 @@ $query = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.  $request.'%" o
 $requery = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.$request.'%" or `title` LIKE "%'.$request.'%") AND `interval` > -2  AND `lang` = "'.$_SESSION["Lang"].'"';
 $res = engine::mysql($query);
 while($data = mysql_fetch_array($res)){
-    if(mb_strpos($data["url"], "search")===FALSE){
+    if(strpos($data["url"], "search")===FALSE){
         if(empty($data["url"])) $data["url"] = "/";
         if(!empty($data["title"])) $title = $data["title"];
         else $title = $data["url"];

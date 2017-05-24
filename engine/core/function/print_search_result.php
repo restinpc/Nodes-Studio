@@ -3,9 +3,9 @@
 * Prints search result block.
 * @path /engine/core/function/print_search_result.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -26,7 +26,7 @@ function print_search_result($site, $caption, $html, $url){
     $request = mysql_real_escape_string(urldecode($_GET[1]));
     $html = preg_replace('#<[^>]+>#', " ", $html);
     $html = trim(preg_replace('#[\s]+#', ' ', $html));
-    $pos = mb_strpos($html, $request);
+    $pos = strpos($html, $request);
     if($pos){
         if(strlen($html)>180){
             if($pos<90){

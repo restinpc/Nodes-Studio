@@ -3,9 +3,9 @@
 * Print account chat page.
 * @path /engine/core/account/print_chat.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @param int $user_id @mysql[nodes_user]->id.
 * @return string Returns content of page on success, or die with error.
@@ -27,9 +27,9 @@ function print_chat($user_id){
                     . '<table class="list">'
                     . '<td align=left width=100% valign=top>';
             if(!$data["system"]){
-                $fout .= '<span class="chat_left_text">'.lang("Sended").' '.date("d.m", $data["date"]).' '.lang("at").' '.date("H:i", $data["date"]).'</span><br/>'.$data["text"];
+                $fout .= '<span class="chat_left_text">'.lang("Sended").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></span><br/>'.engine::decrypt($data["text"], $_SERVER["HTTP_HOST"]);
             }else{
-                $fout .= '<span class="chat_left_text">'.lang("System message").' '.date("d.m", $data["date"]).' '.lang("at").' '.date("H:i", $data["date"]).'</span><br/>'.'<i>'.lang($data["text"]).'</i>';
+                $fout .= '<span class="chat_left_text">'.lang("System message").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span><br/>'.'<i>'.lang($data["text"]).'</i>';
             }     
             $fout .= '</td>'
                     . '</tr>'
@@ -42,11 +42,11 @@ function print_chat($user_id){
                     . '<td align=left width=100% valign=top>';
             if(!$data["system"]){
                 $fout .= '<div class="chat_right_text">'
-                        . lang("Received").' '.date("d.m", $data["date"]).' '.lang("at").' '.date("H:i", $data["date"]).'</div>'
-                    . '<div class="clear"></div>'.$data["text"];
+                        . lang("Received").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></div>'
+                    . '<div class="clear"></div>'.engine::decrypt($data["text"], $_SERVER["HTTP_HOST"]);
             }else{
                 $fout .= '<div class="chat_right_text">'
-                        . lang("System message").' '.date("d.m", $data["date"]).' '.lang("at").' '.date("H:i", $data["date"]).'</div>'
+                        . lang("System message").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></div>'
                     . '<div class="clear"></div>'.'<i>'.lang($data["text"]).'</i>';
             }     
             $fout .= '</td>'
@@ -56,6 +56,7 @@ function print_chat($user_id){
                     . '</div>'
                     . '</td></tr>';
         }
-    }$fout .= '<tr><td> </td></tr></table>';
+    }$fout .= '<tr><td> </td></tr></table>
+    <script>browser_time();</script>';
     return $fout;
 }

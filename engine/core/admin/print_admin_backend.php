@@ -3,9 +3,9 @@
 * Print admin backend page.
 * @path /engine/core/admin/print_admin_backend.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -31,7 +31,7 @@ function print_admin_backend($cms){
         $mode = trim(htmlspecialchars($_POST["mode"]));
         $mode = str_replace('/', '', $mode);
         $file = trim(htmlspecialchars($_POST["file"]));
-        if(mb_strpos($file, ".php")===FALSE) $file .= '.php';
+        if(strpos($file, ".php")===FALSE) $file .= '.php';
         $fname = "engine/site/".$file;
         $fname = fopen($fname, 'w') or die("can't open file");
         $code = "<?php
@@ -39,8 +39,8 @@ function print_admin_backend($cms){
 * Backend '.$mode.' page file.
 * @path /engine/site/'.$file.'
 *
-* @name    Nodes Studio    @version 2.0.2
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var \$this->title - Page title.
 * @var \$this->content - Page HTML data.

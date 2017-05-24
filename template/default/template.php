@@ -3,9 +3,9 @@
 * Default template file.
 * @path /template/default/template.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title
 * @var $this->content - Page HTML data
@@ -15,6 +15,8 @@
 * @var $this->onload - Page executable JavaScript code
 * @var $this->configs - Array MySQL configs
 */
+$header = '';
+$footer = '';
 if(!isset($_POST["jQuery"])){
     if(!empty($_POST["new_message"]) && !empty($_POST["text"]) && !empty($_SESSION["user"]["id"])){
          engine::send_mail(
@@ -23,9 +25,7 @@ if(!isset($_POST["jQuery"])){
             $_SERVER["New message from"]." ".$_SERVER["HTTP_HOST"], 
             str_replace("\n", "<br/>", $_POST["text"])
         );
-         $this->onload .= '
-        alert("'.lang("Message sent successfully").'");
-             ';
+         $this->onload .= '; alert("'.lang("Message sent successfully").'"); ';
         $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
         . 'VALUES("7", "'.$_SESSION["user"]["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$_POST["text"].'")';
         engine::mysql($query);
@@ -167,8 +167,7 @@ $footer = '
             <span><a href="'.$_SERVER["DIR"].'/sitemap.php" target="_blank">'.lang("Sitemap").'</a></span> 
         </div>
     </div>
-</section>
-    ';
+</section>';
     $count = 0;
     if(!empty($_SESSION["products"])) foreach($_SESSION["products"] as $key=>$value) if($value>0) $count++;
     if($count) $footer .= engine::print_cart($count);
@@ -178,4 +177,13 @@ $footer = '
 }
 $header .= '<section id="contentSection"><div class="container">';
 $footer = '</div></section>'.$footer;
+if($this->configs["pattern_color"]){
+    $color = color::page_color('4473ba');
+    if($color != '#000000') $this->content .= '<style>
+    .nodes a, .nodes .input, .nodes .title{color: '.$color.';}
+    .nodes .profile_menu, .nodes .buy_now, .nodes .btn, 
+    .alertify-button{background-color: '.$color.' !important;}
+    .nodes .admin_menu_icon, .nodes .admin_menu_icon a{color: '.$color.' !important;}
+    </style>';
+}
 $this->content = $header.$this->content.$footer;

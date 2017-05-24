@@ -204,8 +204,8 @@ class Google_CurlIO implements Google_IO {
     }
 
     if ($headerSize) {
-      $responseBody = substr($respData, $headerSize);
-      $responseHeaders = substr($respData, 0, $headerSize);
+      $responseBody = mb_substr($respData, $headerSize);
+      $responseHeaders = mb_substr($respData, 0, $headerSize);
     } else {
       list($responseHeaders, $responseBody) = explode("\r\n\r\n", $respData, 2);
     }

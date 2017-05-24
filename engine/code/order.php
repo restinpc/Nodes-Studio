@@ -3,9 +3,9 @@
 * Product purchase processor.
 * @path /engine/code/order.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -227,7 +227,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
 $fout .= '<link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />
 <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'";</script>
-<script src="'.$_SERVER["DIR"].'/script/jquery-1.11.1.js" type="text/javascript"></script>
+<script src="'.$_SERVER["DIR"].'/script/jquery.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript"></script>
 <script>jQuery("#country_selector").countrySelect({  defaultCountry: "us" })</script>

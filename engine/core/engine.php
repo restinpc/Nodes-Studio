@@ -3,9 +3,9 @@
 * Framework engine class.
 * @path /engine/core/engine.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code> engine::timezone_list(); </code>
 */
@@ -22,7 +22,7 @@ class engine{
 * @example <code> 
 *  engine::print_paypal_form($site, 10, "/account/finance"); 
 * </code> 
-*/   
+*/
 public static function __callStatic($name, $arguments) {
     $exec = function_exists($name);
     if(!$exec && !empty($_SERVER["CORE_PATH"])){
@@ -95,7 +95,7 @@ static function error($error_code='0'){
     if(!isset($_GET["204"]) && !isset($_GET["504"])){
         $_SERVER["SCRIPT_URI"] = str_replace("http://","\$h", $_SERVER["SCRIPT_URI"]);   
         while($_SERVER["SCRIPT_URI"][strlen($_SERVER["SCRIPT_URI"])-1]=="/"){
-            $_SERVER["SCRIPT_URI"] = substr($_SERVER["SCRIPT_URI"], 0, strlen($_SERVER["SCRIPT_URI"])-1);
+            $_SERVER["SCRIPT_URI"] = mb_substr($_SERVER["SCRIPT_URI"], 0, strlen($_SERVER["SCRIPT_URI"])-1);
         }$_SERVER["SCRIPT_URI"] = str_replace("\$h", "http://", $_SERVER["SCRIPT_URI"]);
         if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]="/";
         $get = $session = $post = '';
@@ -110,14 +110,28 @@ static function error($error_code='0'){
         $query = 'DELETE FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" '
                 . 'AND `lang` = "'.$_SESSION["Lang"].'"';
         engine::mysql($query);
-        $query = 'INSERT INTO `nodes_error`(`url`, `lang`, `date`, `ip`, `get`, `post`, `session`) '
+        $query = 'SELECT * FROM `nodes_error` WHERE '
+                . '`url` = "'.$_SERVER["SCRIPT_URI"].'" AND '
+                . '`lang` = "'.$_SESSION["Lang"].'" AND '
+                . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" AND '
+                . '`get` = "'.$get.'" AND '
+                . '`post` = "'.$post.'" AND '
+                . '`session` = "'.$session.'"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        if(empty($data)){
+            $query = 'INSERT INTO `nodes_error`(`url`, `lang`, `date`, `ip`, `get`, `post`, `session`, `count`) '
             . 'VALUES("'.$_SERVER["SCRIPT_URI"].'", '
                     . '"'.$_SESSION["Lang"].'", '
                     . '"'.date("U").'", '
                     . '"'.$_SERVER["REMOTE_ADDR"].'", '
                     . '"'.$get.'", '
                     . '"'.$post.'", '
-                    . '"'.$session.'")';
+                    . '"'.$session.'", '
+                    . '"1")';
+        }else{
+           $query = 'UPDATE `nodes_error` SET `date` = "'.date("U").'", `count` = "'.($data["count"]+1).'" WHERE `id` = "'.$data["id"].'"'; 
+        }
         self::mysql($query);
     }
     if(empty($_POST["jQuery"])){ echo '<!DOCTYPE html>
@@ -284,6 +298,31 @@ static function curl_post_query($url, $query, $format=0){
     }return $html;
 }
 //------------------------------------------------------------------------------
+static function encrypt($encrypt, $key){
+    $encrypt = serialize($encrypt);
+    $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC), MCRYPT_DEV_URANDOM);
+    $key = pack('H*', $key);
+    $mac = hash_hmac('sha256', $encrypt, mb_substr(bin2hex($key), -32));
+    $passcrypt = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $encrypt.$mac, MCRYPT_MODE_CBC, $iv);
+    $encoded = base64_encode($passcrypt).'|'.base64_encode($iv);
+    return $encoded;
+}
+//------------------------------------------------------------------------------
+static function decrypt($decrypt, $key){
+    $decrypt = explode('|', $decrypt.'|');
+    $decoded = base64_decode($decrypt[0]);
+    $iv = base64_decode($decrypt[1]);
+    if(strlen($iv)!==mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC)){ return false; }
+    $key = pack('H*', $key);
+    $decrypted = trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $decoded, MCRYPT_MODE_CBC, $iv));
+    $mac = mb_substr($decrypted, -64);
+    $decrypted = mb_substr($decrypted, 0, -64);
+    $calcmac = hash_hmac('sha256', $decrypted, mb_substr(bin2hex($key), -32));
+    if($calcmac!==$mac){ return false; }
+    $decrypted = unserialize($decrypted);
+    return $decrypted;
+}
+//------------------------------------------------------------------------------
 /**
 * Gets the timezone list used by all date/time functions.
 * 
@@ -301,5 +340,139 @@ static function timezone_list(){
     }
     date_default_timezone_set($default);
     return $zones_array;
+}
+//------------------------------------------------------------------------------
+/**
+* Check URL in @mysql[nodes_content] and @mysql[nodes_catalog].
+* 
+* @return array Returns TRUE if URL is article.
+* @usage <code> engine::is_article(); </code>
+*/
+static function is_article($url){
+    $url = str_replace($_SERVER["PUBLIC_URL"].'/', '', $url);
+    if(strpos($url, "content/")!==FALSE) $url = mb_substr($url, 8);
+    $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    if(!empty($data)) return 1;
+    $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    if(!empty($data)) return 1;
+    return 0;
+}
+//------------------------------------------------------------------------------
+/**
+* Check URL in @mysql[nodes_product].
+* 
+* @return array Returns TRUE if URL is porduct.
+* @usage <code> engine::is_product(); </code>
+*/
+static function is_product($url){
+    $url = str_replace($_SERVER["PUBLIC_URL"].'/', '', $url);
+    if(strpos($url, "product/")!==FALSE){
+        $id = intval(mb_substr($url, 8));
+        $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$id.'"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        if(!empty($data)) return $id;
+    }else return 0;
+}
+//------------------------------------------------------------------------------
+/**
+* Matching pattern with database.
+* 
+* @param int $url Page URL. 
+* @return string Returns formatted string.
+* @usage <code>
+*   $url = '/test1';
+*   $fout = engine::match_patterns($url);
+* </code>
+*/
+static function match_patterns($url){
+    $query = 'SELECT `cache`.`url` AS `value`, `att`.`date` AS `date`, `cache`.`id` as `cache_id` '
+            . 'FROM `nodes_attendance` AS `att` '
+            . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
+            . 'WHERE `att`.`token` = "'.session_id().'" ORDER BY `att`.`date` DESC';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    $cache_id = $data["cache_id"];
+    $is_article = $is_product = 0;
+    if(engine::is_article($url)) $is_article = 1;
+    else if(engine::is_product($url)) $is_product = 1; 
+    else die();
+    $pattern = array($url);
+    $i = 1;
+    while($data = mysql_fetch_array($res)){
+        if(!empty($data["value"])){
+            $pattern[$i++] = $data["value"];
+        }
+    }
+    // echo "Current pattern: "; print_r($pattern); echo '<br/><hr/>';
+    $query = 'SELECT `att`.`token` as `token` '
+        . 'FROM `nodes_attendance` AS `att` '
+        . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
+        . 'WHERE `cache`.`id` = "'.$cache_id.'" AND `att`.`token` <> "'.session_id().'"';
+    $res = engine::mysql($query);
+    $nodes = array();
+    while($data = mysql_fetch_array($res)){
+        if(!in_array($data["token"], $nodes))
+            array_push($nodes, $data["token"]);
+    }
+    // echo "Same patterns: "; print_r($nodes); echo '<br/><hr/>';
+    $output = array();
+    foreach($nodes as $node){
+        $query = 'SELECT `cache`.`url` AS `value`, `att`.`date` AS `date`, `cache`.`id` as `cache_id` '
+            . 'FROM `nodes_attendance` AS `att` '
+            . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
+            . 'WHERE `att`.`token` = "'.$node.'"';
+        $r = engine::mysql($query);
+        while($d = mysql_fetch_array($r)){
+            if($is_article){ 
+                if(engine::is_article($d["value"])){
+                    $output[$d["value"]]++;
+                }
+            }else if($is_product){ 
+                if(engine::is_product($d["value"])){
+                    $output[$d["value"]]++;  
+                }
+            }
+        }
+    }
+    // echo "Unsorted pages: "; print_r($output); echo '<br/><hr/>';
+    $pages = array();
+    $views = array();
+    $i = 0;
+    foreach($output as $key=>$value){
+        if(!in_array($key, $pattern)){
+            $pages[$i] = $key;
+            $views[$i++] = $value;
+        }
+    }
+    for($i = 1; $i < count($views); $i++){
+        for($j = 0; $j<$i; $j++){
+            if($views[$i]>$views[$j]){
+                $temp = $pages[$j];
+                $pages[$j] = $pages[$i];
+                $pages[$i] = $temp;
+                $temp = $views[$j];
+                $views[$j] = $views[$i];
+                $views[$i] = $temp;
+            }
+        }
+    } 
+    // echo "Sorted pages: "; print_r($pages); echo '<br/><hr/>';
+    $fout = '';
+    for($i = 0; $i < count($pages); $i++){
+        $pages[$i] = str_replace($_SERVER["PUBLIC_URL"].'/', '', $pages[$i]);
+        if(mb_strpos($pages[$i], 'content/') !== FALSE || 
+            mb_strpos($pages[$i], 'product/') !== FALSE)
+                $pages[$i] = mb_substr($pages[$i], 8);
+        if(empty($fout)){
+            $fout .= $pages[$i];
+        }else{
+            $fout .= ';'.$pages[$i];
+        }
+    } return $fout;
 }
 }

@@ -3,9 +3,9 @@
 * Print admin templates page.
 * @path /engine/core/admin/print_admin_templates.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -29,8 +29,8 @@ function print_admin_templates($cms){
 * '.ucfirst($_POST["new_template"]).' template file.
 * @path /template/'.$_POST["new_template"].'/template.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title
 * @var $this->content - Page HTML data
@@ -68,14 +68,24 @@ $footer = \'
     .$_SERVER["HTTP_HOST"].\'</a>, 2016.</nobr> <nobr>\'.lang("All rights reserved").\'</nobr>.</p>
 </footer>\';
 //  Footer End
-} $this->content = $header.$this->content.$footer;';
+}
+if($this->configs["pattern_color"]){
+    $color = color::page_color(\'4473ba\');
+    if($color != \'#000000\') $this->content .= \'<style>
+    .nodes a, .nodes .input, .nodes .title{color: \'.$color.\';}
+    .nodes .profile_menu, .nodes .buy_now, .nodes .btn, 
+    .alertify-button{background-color: \'.$color.\' !important;}
+    .nodes .admin_menu_icon, .nodes .admin_menu_icon a{color: \'.$color.\' !important;}
+    </style>\';
+}
+$this->content = $header.$this->content.$footer;';
         
         $css = '/**
 * '.ucfirst($_POST["new_template"]).' template stylesheets file.
 * @path /template/'.$_POST["new_template"].'/template.css
 *
-* @name    Nodes Studio    @version 2.0.2
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 @charset "UTF-8";
 html {
@@ -84,14 +94,14 @@ html {
     -ms-touch-action: manipulation;
     touch-action: manipulation; 
 }
-.nodes #content{
-    background: #fff;
-}
-.nodes a{ 
+a{ 
     color: #4473ba; 
 }
-.nodes a:hover{ 
+a:hover{ 
     color: #333; 
+}
+.nodes #content{
+    background: #fff;
 }
 .nodes header{
     padding-bottom: 20px;
@@ -135,8 +145,8 @@ html {
 *  '.ucfirst($_POST["new_template"]).' template JavaScript file.
 * @path /template/'.$_POST["new_template"].'/template.js
 *
-* @name    Nodes Studio    @version 2.0.2
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 (function() {
 "use strict";

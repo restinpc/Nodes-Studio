@@ -3,9 +3,9 @@
 * AJAX requsts processor.
 * @path /engine/code/bin.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/language.php");
@@ -38,7 +38,7 @@ if(!empty($_POST["id"])){
     if(!empty($_GET["message"])){
         if(!empty($_POST["text"])){
             $text = trim(str_replace('"', "'", htmlspecialchars(strip_tags($_POST["text"]))));
-            $text = str_replace("\n", "<br/>", $text);
+            $text = engine::encrypt(str_replace("\n", "<br/>", $text), $_SERVER["HTTP_HOST"]);
             $query = 'SELECT * FROM `nodes_inbox` WHERE `from` = "'.intval($_SESSION["user"]["id"]).'" AND `to` = "'.intval($_GET["message"]).'" AND `text` LIKE "'.$text.'" AND `date` > "'.(date("U")-600).'"';
             $res = engine::mysql($query);
             $message = mysql_fetch_array($res);

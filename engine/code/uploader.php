@@ -3,9 +3,9 @@
 * Image croper & uploader.
 * @path /engine/code/uploader.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -13,10 +13,10 @@ require_once("engine/nodes/language.php");
 if(empty($_SESSION["user"]["id"])) die(engine::error(401));
 define("MAX_IMG_WIDTH", 1000);
 define("MAX_IMG_HEIGHT", 1000);
-$THUMB_WIDTH = 400;
-if(!empty($_GET["width"])) $THUMB_WIDTH = $_GET["width"];
-$THUMB_HEIGHT = 400;
-if(!empty($_GET["height"])) $THUMB_HEIGHT = $_GET["height"];
+$THUWIDTH = 400;
+if(!empty($_GET["width"])) $THUWIDTH = $_GET["width"];
+$THUHEIGHT = 400;
+if(!empty($_GET["height"])) $THUHEIGHT = $_GET["height"];
 $f1 = "f1";
 if(!empty($_GET["id"])) $f1 .= $_GET["id"];
 $result_file = "result_file";   
@@ -67,8 +67,8 @@ echo '<!DOCTYPE html>
 <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css">
 <link href="'.$_SERVER["DIR"].'/template/uploader.css" rel="stylesheet" type="text/css">
 <script type="text/javascript">     
-    var width = twidth='.$THUMB_WIDTH.';
-    var height = theight='.$THUMB_HEIGHT.';
+    var width = twidth='.$THUWIDTH.';
+    var height = theight='.$THUHEIGHT.';
     var no_drag_dpop = "'.lang("Error! Drag-n-drop disabled on this server").'";  
     var uploading = "'.lang("Uploading").'";
     var confirm_upload = "'.lang("Upload selection as thumb?").'";
@@ -88,7 +88,7 @@ if(!empty($_POST["name"])){
         $img->save($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/big/', $name, $ext, true, 100);
         unlink($_POST["url"]);
         $img->crop($_POST["l"], $_POST["t"], $_POST["w"], $_POST["h"]); 
-        $img->resize($THUMB_WIDTH, $THUMB_HEIGHT); 
+        $img->resize($THUWIDTH, $THUHEIGHT); 
         $path = $img->save($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/thumb/', $name, $ext, true, 100); 
         $fout .= '<body class="nodes result_body">
             <img src="'.$_SERVER["DIR"].'/img/data/thumb/'. $name.'.'.$ext.'" />
@@ -103,13 +103,13 @@ if(!empty($_POST["name"])){
             $fout .= '
                     var z = parent.document.getElementById("new_img'.(intval($_GET["id"])+1).'"); 
                     if(z) z.style.display = "block";
-                    parent.document.getElementById("new_img'.(intval($_GET["id"])).'").style.width = "'.$THUMB_WIDTH.'px";';
+                    parent.document.getElementById("new_img'.(intval($_GET["id"])).'").style.width = "'.$THUWIDTH.'px";';
         }
         $fout .= '
                     parent.document.getElementById("'.$result.'").style.display = "none";
                     parent.document.getElementById("'.$new_img.'").appendChild(df_img);
-                    parent.document.getElementById("'.$f1.'").style.width=('.($THUMB_WIDTH+20).'+"px");
-                    parent.document.getElementById("'.$f1.'").style.height=('.($THUMB_HEIGHT+20).'+"px");
+                    parent.document.getElementById("'.$f1.'").style.width=('.($THUWIDTH+20).'+"px");
+                    parent.document.getElementById("'.$f1.'").style.height=('.($THUHEIGHT+20).'+"px");
                 }catch(e){ console.log("error 1"); }     
                 try{
                     var ii = 0;
@@ -143,7 +143,7 @@ if(!empty($_POST["name"])){
     }else if(!empty($_POST["new_image"])){
         $file = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/big/'.$_POST["new_image"];
         $size = getimagesize($file);
-        if($size[0]<$THUMB_WIDTH||$size[1]<$THUMB_HEIGHT) 
+        if($size[0]<$THUWIDTH||$size[1]<$THUHEIGHT) 
             die('<script type="text/javascript">alert("'.lang("Image too small. Minimal size is 400x400").'."); window.location="'.$_SERVER["DIR"].'/uploader.php?id='.$_GET["id"].'";</script></html>');
         $f_name = "";
         $a = md5(date('U').$file);
@@ -152,7 +152,7 @@ if(!empty($_POST["name"])){
              die(lang("Error").'<script type="text/javascript">setTimeout(function(){window.location="'.$_SERVER["DIR"].'/uploader.php?id='.$_GET["id"].'";}, 1000);</script>'); 
         }if($ext == "jpeg") $ext = "jpg";
         $f_name = "img/data/big/".$a.".".$ext;
-        $thumb_name = "img/data/thumb/".$a.".".$ext;
+        $thuname = "img/data/thumb/".$a.".".$ext;
         if (rename($file, $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name)){
             $size = getimagesize($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name);
             if($size[0] > MAX_IMG_WIDTH || $size[1] > MAX_IMG_HEIGHT){
@@ -173,7 +173,7 @@ if(!empty($_POST["name"])){
                 <div id="image" draggable="false" style="background: url('.$_SERVER["DIR"].'/'.$f_name.') top left no-repeat;" >
                     <img id="img" draggable="false" src="'.$_SERVER["DIR"].'/'.$f_name.'" />
                 </div>
-                <div id="frame" draggable="false" style="width:'.$THUMB_WIDTH.'px; height:'.$THUMB_HEIGHT.'px;position: absolute;top: 28px;left: 28px;display:block;">
+                <div id="frame" draggable="false" style="width:'.$THUWIDTH.'px; height:'.$THUHEIGHT.'px;position: absolute;top: 28px;left: 28px;display:block;">
                     <table draggable="false" cellpadding=0 cellspacing=0 onMouseDown=\'if(drag_mode!=3)drag_mode=1;\'>
                     <tr><td align=left valign=top></td></tr></table>
                     <div id="bottom_dot" onMouseDown=\'drag_mode=2;\' draggable="false">
@@ -187,8 +187,8 @@ if(!empty($_POST["name"])){
                     <input type="hidden" name="filename" value="'.$a.'"/>
                     <input type="hidden" id="t" name="t" value="0"/>
                     <input type="hidden" id="l" name="l" value="0"/>
-                    <input type="hidden" id="w" name="w" value="'.$THUMB_WIDTH.'"/>
-                    <input type="hidden" id="h" name="h" value="'.$THUMB_HEIGHT.'"/>
+                    <input type="hidden" id="w" name="w" value="'.$THUWIDTH.'"/>
+                    <input type="hidden" id="h" name="h" value="'.$THUHEIGHT.'"/>
                     <input type="submit" class="btn w280" value="'.lang("Crop image").'" />
                 </form>
                 <script type="text/javascript">

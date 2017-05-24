@@ -82,7 +82,7 @@ class URI_Template_Parser {
         $var->name = $vm[1];
         $var->modifier = isset($vm[2]) && $vm[2] ? $vm[2] : null;
         $var->modifier = isset($vm[3]) && $vm[3] ? $vm[3] : $var->modifier;
-        $var->default = isset($vm[4]) ? substr($vm[4], 1) : null;
+        $var->default = isset($vm[4]) ? mb_substr($vm[4], 1) : null;
         $exp->vars[] = $var;
       }
 

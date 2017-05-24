@@ -3,9 +3,9 @@
 * Config.php generator.
 * @path /engine/code/config.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 if(!empty($_POST["admin_email"])){
     if(mysql_connect($_POST["server"], 
@@ -18,7 +18,7 @@ if(!empty($_POST["admin_email"])){
                 $res = mysql_query($query);
                 $data = mysql_fetch_array($res);
                 $email = strtolower($_POST["admin_email"]);
-                $pass = md5(strtolower($_POST["admin_pass"])); 
+                $pass = md5(trim(strtolower($_POST["admin_pass"]))); 
                 if($email==$data["email"]&&$pass==$data["pass"]){
                     $fname = "engine/nodes/config.php";
                     $fname = fopen($fname, 'w') or die("Error. Can't open file engine/nodes/config.php");
@@ -26,9 +26,9 @@ if(!empty($_POST["admin_email"])){
 /**
 * Config file.
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 ';
 $source = '/**'."\n".'

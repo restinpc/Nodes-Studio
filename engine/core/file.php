@@ -1,12 +1,11 @@
 <?php
 /**
 * File managment library.
-* Should be required before using.
 * @path /engine/core/file.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code>
 *  if(file::zip('/temp', '/temp/files.zip')){
@@ -97,7 +96,7 @@ private static function zip_folder($folder, &$zipFile, $exclusiveLength) {
     while (false !== $f = readdir($handle)) { 
       if ($f != '.' && $f != '..') { 
         $filePath = "$folder/$f";
-        $localPath = substr($filePath, $exclusiveLength); 
+        $localPath = mb_substr($filePath, $exclusiveLength); 
         if (is_file($filePath)) { 
           $zipFile->addFile($filePath, $localPath); 
         } elseif (is_dir($filePath)) { 

@@ -3,9 +3,9 @@
 * Print content navigation menu.
 * @path /engine/core/content/print_navigation.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -29,7 +29,7 @@ function print_navigation($site, $title){
             <span class="profile_menu_item '.($title == lang("Content")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>
                 <a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/content">'. lang("Content").'</a>
             </span>';
-    $query = 'SELECT * FROM `nodes_catalog` WHERE `visible` = "1" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `id` ASC';
+    $query = 'SELECT * FROM `nodes_catalog` WHERE `visible` = "1" AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `order` DESC';
     $res = engine::mysql($query);
     $i = 0;
     while($data = mysql_fetch_array($res)){

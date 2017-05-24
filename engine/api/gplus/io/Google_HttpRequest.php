@@ -66,7 +66,7 @@ class Google_HttpRequest {
    */
   public function getBaseUrl() {
     if ($pos = strpos($this->url, '?')) {
-      return substr($this->url, 0, $pos);
+      return mb_substr($this->url, 0, $pos);
     }
     return $this->url;
   }
@@ -78,7 +78,7 @@ class Google_HttpRequest {
    */
   public function getQueryParams() {
     if ($pos = strpos($this->url, '?')) {
-      $queryStr = substr($this->url, $pos + 1);
+      $queryStr = mb_substr($this->url, $pos + 1);
       $params = array();
       parse_str($queryStr, $params);
       return $params;
@@ -189,11 +189,11 @@ class Google_HttpRequest {
    * @param string $url the url to set
    */
   public function setUrl($url) {
-    if (substr($url, 0, 4) == 'http') {
+    if (mb_substr($url, 0, 4) == 'http') {
       $this->url = $url;
     } else {
       // Force the path become relative.
-      if (substr($url, 0, 1) !== '/') {
+      if (mb_substr($url, 0, 1) !== '/') {
         $url = '/' . $url;
       }
       global $apiConfig;

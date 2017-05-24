@@ -1,7 +1,6 @@
 <?php
 /**
 * Dump MySQL database.
-* Should be required before using.
 * @path /engine/core/dump.php
 * 
 * @name    MySQLDump    @version 2.20 - 02/11/2007
@@ -171,8 +170,8 @@ function getTableData($table,$hexValue = true) {
         $insertStatement .= ", ";
         $selectStatement .= ", ";
     }
-    $insertStatement = @substr($insertStatement,0,-2).') VALUES';
-    $selectStatement = @substr($selectStatement,0,-2).' FROM `'.$table.'`';
+    $insertStatement = @mb_substr($insertStatement,0,-2).') VALUES';
+    $selectStatement = @mb_substr($selectStatement,0,-2).' FROM `'.$table.'`';
     $records = @mysql_query($selectStatement);
     $num_rows = @mysql_num_rows($records);
     $num_fields = @mysql_num_fields($records);
@@ -192,7 +191,7 @@ function getTableData($table,$hexValue = true) {
                         $data .= "'".@str_replace('\"','"',@mysql_escape_string($record[$field_name]))."'";
                 $data .= ',';
             }
-            $data = @substr($data,0,-1).")";
+            $data = @mb_substr($data,0,-1).")";
             $data .= ( $i < ($num_rows-1) ) ? ',' : ';';
             $data .= "\n";
             //if data in greater than 1MB save

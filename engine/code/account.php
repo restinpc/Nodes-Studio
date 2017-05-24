@@ -3,9 +3,9 @@
 * User login window.
 * @path /engine/code/account.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -35,7 +35,7 @@ if($_GET["mode"] == "login"){
                     . '<script>var sec = '.(181-(date("U")-$date)).'; function tick(){sec--; document.getElementById("tick").innerHTML=sec;} setInterval(tick, 1000);'
                     . 'function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, '.((180-(date("U")-$date))*1000).');</script>';
         }else{
-            $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(strtolower($_POST["pass"])).'"';
+            $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(trim(strtolower($_POST["pass"]))).'"';
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
             if(!empty($data)){
@@ -103,9 +103,9 @@ if($_GET["mode"] == "login"){
         $res = engine::mysql($query);
         $data = mysql_num_rows($res);
         if($data){
-            $code = substr(md5($email.date("Y-m-d")), 0, 6);
+            $code = mb_substr(md5($email.date("Y-m-d")), 0, 6);
             if($code == $_GET["code"]){
-                $new_pass = substr(md5($email.date("Y-m-d")), 0, 8);
+                $new_pass = mb_substr(md5($email.date("Y-m-d")), 0, 8);
                 $query = 'UPDATE `nodes_user` SET `pass` = "'.md5($new_pass).'" WHERE `email` = "'.$email.'"';   
                 engine::mysql($query);
                 $fout .= '<div class="center pt100">'.lang("New password activated!").'</div>
@@ -124,8 +124,8 @@ if($_GET["mode"] == "login"){
         $res = engine::mysql($query);
         $data = mysql_fetch_array($res);
         if(!empty($data)){
-            $code = substr(md5($email.date("Y-m-d")), 0, 6);
-            $new_pass = substr(md5($email.date("Y-m-d")), 0, 8);
+            $code = mb_substr(md5($email.date("Y-m-d")), 0, 6);
+            $new_pass = mb_substr(md5($email.date("Y-m-d")), 0, 8);
             email::restore_password($data["email"], $new_pass, $code);
             $fout .= '<div class="center pt100">'.lang("Message with new password is sended to email").'</div><script>'
                     . 'function redirect(){this.location = "'.$_SERVER["DIR"].'/account.php?mode=login";}setTimeout(redirect, 3000); </script>';   

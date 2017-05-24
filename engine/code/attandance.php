@@ -3,15 +3,15 @@
 * Attendance graph.
 * @path /engine/code/attandance.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 $W=600;     // Width
 $H=300;     // Height
 $MB=20;     // Padding bottom
 $ML=8;      // Padding left
-$M=5;       // Padding right & top
+$M=10;       // Padding right & top
 $county=10; // Lines count
 //------------------------------------------------------------------------------
 /**
@@ -67,16 +67,16 @@ for ($i=0;$i<10;$i++) {
         $date = date("Y-m-d");
     }
     if($_GET["interval"]=="day"){
-        $from = strtotime($date." 23:23:59 - ".(10-$i)." days");
-        $to = strtotime($date." 23:23:59 - ".(9-$i)." days");
+        $from = strtotime($date." 23:59:59 - ".(10-$i)." days");
+        $to = strtotime($date." 23:59:59 - ".(9-$i)." days");
         $DATA["x"][]=date("d/m", $to);
     }else if($_GET["interval"]=="week"){
-        $from = strtotime($date." 23:23:59 - ".((10-$i)*7)." days");
-        $to = strtotime($date." 23:23:59 - ".((9-$i)*7)." days");
+        $from = strtotime($date." 23:59:59 - ".((10-$i)*7)." days");
+        $to = strtotime($date." 23:59:59 - ".((9-$i)*7)." days");
         $DATA["x"][]=date("d/m", $to);
     }else{
-        $from = strtotime($date." 23:23:59 - ".(10-$i)." month");
-        $to = strtotime($date." 23:23:59 - ".(9-$i)." month");
+        $from = strtotime($date." 23:59:59 - ".(10-$i)." month");
+        $to = strtotime($date." 23:59:59 - ".(9-$i)." month");
         $DATA["x"][]=date("m/Y", $to);
     }
     $query = 'SELECT COUNT(DISTINCT `token`, `ip`) as `a`, COUNT(`id`) as `b` FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
@@ -98,10 +98,13 @@ for ($i=0;$i<$count;$i++) {
     }
 $max=intval($max+($max/10)+1);
 $im=imagecreate($W,$H);
+$font = "font/Open-Sans-regular/Open-Sans-regular.ttf";
 $bg[0]=imagecolorallocate($im,255,255,255);
 $bg[1]=imagecolorallocate($im,231,231,231);
 $bg[2]=imagecolorallocate($im,212,212,212);
 $c=imagecolorallocate($im,184,184,184);
+$black=imagecolorallocate($im,30,30,30);
+$white=imagecolorallocate($im,255,255,255);
 $text=imagecolorallocate($im,136,136,136);
 $bar[0]=imagecolorallocate($im,20,180,180);
 $bar[1]=imagecolorallocate($im,68,115,186);
@@ -111,8 +114,8 @@ for ($i=1;$i<=$county;$i++) {
     if ($strl>$text_width) $text_width=$strl;
 }
 $ML+=$text_width;
-$RW=$W-$ML-$M;
-$RH=$H-$MB-$M;
+$RW=$W-$ML-5;
+$RH=$H-$MB-25;
 $X0=$ML;
 $Y0=$H-$MB;
 $step=$RH/$county;
@@ -131,23 +134,32 @@ $dx=($RW/$count)/2;
 $pi=$Y0-($RH/$max*$DATA[0][0]);
 $po=$Y0-($RH/$max*$DATA[1][0]);
 $px=intval($X0+$dx);
+$ML-=$text_width;
+$str = $DATA[1][0].'/'.$DATA[0][0];
+imagestring($im,2, $px-(strlen($str)*$LW/2)+1, 5, $str, $text);
 for ($i=1;$i<$count;$i++) {
     $x=intval($X0+$i*($RW/$count)+$dx);
     $y=$Y0-($RH/$max*$DATA[0][$i]);
-    draw_line($im,$px,$pi,$x,$y,$bar[0], 4);
+    draw_line($im,$px,$pi,$x,$y,$bar[0], 3);
+    $y1 = $y;
     $pi=$y;
     $y=$Y0-($RH/$max*$DATA[1][$i]);
-    draw_line($im,$px,$po,$x,$y,$bar[1], 4);
+    draw_line($im,$px,$po,$x,$y,$bar[1], 3);
     $po=$y;
     $px=$x;
+    $x=intval($X0+$i*($RW/$count)+$dx);
+    $y=$Y0-($RH/$max*$DATA[0][$i]);
+    $y1=$Y0-($RH/$max*$DATA[1][$i]);
+    ImageFilledEllipse($im, $x, $y, 5, 6, $bar[0]);
+    ImageFilledEllipse($im, $x, $y1, 5, 6, $bar[1]);
+    $str = $DATA[1][$i].'/'.$DATA[0][$i];
+    imagestring($im,2, $x-(strlen($str)*$LW/2)+1, 5, $str, $text);
 }
-$ML-=$text_width;
-$prev_str = '';
 for ($i=1;$i<=$county;$i++) {
     $str=intval(($max/$county)*$i);
     if($str!=$prev_str){
     imagestring($im,2, $X0-strlen($str)*$LW-$ML/4-2,$Y0-$step*$i-
-                       imagefontheight(2)/2,$str,$text);
+                       imagefontheight(2)/2,$str,$c);
     }$prev_str = $str;
 }
 $prev=100000;

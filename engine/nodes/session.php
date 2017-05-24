@@ -3,18 +3,16 @@
 * Framework session loader.
 * @path /engine/nodes/session.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 ini_set('session.name', 'token');
 ini_set('session.save_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/session');
 ini_set('session.gc_maxlifetime', 604800);
 ini_set('session.entropy_file', '/dev/urandom');
 ini_set('session.entropy_length', '512');
-if(empty($_SERVER["DIR"])){
-    session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
-}
+if(empty($_SERVER["DIR"])) session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
 session_name('token');
 session_start();
 require_once("engine/nodes/mysql.php");
@@ -36,8 +34,6 @@ if(!empty($_COOKIE["token"])){
         }
     }
 }else{
-    setcookie("token", session_id(), time() + 2592000, '/');
-    $_COOKIE["token"] = session_id();
     if(!empty($_SESSION["user"])){
         $query = 'UPDATE `nodes_user` SET `token` = "'.session_id().'", '
             . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
@@ -90,27 +86,27 @@ if(date("U")-$date<60){
         if(!empty($agent)){ 
             $ref_id = $ref["id"];
         }else if(!empty($_SERVER["HTTP_REFERER"])){
-            if(mb_strpos($_SERVER["HTTP_REFERER"], $_SERVER["HTTP_HOST"]) === false){
+            if(strpos($_SERVER["HTTP_REFERER"], $_SERVER["HTTP_HOST"]) === false){
                 $query = 'INSERT INTO `nodes_referrer`(name) VALUES("'.$_SERVER["HTTP_REFERER"].'")';
                 engine::mysql($query);
                 $ref_id = mysql_insert_id();
             }else $ref_id = -1;
         }else $ref_id = 0;
-        if(mb_strpos($_SERVER["SCRIPT_URI"], "/search")===false
-            && mb_strpos($_SERVER["SCRIPT_URI"], "/account")===false
-            && mb_strpos($_SERVER["SCRIPT_URI"], "/admin")===false
-            && mb_strpos($_SERVER["SCRIPT_URI"], ".php")===false
-            && mb_strpos($_SERVER["SCRIPT_URI"], ".xml")===false
-            && mb_strpos($_SERVER["SCRIPT_URI"], ".txt")===false){
+        if(strpos($_SERVER["SCRIPT_URI"], "/search")===false
+            && strpos($_SERVER["SCRIPT_URI"], "/account")===false
+            && strpos($_SERVER["SCRIPT_URI"], "/admin")===false
+            && strpos($_SERVER["SCRIPT_URI"], ".php")===false
+            && strpos($_SERVER["SCRIPT_URI"], ".xml")===false
+            && strpos($_SERVER["SCRIPT_URI"], ".txt")===false){
             if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]='/';
             $cache = new cache();
             $cache_id = $cache->page_id();
             if($cache_id && !$is_bot){
                 $query = 'INSERT INTO `nodes_attendance`(cache_id, user_id, token, ref_id, ip, agent_id, date, display) '
-                        . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.$_COOKIE["token"].'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "1")';
+                        . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.session_id().'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "'.intval($_SESSION["display"]).'")';
             }else if($cache_id){
                 $query = 'INSERT INTO `nodes_attendance`(cache_id, user_id, token, ref_id, ip, agent_id, date, display) '
-                . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.$_COOKIE["token"].'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "0")';     
+                . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.session_id().'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "0")';     
             }
             engine::mysql($query);
         }  

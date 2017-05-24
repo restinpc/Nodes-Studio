@@ -3,14 +3,15 @@
 * Crontab system script.
 * @path /engine/code/cron.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 $_SERVER["CRON"] = 1;
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/session.php");
+//----------------------------------------------------------
 $flag = 0;
 $query = 'UPDATE `nodes_config` SET `value` = "'.date("U").'" WHERE `name` = "cron_exec"';
 engine::mysql($query);
@@ -28,9 +29,9 @@ $res = engine::mysql($query);
 while($data = mysql_fetch_array($res)) email::bulk_mail($data); 
 //------------------------------------------------------------------------------
 /*
-* Milestones a performance once a 10 minute.
+* Milestones a performance once a 20 minute.
 */
-$query = 'SELECT `date` FROM `nodes_perfomance` WHERE `date` > "'.(date("U")-600).'"';
+$query = 'SELECT `date` FROM `nodes_perfomance` WHERE `date` > "'.(date("U")-1200).'"';
 $res = engine::mysql($query);
 $data = mysql_fetch_array($res);
 if(empty($data)){
@@ -237,7 +238,7 @@ if(!$flag){
             $target = '';
             foreach(scandir($dir) as $file) {
                 if ('.' === $file || '..' === $file || '.htaccess' == $file) continue;
-                $date = mb_substr($file, 0, mb_strpos($file, '.'));
+                $date = mb_substr($file, 0, strpos($file, '.'));
                 $time = strtotime($date);
                 if($first>$time || !$first){
                     $target = $file;
@@ -293,6 +294,16 @@ if(!$flag){
             cache::update_cache($url,0,$data["lang"]);
         }
     }
+    if(!$flag){
+        $query = 'SELECT * FROM `nodes_cache` WHERE `date` < '.(date("U")-86400).' AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY RAND() ASC LIMIT 0, 1';
+        $res = engine::mysql($query);
+        while($data = mysql_fetch_array($res)){
+            $flag = 7;
+            $url = $data["url"];
+            $lang = $data["lang"];
+            cache::update_cache($url,0,$lang);
+        } 
+    }
 }
 //------------------------------------------------------------------------------
 /*
@@ -310,18 +321,83 @@ if(!$flag){
 }
 //------------------------------------------------------------------------------
 /*
-* Updates a cache info for random page.
+* Insert color mask of image in DB.
 */
-if(!$flag || $flag == 7){
-    $query = 'SELECT * FROM `nodes_cache` WHERE `date` < '.(date("U")-86400).' AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY RAND() ASC LIMIT 0, 1';
+if(!$flag){
+    $dir = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/thumb/';
+    $hdl = opendir($dir);
+    while ($file_name = readdir($hdl)){
+        if (($file_name != ".") && ($file_name != "..") && is_file($dir.$file_name)){
+            $query = 'SELECT * FROM `nodes_image` WHERE `name` = "'.$file_name.'"';
+            $res = engine::mysql($query);
+            $data = mysql_fetch_array($res);
+            if(empty($data)){
+                $color = color::image_color($dir.$file_name);
+                $size = getimagesize($dir.$file_name);
+                $query = 'INSERT INTO `nodes_image`(name, color, width, height) 
+                    VALUES("'.$file_name.'", "'.$color.'", "'.$size[0].'", "'.$size[1].'")';
+                engine::mysql($query);
+                $flag = 9;
+                break;
+            }
+        }
+    }
+}
+//------------------------------------------------------------------------------
+/*
+* Checking the DB tables for overflow.
+*/
+if(!$flag){
+    $query = 'SHOW TABLES';
     $res = engine::mysql($query);
+    $tables = array();
     while($data = mysql_fetch_array($res)){
-        $flag = 9;
-        $url = $data["url"];
-        $lang = $data["lang"];
-        cache::update_cache($url,0,$lang);
-    }  
+        $pos = strpos($data[0], '_backup');
+        if($pos>0){
+            $value = mb_substr($data[0], 0, $pos);
+            $tables[$value]++;
+        }else{
+            $tables[$data[0]] = 1;
+        }
+    }
+    $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "db_table_limit"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    $max = $data[0];
+    $count = intval($max/10);
+    if($count<1) $count = 1;
+    foreach($tables as $key=>$value){
+        $query = 'SELECT COUNT(*) FROM `'.$key.'`';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        if($data[0]>$max){
+            $query = 'CREATE TABLE `'.$key.'_backup_'.$value.'` LIKE `'.$key.'`';
+            engine::mysql($query);
+            $query = 'INSERT INTO `'.$key.'_backup_'.$value.'` SELECT * FROM `'.$key.'`';
+            engine::mysql($query);
+            $query = 'SELECT * FROM `'.$key.'`';
+            $r = engine::mysql($query);
+            $d = mysql_fetch_array($r);
+            $field = '';
+            foreach($d as $k=>$v){
+                if($k!="0"){
+                    $field = $k;
+                    break;
+                }
+            }
+            $query = 'SELECT `id` FROM `'.$key.'` ORDER BY `'.$field.'` DESC LIMIT '.($max).', 1';
+            $r = engine::mysql($query);
+            $d = mysql_fetch_array($r);
+            $limit = $d[0];
+            $query = 'DELETE FROM `'.$key.'_backup_'.$value.'` WHERE `'.$field.'` > '.$limit;
+            engine::mysql($query);
+            $query = 'DELETE FROM `'.$key.'` WHERE `'.$field.'` <= '.$limit;
+            engine::mysql($query);
+            $flag = 10;
+            break;
+        }
+    }
 }
 $query = 'UPDATE `nodes_config` SET `value` = "'.date("U").'" WHERE `name` = "cron_done"';
 engine::mysql($query);
-die($flag);
+echo $flag;

@@ -3,9 +3,9 @@
 * Print admin logs page.
 * @path /engine/core/admin/print_admin_logs.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -85,7 +85,7 @@ function print_admin_logs($cms){
             $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
             $r = engine::mysql($query);
             $d = mysql_fetch_array($r);
-            $user = mb_substr($d["name"],0,20).((mb_strlen($d["name"])>20)?'...':'');
+            $user = mb_substr($d["name"],0,20).((strlen($d["name"])>20)?'...':'');
         }else if($data["user_id"]=="-1"){
             $user = "Cron";
         }else{

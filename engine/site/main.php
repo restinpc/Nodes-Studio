@@ -3,9 +3,9 @@
 * Backend main page file.
 * @path /engine/site/main.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -34,7 +34,7 @@ while($data = mysql_fetch_array($res)){
 }
 $content .= '</div>'
         . '<div class="clear h20"></div>'
-        . '<a href="'.$_SERVER["DIR"].'/content"><input type="button" class="btn w280" value="'.lang("Show more").' '.lang("Articles").'&nbsp; &raquo;" /></a> '
+        . '<a href="'.$_SERVER["DIR"].'/content"><input type="button" class="btn w280" value="'.lang("Show more").' '.mb_strtolower(lang("Articles")).'&nbsp; &raquo;" /></a> '
         . '<div class="clear h20"></div>';
 if($flag){
     $this->content .= $content;
@@ -51,7 +51,7 @@ while($data = mysql_fetch_array($res)){
 }
 $products .= '</div>'
         . '<div class="clear h20"> </div>'
-        . '<a href="'.$_SERVER["DIR"].'/product"><input type="button" class="btn w280" value="'.lang("Show more").' '.lang("Products").'&nbsp; &raquo;" /></a><br/><br/> '
+        . '<a href="'.$_SERVER["DIR"].'/product"><input type="button" class="btn w280" value="'.lang("Show more").' '.  mb_strtolower(lang("Products")).'&nbsp; &raquo;" /></a><br/><br/> '
         . '<div class="clear h20"> </div>';
 if($flag==2){
     $this->content .= $products;

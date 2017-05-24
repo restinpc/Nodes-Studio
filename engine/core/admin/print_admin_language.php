@@ -3,9 +3,9 @@
 * Print admin language page.
 * @path /engine/core/admin/print_admin_language.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -35,12 +35,16 @@ function print_admin_language($cms){
             engine::mysql($query);
         }else if($_POST["language"]=="1"){
             foreach($_POST as $id=>$value){
-                $id = trim(base64_decode($id));
-                if(!empty($id)&&$id!="jQuery"&&
+                if($id=="language") continue;
+                $id = base64_decode($id);
+                $id = trim($id);
+                if(!empty($id)&&
+                        $id!="jQuery"&&
                         $id!="cache"&&
                         $id!="nocache"&&
                         $id!="lang"&&
-                        $id!="language"){
+                        $id!="language"&&
+                        $id!=""){
                     $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE  "'.$id.'" AND `lang` = "'.$_GET["l"].'"';
                     $res = engine::mysql($query);
                     $data = mysql_fetch_array($res);

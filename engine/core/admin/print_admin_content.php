@@ -3,9 +3,9 @@
 * Print admin content page.
 * @path /engine/core/admin/print_admin_content.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -102,8 +102,8 @@ function print_admin_content($cms){
                     }
                 }
 
-                $query = 'INSERT INTO `nodes_content`(cat_id, url, lang, caption, text, img, date) '
-                        . 'VALUES("'.$_GET["cat_id"].'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$caption.'", "'.$text.'", "'.$img.'", "'.date("U").'")';
+                $query = 'INSERT INTO `nodes_content`(cat_id, url, lang, caption, text, img, date, public_date) '
+                        . 'VALUES("'.$_GET["cat_id"].'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$caption.'", "'.$text.'", "'.$img.'", "'.date("U").'", "'.date("U").'")';
                 engine::mysql($query);
                 $fout = '<script type="text/javascript">window.location = "'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$_GET["cat_id"].'&act=list";</script>';
                 return $fout;
@@ -124,9 +124,9 @@ function print_admin_content($cms){
                 }
             }$visible = $_POST["visible"];
             if(!empty($img)){
-                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, img, visible) VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$img.'", "'.$visible.'")';
+                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, img, visible, date, public_date) VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$img.'", "'.$visible.'", "'.date("U").'", "'.date("U").'")';
             }else{
-                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, visible) VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$visible.'")';
+                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, visible, date, public_date) VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$visible.'", "'.date("U").'", "'.date("U").'")';
             }engine::mysql($query);
         }
     }
@@ -189,8 +189,8 @@ function print_admin_content($cms){
                     if(!empty($d)){
                         die('<script>alert("'.lang("This article already exist in").' '.$_GET["target"].' '.lang("translation").'"); window.location = "'.$_SERVER["DIR"].'/admin/?mode=content";</script>');
                     }else{
-                        $query = 'INSERT INTO `nodes_content`(cat_id, url, lang, caption, text, img, date) '
-                                . 'VALUES("'.$cat_id.'", "'.$data["url"].'", "'.$_GET["target"].'", "'.$data["caption"].'", "'.$data["text"].'", "'.$data["img"].'", "'.date("U").'")';
+                        $query = 'INSERT INTO `nodes_content`(cat_id, url, lang, caption, text, img, date, public_date) '
+                                . 'VALUES("'.$cat_id.'", "'.$data["url"].'", "'.$_GET["target"].'", "'.$data["caption"].'", "'.$data["text"].'", "'.$data["img"].'", "'.date("U").'", "'.date("U").'")';
                         engine::mysql($query);
                         die('<script>window.location = "'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$cat_id.'&act=list&lang='.$_GET["target"].'";</script>');
                     }
@@ -263,6 +263,24 @@ function print_admin_content($cms){
             engine::mysql($query);
             $fout = '<script type="text/javascript">window.location = "'.$_SERVER["DIR"].'/admin/?mode=content";</script>';
             return $fout; 
+        }else if($_GET["act"] == "up"){
+            $query = 'SELECT MAX(`order`) FROM `nodes_catalog`';
+            $res = engine::mysql($query);
+            $data = mysql_fetch_array($res);
+            $order = $data[0]+1;
+            $query = 'UPDATE `nodes_catalog` SET `order` = "'.$order.'" WHERE `id` = "'.$_GET["cat_id"].'"';
+            engine::mysql($query);
+            $fout = '<script type="text/javascript">window.location = "'.$_SERVER["DIR"].'/admin/?mode=content";</script>';
+            return $fout; 
+        }else if($_GET["act"] == "down"){
+            $query = 'SELECT MIN(`order`) FROM `nodes_catalog`';
+            $res = engine::mysql($query);
+            $data = mysql_fetch_array($res);
+            $order = $data[0]-1;
+            $query = 'UPDATE `nodes_catalog` SET `order` = "'.$order.'" WHERE `id` = "'.$_GET["cat_id"].'"';
+            engine::mysql($query);
+            $fout = '<script type="text/javascript">window.location = "'.$_SERVER["DIR"].'/admin/?mode=content";</script>';
+            return $fout;
         }else if($_GET["act"] == "edit"){
             $fout .= '<form method="POST" id="edit_form"  ENCTYPE="multipart/form-data">';
             $query = 'SELECT * FROM `nodes_catalog` WHERE `id` = "'.$_GET["cat_id"].'"';
@@ -429,8 +447,8 @@ function print_admin_content($cms){
             if(!empty($d)){
                 die('<script>alert("'.lang("This catalog already exist in").' '.$_GET["target"].' '.lang("translation").'"); window.location = "'.$_SERVER["DIR"].'/admin/?mode=content";</script>');
             }else{
-                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, img, visible, lang) '
-                        . 'VALUES("'.$data["caption"].'", "'.$data["text"].'", "'.$data["url"].'", "'.$data["img"].'", "'.$data["visible"].'", "'.$_GET["target"].'")';
+                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, img, visible, lang, date, public_date) '
+                        . 'VALUES("'.$data["caption"].'", "'.$data["text"].'", "'.$data["url"].'", "'.$data["img"].'", "'.$data["visible"].'", "'.$_GET["target"].'". "'.date("U").'", "'.date("U").'")';
                 engine::mysql($query);
                 die('<script>window.location = "'.$_SERVER["DIR"].'/admin/?mode=content&lang='.$_GET["target"].'";</script>');
             }
@@ -464,7 +482,7 @@ function print_admin_content($cms){
     }else{
         // print base directory
         $query = 'SELECT * FROM `nodes_catalog` WHERE `lang` = "'.$_SESSION["Lang"].'"'
-                . ' ORDER BY `id` '.$_SESSION["method"].' LIMIT '.($from-1).', '.$_SESSION["count"];
+                . ' ORDER BY `order` DESC LIMIT '.($from-1).', '.$_SESSION["count"];
         $requery = 'SELECT COUNT(*) FROM `nodes_catalog` WHERE `lang` = "'.$_SESSION["Lang"].'"';
         $table = '
             <div class="table">
@@ -502,6 +520,8 @@ function print_admin_content($cms){
                 }
                 $table .= '
                 <option value="'.$_SERVER["DIR"].'/admin/?mode='.$_GET["mode"].'&cat_id='.$data["id"].'&act=edit">'.lang("Edit catalog").'</option>
+                <option value="'.$_SERVER["DIR"].'/admin/?mode='.$_GET["mode"].'&cat_id='.$data["id"].'&act=up">'.lang("Up to top").'</option>
+                <option value="'.$_SERVER["DIR"].'/admin/?mode='.$_GET["mode"].'&cat_id='.$data["id"].'&act=down">'.lang("Down to bottom").'</option>
                 <option value="'.$_SERVER["DIR"].'/admin/?mode='.$_GET["mode"].'&cat_id='.$data["id"].'&act=remove">'.lang("Delete catalog").'</option>
             </select>
             </td></tr>';

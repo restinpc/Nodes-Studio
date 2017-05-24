@@ -3,9 +3,9 @@
 * Print admin attendance page.
 * @path /engine/core/admin/print_admin_attendance.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -175,23 +175,17 @@ function print_admin_attendance($cms){
         </tr>
         </table><br/>';
     if($_GET["action"]=="stat" || empty($_GET["action"])){
-        $query = 'SELECT COUNT(*) FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
+        $query = 'SELECT COUNT(DISTINCT `token`, `ip`) as `a`, COUNT(`id`) as `b` FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
         $res = engine::mysql($query);
         $data = mysql_fetch_array($res);
-        $views = $data[0];
-        $query = 'SELECT DISTINCT(`token`), `ip` FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'"';
+        $views = $data['b'];
+        $visit = $data['a'];
+        $query = 'SELECT COUNT(DISTINCT `att`.`token`, `att`.`ip`) as `a` FROM `nodes_attendance` AS `att` '
+                . 'LEFT JOIN `nodes_agent` AS `agent` ON `agent`.`id` = `att`.`agent_id` '
+                . 'WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `agent`.`bot` = 1';
         $res = engine::mysql($query);
-        $users = array();
-        $bots = array();
-        while($data = mysql_fetch_array($res)){
-            if(!$data["display"]){
-                if(!in_array($data["ip"], $users)) array_push($users, $data['ip']);
-            }else{
-                if(!in_array($data["ip"], $bots)) array_push($bots, $data['ip']);
-            }
-        }
-        $visit = count($users);
-        $bots_visit = count($bots);
+        $data = mysql_fetch_array($res);
+        $bots_visit = $data['a'];
         $fout .= '<center class="lh2"><span class="statistic_span">'.lang("Visitors").": ".$visit.'</span> ';
         $fout .= '<span class="statistic_span"  style="color: rgb(20,180,180);">'.lang("Views").": ".$views.'</span> ';
         $fout .= '<span class="statistic_span blue">'.lang("Bots").": ".$bots_visit.'</span> ';
@@ -199,7 +193,7 @@ function print_admin_attendance($cms){
     }else if($_GET["action"]=="pages"){
         $query = 'SELECT `cache`.`url` FROM `nodes_attendance` AS `att` '
                 . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
-                . 'WHERE `att`.`date` >= "'.$from.'" AND `att`.`date` <= "'.$to.'" AND `att`.`display` = "1" AND `cache`.`url` <> ""';
+                . 'WHERE `att`.`date` >= "'.$from.'" AND `att`.`date` <= "'.$to.'" AND `att`.`display` = "1"';
         $res = engine::mysql($query);
         $pages = array();
         while($data = mysql_fetch_array($res)){
@@ -213,10 +207,18 @@ function print_admin_attendance($cms){
             <th>URL</th>
             <th>'.lang("Amount").'</th>
         </tr>';
+        $max_val = 0;
         $table = '';
         foreach($pages as $page=>$count){
-            $table = '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
-                . '<td>'.$count.'</td></tr>'.$table;
+            if($count > $max_val){
+                $table = '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
+                        . '<td>'.$count.'</td></tr>'.$table;
+                $max_val=$count;
+            }else if($count < $min_val){
+                $table .= '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
+                        . '<td>'.$count.'</td></tr>';  
+                $min_val = $count;
+            }
         }$fout .= $table.'</table></div>';
     }else if($_GET["action"]=="ref"){
         $query = 'SELECT *, `ref`.`name` as `ref` FROM `nodes_attendance` LEFT JOIN `nodes_referrer` AS `ref` ON `ref`.`id` = `ref_id` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
@@ -243,30 +245,32 @@ function print_admin_attendance($cms){
         foreach($ref as $data=>$value){
             if(!is_array($value)){
                 if(!empty($data)){
-                    $fout .= '<tr><td align=left width=100%>'.$data.'" target="_blank">'.$data.'</a></td>';
+                    $fout .= '<tr><td align=left>'.$data.'" target="_blank">'.$data.'</a></td>';
                 }else{
                     $fout .= '<tr><td align=left>'.lang("Blank").'</td>';
                 }
-                $fout .= '<td align=center>'.$value.'</td></tr>'; 
+                $fout .= '<td>'.$value.'</td></tr>'; 
             }else{
                 $f = '';
                 $count = 0;
                 foreach($value as $d=>$v){
                     if(!empty($d)){
                         $url = parse_url($d);
-                        $f .= '<tr class="'.$data.' hidden"><td align=left class="pl10">'
-                                . '<a href="'.$d.'" target="_blank">'.mb_substr($url["path"],0,40).'</a>'
+                        $f .= '<tr><td align=left class="pl10">'
+                                . '<a href="'.$d.'" target="_blank">'.$url["path"].'</a>'
                             . '</td>';
                     }else{
                         $f .= '<tr><td align=left class="pl10">'.lang("Blank").'</td>';
                     }$count += $v;
-                    $f .= '<td width=50 align=center style="color: #c0c0c0;">'.$v.'</td></tr>';  
+                    $f .= '<td width=50>'.$v.'</td></tr>';  
                 }                
-                $fout .= '<tr><td width=100% align=left class="pointer" onClick=\'var elems = document.getElementsByClassName("'.$data.'"); for(var i = 0; i < elems.length; i++) { elems[i].style.display="table-row"; }\'>'.$data.'</td>'
-                        . '<td align=center width=50>'.$count.'</td></tr>'.$f;
+                $fout .= '<tr><td align=left class="pointer" onClick=\'document.getElementById("'.$data.'").style.display="block";\'>'.$data.'</td>'
+                        . '<td align=left>'.$count.'</td></tr>'
+                        . '<tr><td colspan=2>'
+                            . '<table id="'.$data.'" class="hidden">'.$f.'</table>'
+                        . '</td></tr>';
             }
         }$fout .= '</table></div>';
     }$fout .= '</div><br/>';
     return $fout;
 }
-

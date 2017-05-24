@@ -3,9 +3,9 @@
 * RSS-feed generator.
 * @path /engine/code/rss.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -30,7 +30,7 @@ while($data = mysql_fetch_array($res)){
     echo '<item>
     <title>'.$data["caption"].'</title>
     <link>'.$_SERVER["PUBLIC_URL"].'/'.$data["url"].'</link>
-    <description>'.substr(strip_tags($data["text"]),0,100).'</description>
+    <description>'.mb_substr(strip_tags($data["text"]),0,100).'</description>
     <guid>'.$_SERVER["PUBLIC_URL"].'/'.$data["url"].'</guid>
     <pubDate>'.date(DATE_RSS, $data["date"]).'</pubDate>
 </item>

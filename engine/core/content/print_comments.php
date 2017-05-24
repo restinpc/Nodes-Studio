@@ -3,9 +3,9 @@
 * Prints comments block.
 * @path /engine/core/content/print_comments.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @param string $url Page URL.
 * @return string Returns content of page on success, or die with error.
@@ -34,23 +34,7 @@ function print_comment($id, $noreply = 0){
                 $fout .= '<a class="red" onClick=\'delete_comment("'.lang("Are you sure?").'", '.$c["id"].');\'>'.lang("Delete").'</a>';
             }
             if(!$no_reply){
-            $fout .= '
-                <a onClick=\'document.getElementById("comment_'.$c["id"].'").style.display ="block";'
-                    .'this.style.display = "none";\'>'.lang("Reply").'</a><br/>
-                <div id="comment_'.$c["id"].'" class="comment_reply">
-                ';
-                if(empty($_SESSION["user"])){
-                    $fout .= '<center>'.lang("To post a comment, please").' <a target="_parent" href="'.$_SERVER["DIR"].'/login" onClick="event.preventDefault(); show_login_form();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center></div>';
-                }else{
-                    $fout .= '
-                <form method="POST">
-                    <input type="hidden" name="reply" value="'.$c["id"].'" />
-                    <textarea name="comment" cols=50 class="comment_textarea"></textarea>
-                    <br/><br/>
-                    <input type="submit" class="btn"  value="'.lang("Add comment").'" />
-                </form>
-                </div>';
-                }
+                $fout .= ' <a onClick=\'add_comment("'.lang("Add new comment").'", "'.lang("Submit comment").'", "'.$c["id"].'");\'>'.lang("Reply").'</a><br/>';
             }
         }
         $fout1 .= '<table align=center class="comment_table">';
@@ -97,7 +81,7 @@ function print_comments($url){
         }
     }
     $flag = 0;
-    $fout1 .= '<table align=center class="w400">';
+    $fout1 .= '<table align=center class="w100p">';
     $query = 'SELECT * FROM `nodes_comment` WHERE `url` LIKE "'.$url.'" AND `reply` = 0';
     $res = engine::mysql($query);
     while($data = mysql_fetch_array($res)){
@@ -114,17 +98,10 @@ function print_comments($url){
             $fout .= $fout1;
         }
         $fout .= '<br/>
-            <form method="POST">
-                <div id="new_comment" class="hidden">
-                    <strong>'.lang("Add new comment").'</strong><br/><br/>
-                    <textarea name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>
-                    <center><input type="submit" class="btn w280" value="'.lang("Submit comment").'" /></center>
-                </div>
-                <input type="button" class="btn w280" value="'.lang("Add comment").'" onClick=\'document.getElementById("new_comment").style.display="block";this.style.display="none";\' />
-            </form>
+            <input type="button" class="btn w280" value="'.lang("Add comment").'"  onClick=\'add_comment("'.lang("Add new comment").'", "'.lang("Submit comment").'");\' /><br/>
             ';
     }else{
-        $fout .= '<center>'.lang("To post a comment, please").' <a target="_parent" onClick="event.preventDefault(); login();">'.mb_strtolower(lang("sign in")).'</a> '.mb_strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.mb_strtolower(lang("register now")).'</a>.</center>';
+        $fout .= '<center>'.lang("To post a comment, please").' <a target="_parent" onClick="event.preventDefault(); login();">'.strtolower(lang("sign in")).'</a> '.strtolower(lang("or")).' <a href="'.$_SERVER["DIR"].'/register" target="account">'.strtolower(lang("register now")).'</a>.</center>';
     }
     return $fout;
 }

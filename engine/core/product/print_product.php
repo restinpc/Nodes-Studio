@@ -3,9 +3,9 @@
 * Print product page.
 * @path /engine/core/product/print_product.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -22,15 +22,27 @@
 */
 function print_product($site, $data){
     $images = explode(";", $data["img"]);
+    $rating = number_format(($data["rating"]/$data["votes"]),2);
     $fout = '<div class="document980">
     <div class="two_columns product_details">
         <section class="left_column">
-            '.engine::print_image_rotator($site, $images).'
+            '.engine::print_image_rotator($site, $data["title"], $images).'
         </section>
         <section class="right_column">
             <div class="right_column_block">
                 <h1>'.$data["title"].'</h1>
-                <br/><br/>
+                <br/>
+                <div class="profile_star fl">
+                    <div class="profile_stars">
+                        <div class="baseimage" style="margin-top: -'.(160-round($rating)*32).'px;" ></div>
+                    </div>
+                    <div class="votes">
+                       '.$rating.' / 5.00 ('.$data["votes"].' '.lang("votes").')
+                    </div>
+                </div>
+                <div class="share_block"><div>'.lang("Share friends").'</div><br/>'.
+                    engine::print_share($_SERVER["PUBLIC_URL"].'/product/'.$data["id"]).'</div>
+                <div class="clear"></div>
                 <p>'.$data["text"].'</p>
             </div>
             <div class="right_column_block pt0">';
@@ -65,9 +77,7 @@ function print_product($site, $data){
                         <div class="label_2 cart_img">&nbsp;</div>
                         <div class="label_3">&nbsp;$'.intval($data["price"]).'</div>    
                     </div>
-                </div>
-                <br/><br/>
-                <a href="#comments" onClick=\'document.getElementById("comments_block").style.display="block";\'><button class="btn w280" >'.lang("Show comments").'</button></a>';
+                </div><a href="#comments" onClick=\'document.getElementById("comments_block").style.display="block"; this.style.display="none";\'><button class="btn w280 mt15" >'.lang("Show comments").'</button></a>';
     if($_SESSION["user"]["id"]=="1"){
         $fout .= '<br/><br/>
                 <a href="'.$_SERVER["DIR"].'/admin/?mode=products&action=edit&id='.$data["id"].'"><button class="btn w280">'.lang("Edit product").'</button></a>';
@@ -76,26 +86,23 @@ function print_product($site, $data){
             <div class="clear"><br/></div>
         </section>
         <div class="clear"><br/></div>';
+        if(!empty($data["description"])){ $fout .= $data["description"].'<br/>'; }
     $fout .= '<div id="comments_block">
         <a name="comments"></a>
         <div class="tal pl10 fs21"><b>'.lang("Latest comments").'</b><br/><br/></div>
         '.engine::print_comments("/product/".$data["id"]).'<br/>
         </div>
     </div>';
-    $new_fout .= '<br/>
-        <div class="tal pl10 fs21"><b>'.lang("You might also be interested in").'</b><br/><br/></div>
-        <div class="preview_blocks">';
-    $query = 'SELECT * FROM `nodes_product` WHERE `id` <> "'.$data["id"].'" AND `status` = "1" ORDER BY RAND() DESC LIMIT 0, 6';
-    $res = engine::mysql($query);
-    $count = 0;
-    while($d = mysql_fetch_array($res)){
-        $count++;
-        $new_fout .= engine::print_product_preview($site, $d);
+    $blocks = engine::print_more_products($site, $data["id"]);
+    if(!empty($blocks)){
+        $new_fout .= '<div class="clear"></div><br/>'
+            . '<div class="tal pl10 fs21"><b>'.lang("You might also be interested in").'</b><br/></div>
+            <div class="preview_blocks">'
+            .$blocks.
+            '<div class="clear"></div>
+            </div>';
     }
-    $new_fout .= '
-        <div class="clear"></div>
-        </div>';
-    if($count) $fout .= $new_fout;
+    $fout .= $new_fout;
     $fout .= '<div class="clear"><br/></div>';
     $fout .= '
     </div>';

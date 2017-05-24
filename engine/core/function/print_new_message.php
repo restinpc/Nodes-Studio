@@ -3,9 +3,9 @@
 * Prints new message block.
 * @path /engine/core/function/print_new_message.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -29,7 +29,7 @@ function print_new_message($site){
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["from"].'"';
         $res = engine::mysql($query);
         $user = mysql_fetch_array($res);
-        if(mb_strlen($data["text"])>100) $data["text"] = mb_substr($data["text"], 0, 100)."..";
+        if(strlen($data["text"])>100) $data["text"] = mb_substr($data["text"], 0, 100)."..";
         if($user["online"] > date("U")-300) $online = '<span class="fs11">'.lang("online").'</span>';
         $fout .= '
             <div id="nodes_message">

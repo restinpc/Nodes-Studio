@@ -3,9 +3,9 @@
 * Do not edit directly.
 * @path /script/script.source.js
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 var ua = navigator.userAgent.toLowerCase();         // Navigator
 var isOpera = (ua.indexOf('opera')  > -1);          // is Opera browser
@@ -14,6 +14,9 @@ var keys = {37: 1, 38: 1, 39: 1, 40: 1};            // Keyboard "arrows"
 var window_state = 0;                               // is page loading
 var image_rotator;                                  // Image rotator
 var error;                                          // Gateway Timeout HTML data
+var pattern = new Array();                          // Array of patterns to swap
+var pattern_catch = 0;                              // Pattern flag
+var pattern_size = 0;                               // Count of patterns
 window.stateChangeIsLocal = true;
 History.enabled = true; 
 //------------------------------------------------------------------------------
@@ -152,7 +155,7 @@ function show_window(content){
 */
 function show_popup_window(content){
     if(content&&content!="undefined"){
-        window.scrollTo(0,0);
+        //window.scrollTo(0,0);
         disableScroll();
         parent.document.body.style.overflow = "hidden";
         var a = parent.document.createElement("div");
@@ -173,6 +176,44 @@ function show_popup_window(content){
 function show_editor(file){
     show_window('<div class="fl m5"><b>'+file+'</b></div><div class="clear"><br/></div><img src="'+root_dir+'/img/load.gif" id="loader" class="mt18p">'+
         '<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/edit.php?file='+file+'" onLoad=\'document.getElementById("loader").style.display="none";\' />');  
+}
+//------------------------------------------------------------------------------
+/**
+* Displays new comment form.
+* 
+* @param {string} caption Header of form.
+* @param {string} submit Button text.
+* @param {int} reply @mysql[nodes_comment]->id.
+*/
+function add_comment(caption, submit, reply){
+    show_popup_window('<form method="POST">'+'\n'+
+            '<div id="new_comment">'+'\n'+
+            '<input type="hidden" name="reply" value="'+reply+'" />'+'\n'+
+                '<strong>'+caption+'</strong><br/><br/>'+'\n'+
+                '<textarea name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>'+'\n'+
+                '<center><input type="submit" class="btn w280" value="'+submit+'" /></center><br/>'+'\n'+
+            '</div>'+'\n'+
+        '</form>');  
+}
+//------------------------------------------------------------------------------
+/**
+* Removes a comment.
+* 
+* @param {string} text Text of message.
+* @param {int} id @mysql[nodes_order]->id.
+*/
+function delete_comment(text, id){
+    if(confirm(text)){
+        jQuery.ajax({
+            type: "POST",
+            data: {	"comment_id" : id },
+            url: root_dir+"/bin.php",
+            success: function(data){ 
+                console.log("comment deleted: "+data);
+                window.location.reload();
+            }
+        });
+    }
 }
 //------------------------------------------------------------------------------
 /**
@@ -336,13 +377,13 @@ if(window.jQuery){
 jQuery(function() {
     setTimeout(function(){
         jQuery.ajax({
-            url: root_dir+'/error.php?504=1',
-            type: "POST",
+            url: root_dir+'/timeout.php',
+            type: "GET",
             success: function (data) {
                 error = data;
             }
         });
-    }, 5000);
+    }, 3000);
     if(!alertify){
         alert = function alert(text){
             show_popup_window('<br/><p>'+text+'</p><br/><br/><input type="button" value="OK" onClick=\'js_hide_wnd();\' class="btn w130" /><br/><br/>');
@@ -356,6 +397,24 @@ jQuery(function() {
     browser_time();
     checkAnchors();
 });
+//------------------------------------------------------------------------------
+/**
+* Submits patterns from user to server.
+*/
+function submitPatterns() {
+    if(pattern[0]){
+        console.log("Pattern => Submit["+pattern_size+" patterns]");
+        jQuery.ajax({
+            url: root_dir+'/brain.php',
+            data: { "patterns" : pattern },
+            type: "POST",
+            success: function (data) {
+                pattern = Array();
+                pattern_size = 0;
+            }
+        });
+    }
+}
 //------------------------------------------------------------------------------
 /**
 * Checks for an occurrence of a substring in a string.
@@ -413,7 +472,6 @@ function goto(href) {
             window_state = 1;
             jQuery("#content").animate({opacity: 0}, 300);
             try{ scrolltoTop(); }catch(e){}
-            console.log("Downloading "+href);
             var to = setTimeout(function(){ 
                 jQuery("#content").html(error); 
                 jQuery("#content").animate({opacity: 1}, 500) 
@@ -426,6 +484,9 @@ function goto(href) {
             success: function (data) {
                 if(data[data.length-1]=="=") 
                     data = base64_decode(data);
+                if(submit_patterns){
+                    setTimeout(submitPatterns, 1);
+                }
                 setTimeout(ajaxing, 1);
                 setTimeout(checkAnchors, 1);
                 var title = jQuery(data).filter('title').text();
@@ -696,41 +757,79 @@ function ScaleSlider() {
 /**
 * Displays an image rotator.
 */
-function show_rotator(){
-    console.log("show_rotator");
-    image_rotator = new $JssorSlider$("jssor_1", {
-        $AutoPlay: true,
-        $FillMode: 5,
-        $SlideshowOptions: {
-            $Class: $JssorSlideshowRunner$,
-            $Transitions: [
-                {$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Zoom:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:0.5},$Brother:{$Duration:1200,$Zoom:1,$Rotate:1,$Easing:$Jease$.$Swing,$Opacity:2,$Round:{$Rotate:0.5},$Shift:90}},
-                {$Duration:1400,x:0.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1400,x:-0.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10}},
-                {$Duration:1200,$Zoom:11,$Rotate:1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Brother:{$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Shift:600}},
-                {$Duration:1500,x:0.5,$Cols:2,$ChessMode:{$Column:3},$Easing:{$Left:$Jease$.$InOutCubic},$Opacity:2,$Brother:{$Duration:1500,$Opacity:2}},
-                {$Duration:1500,x:-0.3,y:0.5,$Zoom:1,$Rotate:0.1,$During:{$Left:[0.6,0.4],$Top:[0.6,0.4],$Rotate:[0.6,0.4],$Zoom:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,$Zoom:11,$Rotate:-0.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},
-                {$Duration:1500,$Zoom:11,$Rotate:0.5,$During:{$Left:[0.4,0.6],$Top:[0.4,0.6],$Rotate:[0.4,0.6],$Zoom:[0.4,0.6]},$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,$Zoom:1,$Rotate:-0.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},
-                {$Duration:1500,x:0.3,$During:{$Left:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2,$Outside:true,$Brother:{$Duration:1000,x:-0.3,$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2}},
-                {$Duration:1200,x:0.25,y:0.5,$Rotate:-0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1200,x:-0.1,y:-0.7,$Rotate:0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},
-                {$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
-                {$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
-                {$Duration:1600,y:-1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,y:1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
-                {$Duration:1200,y:1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
-                {$Duration:1200,x:1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,x:-1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
-                {$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},
-                {$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},
-                {$Duration:1500,x:-0.1,y:-0.7,$Rotate:0.1,$During:{$Left:[0.6,0.4],$Top:[0.6,0.4],$Rotate:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,x:0.2,y:0.5,$Rotate:-0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},
-                {$Duration:1600,x:-0.2,$Delay:40,$Cols:12,$During:{$Left:[0.4,0.6]},$SlideOut:true,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:260,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Outside:true,$Round:{$Top:0.5},$Brother:{$Duration:1000,x:0.2,$Delay:40,$Cols:12,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:1028,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Round:{$Top:0.5}}}
-            ],
-            $TransitionsOrder: 1
-        },
-        $BulletNavigatorOptions: {
-          $Class: $JssorBulletNavigator$
-        }
-    });
-    ScaleSlider();
-    addHandler(window, "load", ScaleSlider);
-    addHandler(window, "resize", ScaleSlider);
-    addHandler(window, "orientationchange", ScaleSlider);
+function show_rotator(obj){
+    try{
+        image_rotator = new $JssorSlider$("jssor_1", {
+            $AutoPlay: true,
+            $FillMode: 5,
+            $SlideshowOptions: {
+                $Class: $JssorSlideshowRunner$,
+                $Transitions: [
+                    {$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Zoom:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:0.5},$Brother:{$Duration:1200,$Zoom:1,$Rotate:1,$Easing:$Jease$.$Swing,$Opacity:2,$Round:{$Rotate:0.5},$Shift:90}},
+                    {$Duration:1400,x:0.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1400,x:-0.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10}},
+                    {$Duration:1200,$Zoom:11,$Rotate:1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Brother:{$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Shift:600}},
+                    {$Duration:1500,x:0.5,$Cols:2,$ChessMode:{$Column:3},$Easing:{$Left:$Jease$.$InOutCubic},$Opacity:2,$Brother:{$Duration:1500,$Opacity:2}},
+                    {$Duration:1500,x:-0.3,y:0.5,$Zoom:1,$Rotate:0.1,$During:{$Left:[0.6,0.4],$Top:[0.6,0.4],$Rotate:[0.6,0.4],$Zoom:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,$Zoom:11,$Rotate:-0.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},
+                    {$Duration:1500,$Zoom:11,$Rotate:0.5,$During:{$Left:[0.4,0.6],$Top:[0.4,0.6],$Rotate:[0.4,0.6],$Zoom:[0.4,0.6]},$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,$Zoom:1,$Rotate:-0.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},
+                    {$Duration:1500,x:0.3,$During:{$Left:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2,$Outside:true,$Brother:{$Duration:1000,x:-0.3,$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,x:0.25,y:0.5,$Rotate:-0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1200,x:-0.1,y:-0.7,$Rotate:0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},
+                    {$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1600,y:-1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,y:1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,y:1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,x:1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,x:-1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},
+                    {$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},
+                    {$Duration:1500,x:-0.1,y:-0.7,$Rotate:0.1,$During:{$Left:[0.6,0.4],$Top:[0.6,0.4],$Rotate:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,x:0.2,y:0.5,$Rotate:-0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},
+                    {$Duration:1600,x:-0.2,$Delay:40,$Cols:12,$During:{$Left:[0.4,0.6]},$SlideOut:true,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:260,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Outside:true,$Round:{$Top:0.5},$Brother:{$Duration:1000,x:0.2,$Delay:40,$Cols:12,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:1028,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Round:{$Top:0.5}}}
+                ],
+                $TransitionsOrder: 1
+            },
+            $BulletNavigatorOptions: {
+              $Class: $JssorBulletNavigator$
+            }
+        });
+        ScaleSlider();
+        addHandler(window, "load", ScaleSlider);
+        addHandler(window, "resize", ScaleSlider);
+        addHandler(window, "orientationchange", ScaleSlider);
+    }catch(e){}
+    initPhotoSwipeFromDOM(obj);
+}
+//------------------------------------------------------------------------------
+/**
+* Displays an image viewer.
+*/
+function nodes_galery(src){
+    onpop_state = 1;
+    for(var i = 0; i<20; i++){
+        try{
+            if(document.getElementById('nodes_galery_'+i).alt == src){
+                document.getElementById('nodes_galery_'+i).click();
+            }
+        }catch(e){}
+    }
+}
+//------------------------------------------------------------------------------
+function capture_click(e){
+    console.log("Pattern => Click[x="+e.clientX+";y="+e.clientY+']');
+    pattern[pattern_size++] = Array("1", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight());
+}
+//------------------------------------------------------------------------------
+function capture_mousemove(e){
+    if(!pattern_catch){
+        pattern_catch = 1;
+        pattern[pattern_size++] = Array("2", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight());
+        console.log("Pattern => Pointer[x="+e.clientX+";y="+e.clientY+']');
+        setTimeout( function(){
+            pattern_catch = 0;
+        }, 1000);
+    }
+}
+//------------------------------------------------------------------------------
+if(submit_patterns){
+    addHandler(window, "click", capture_click);
+    addHandler(window, "mousemove", capture_mousemove);
+    setInterval(submitPatterns, 10000);
 }
 }

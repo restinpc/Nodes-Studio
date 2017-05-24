@@ -1,12 +1,11 @@
 <?php
 /**
 * Image resize library.
-* Should be required before using.
 * @path /engine/core/image.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code>
 *  $img = new image("/img/1.jpg"); 
@@ -114,7 +113,7 @@ function save($path = '', $fileName, $type = false, $rewrite = false, $quality =
 */
 private function setType($file){
     $size = getimagesize($file);
-    $mime = strtolower(substr($size['mime'], mb_strpos($size['mime'], '/')+1));
+    $mime = strtolower(mb_substr($size['mime'], strpos($size['mime'], '/')+1));
     switch($mime){
         case 'jpg':
             $this->type = "jpg";
@@ -194,7 +193,7 @@ static function resize_image($src, $dest, $width, $height, $rgb=0x1d1d1d, $quali
     if (!file_exists($src)) return false;
     $size = getimagesize($src);
     if ($size === false) return false;
-    $format = strtolower(substr($size['mime'], mb_strpos($size['mime'], '/')+1));
+    $format = strtolower(mb_substr($size['mime'], strpos($size['mime'], '/')+1));
     $icfunc = "imagecreatefrom" . $format;
     if (!function_exists($icfunc)) return false;
     $isrc = $icfunc($src);

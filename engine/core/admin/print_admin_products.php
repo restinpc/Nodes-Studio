@@ -3,9 +3,9 @@
 * Print admin products page.
 * @path /engine/core/admin/print_admin_products.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -19,11 +19,12 @@
 * @usage <code> engine::print_admin_products($cms); </code>
 */
 function print_admin_products($cms){
+    $cms->onload .= '; tinymce_init(); ';
     if($_GET["action"]=="add"){
         if(!empty($_POST["file1"]) && !empty($_SESSION["user"]["id"])){
             $_SESSION["photos"] = '';
             foreach($_POST as $key=>$file){
-                if(!empty($file) && mb_strpos(" ".$key, "file")){
+                if(!empty($file) && strpos(" ".$key, "file")){
                     $_SESSION["photos"] .= trim($file).';';
                 }
             }
@@ -32,16 +33,17 @@ function print_admin_products($cms){
             $title = trim(htmlspecialchars($_POST["title"]));
             $text = trim(htmlspecialchars($_POST["text"]));
             $price = doubleval($_POST["price"]);
+            $description = trim(mysql_real_escape_string($_POST["description"]));
             $date = date("U");
-            $query = 'INSERT INTO `nodes_product`(`user_id`, `title`, `text`, `img`, `price`, `date`, `status`, `views`) '
-                    . 'VALUES("'.$_SESSION["user"]["id"].'", "'.$title.'", "'.$text.'", "'.$_SESSION["photos"].'", "'.$price.'", "'.$date.'", "1", "0")';
+            $query = 'INSERT INTO `nodes_product`(`user_id`, `title`, `text`, `description`, `img`, `price`, `date`, `status`, `views`) '
+                    . 'VALUES("'.$_SESSION["user"]["id"].'", "'.$title.'", "'.$text.'", "'.$description.'", "'.$_SESSION["photos"].'", "'.$price.'", "'.$date.'", "1", "0")';
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_product` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" AND `date` = "'.date("U").'"';
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
             $_SESSION["product"] = $data["id"];
             foreach($_POST as $key=>$value){
-                if(mb_strpos($key, 'property_')!=="false"){
+                if(strpos($key, 'property_')!=="false"){
                     $key = str_replace('property_', '', $key);
                 }if(intval($key) > 0){
                     $value = intval($_POST["property_".$key]);
@@ -181,11 +183,15 @@ function print_admin_products($cms){
                     <br/>
                 </div>
                 <div class="clear"><br/></div>
+                <div class="w600 m0a">
+                    <textarea id="editable" name="description" placeHolder="'.lang("Complete item description").'"></textarea>
+                    <br/><br/>
+                </div>
                 <input type="submit" class="btn w280" value="'.lang("Submit").'" /><br/>
             </form>
             </div>
             <style>.country-select{width: 280px;}</style>';  
-            $cms->onload = '; jQuery("#country_selector").countrySelect({ defaultCountry: "us" }); ';
+            $cms->onload .= '; jQuery("#country_selector").countrySelect({ defaultCountry: "us" }); ';
         }
     }else if($_GET["action"]=="edit"){
         if(!empty($_GET["id"])){
@@ -193,7 +199,7 @@ function print_admin_products($cms){
                 $query = 'DELETE FROM `nodes_property_data` WHERE `product_id` = "'.$_GET["id"].'"';
                 engine::mysql($query);
                 foreach($_POST as $key=>$value){
-                    if(mb_strpos(' '.$key, 'property_')){
+                    if(strpos(' '.$key, 'property_')){
                         $key = str_replace('property_', '', $key);
                     }if(intval($key) > 0){
                         $value = intval($_POST["property_".$key]);
@@ -238,10 +244,12 @@ function print_admin_products($cms){
                 $title = trim(htmlspecialchars($_POST["title"]));
                 $text = trim(htmlspecialchars($_POST["text"]));
                 $price = doubleval($_POST["price"]);
+                $description = mysql_real_escape_string($_POST["description"]);
                 $query = 'UPDATE `nodes_product` SET '
                         . '`title` = "'.$title.'", '
                         . '`text` = "'.$text.'", '
-                        . '`price` = "'.$price.'" '
+                        . '`price` = "'.$price.'", '
+                        . '`description` = "'.$description.'" '
                         . 'WHERE `id` = "'.intval($_GET["id"]).'"';
                 engine::mysql($query);
                 $country = htmlspecialchars($_POST["country"]);
@@ -361,13 +369,17 @@ function print_admin_products($cms){
                         <input type="text" class="input w280" placeHolder="'.lang("Phone number").'" name="phone" required value="'.$data["phone"].'"  /><br/><br/>
                     </section>
                     <div class="clear"></div>
+                    <div class="w600 tal">
+                        <textarea class="w100p" id="editable" name="description">'.$product["description"].'</textarea>
+                        <br/><br/>
+                    </div>
                     <input type="submit" class="btn w280" value="'.lang("Save changes").'" /><br/><br/>
                     <a href="'.$_SERVER["DIR"].'/admin/?mode=products"><input type="button" class="btn w280" value="'.lang("Back to products").'" /></a><br/>
                 </div>
                 </form>
             </div>
             <style>.country-select{width: 280px;}</style>';  
-            $cms->onload = '; jQuery("#country_selector").countrySelect({ defaultCountry: "us" }); ';
+            $cms->onload .= '; jQuery("#country_selector").countrySelect({ defaultCountry: "us" }); ';
         }else{
             if(!empty($_POST["new_property"])){
                 $prop = trim(mysql_real_escape_string($_POST["new_property"]));

@@ -3,9 +3,9 @@
 * Backend register page file.
 * @path /engine/site/register.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -32,7 +32,7 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
     }else{
         $name = mysql_real_escape_string($_POST["name"]);
         $email = strtolower(mysql_real_escape_string($_POST["email"]));
-        $code = substr(md5(date("U")), 0, 4);
+        $code = mb_substr(md5(date("U")), 0, 4);
         $confirm = !$this->configs["confirm_signup_email"];
         $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
         $r = engine::mysql($query);
@@ -43,9 +43,9 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             . 'VALUES("2", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Email '.$_POST["email"].' allready exist")';
             engine::mysql($query);
             unset($_POST["email"]);
-        }else if(mb_strpos($email, "@")){
+        }else if(strpos($email, "@")){
             $query = 'INSERT INTO `nodes_user` (`name`, `photo`, `email`, `pass`, `online`, `confirm`, `code`) 
-                VALUES ("'.$name.'", "anon.jpg", "'.$email.'", "'.md5(trim($_POST["pass"])).'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
+                VALUES ("'.$name.'", "anon.jpg", "'.$email.'", "'.md5(trim(strtolower($_POST["pass"]))).'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(trim($_POST["pass"])).'"';
             $res = engine::mysql($query);

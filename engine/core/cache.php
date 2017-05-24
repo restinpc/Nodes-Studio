@@ -1,12 +1,11 @@
 <?php
 /**
 * Cache library.
-* Should be required before using.
 * @path /engine/core/cache.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code>
 *  $cache = new cache();
@@ -25,7 +24,7 @@ class cache{
 * $usage <code> cache::update_cache("/", TRUE); </code>
 */
 public static function update_cache($url, $jQuery = 0, $lang="en"){
-    if(mb_strpos($url, "http://".$_SERVER["HTTP_HOST"])===FALSE) 
+    if(strpos($url, "http://".$_SERVER["HTTP_HOST"])===FALSE) 
         $path = "http://".$_SERVER["HTTP_HOST"].$url;
     else $path = $url;
     $current = doubleval(microtime(1));

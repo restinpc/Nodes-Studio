@@ -3,9 +3,9 @@
 * Backend profile pages file.
 * @path /engine/site/profile.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -38,10 +38,23 @@ if(empty($user)){
             $button = '<a href="'.$_SERVER["DIR"].'/account/inbox/'.$user["id"].'"><input type="button" class="btn w280" value="'.lang("Send message").'" /><br/><br/>';
         }
     }
-    $this->content .= '<div class="document">'
-        . '<div class="clear_block">'
-        . '<p>'.lang("Member of").' <b>'.$this->configs["name"].'</b> '.lang("community").'.</p>'
-        . '<br/><br/>'.$button
-        . '</div>'
-        . '</div>';
+    $rating = number_format(($user["rating"]/$user["votes"]),2);
+    $this->content .= '
+        <div class="profile_star m10 fl">
+            <div class="profile_stars">
+                <div class="baseimage" style="margin-top: -'.(160-round($rating)*32).'px;" ></div>
+            </div>
+            <div class="votes">
+               '.$rating.' / 5.00 ('.$user["votes"].' '.lang("votes").')
+            </div>
+        </div>
+        <div class="share_block fr m15"><div>'.lang("Share friends").'</div><br/>'.
+            engine::print_share($_SERVER["PUBLIC_URL"].'/product/'.$data["id"]).'</div>
+        <div class="clear"></div>
+        <div class="document">
+            <div class="clear_block">
+                <p>'.lang("Member of").' <b>'.$this->configs["name"].'</b> '.lang("community").'.</p>
+                <br/><br/>'.$button.'<br/>
+            </div>
+        </div>';
 }

@@ -149,7 +149,7 @@ class Google_MediaFileUpload {
    */
   public static function processFileUpload($file, $mime) {
     if (!$file) return array();
-    if (substr($file, 0, 1) != '@') {
+    if (mb_substr($file, 0, 1) != '@') {
       $file = '@' . $file;
     }
 
@@ -215,7 +215,7 @@ class Google_MediaFileUpload {
     }
 
     if (false == $chunk) {
-      $chunk = substr($this->data, $this->progress, $this->chunkSize);
+      $chunk = mb_substr($this->data, $this->progress, $this->chunkSize);
     }
 
     $lastBytePos = $this->progress + strlen($chunk) - 1;

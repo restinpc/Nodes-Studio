@@ -3,9 +3,9 @@
 * Framework updater.
 * @path /engine/code/update.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/language.php");
@@ -49,7 +49,7 @@ function update(){
                     $fullpath = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/temp/';
                     foreach($dirs as $d){
                         $d = trim($d);
-                        if(!empty($d)&&!mb_strpos($d, ".")&&$d!="temp"){
+                        if(!empty($d)&&!strpos($d, ".")&&$d!="temp"){
                             mkdir($fullpath.$d);
                             $fullpath .= $d."/";
                         }
@@ -83,7 +83,7 @@ function update(){
                     $fullpath = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/temp/';
                     foreach($dirs as $d){
                         $d = trim($d);
-                        if(!empty($d)&&!mb_strpos($d, ".")&&$d!="temp"){
+                        if(!empty($d)&&!strpos($d, ".")&&$d!="temp"){
                             mkdir($fullpath.$d);
                             $fullpath .= $d."/";
                         }
@@ -108,7 +108,7 @@ function update(){
         $fullpath = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/';
         foreach($dirs as $d){
             $d = trim($d);
-            if(!empty($d)&&!mb_strpos($d, ".")){
+            if(!empty($d)&&!strpos($d, ".")){
                 mkdir($fullpath.$d);
                 $fullpath .= $d."/";
             }

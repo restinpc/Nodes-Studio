@@ -1,11 +1,11 @@
 <?php
 /**
-* Framework site class.
+* Framework site primary class.
 * @path /engine/nodes/site.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 class site{
 public $title;          // Page title.
@@ -46,10 +46,10 @@ function site($compact=0){
         $this->title = $this->configs["name"];
     }else $this->title = $config["name"];
     if(!empty($this->configs['image'])){
-        if(mb_strpos($this->configs["image"], "http://")!==FALSE){
+        if(strpos($this->configs["image"], "http://")!==FALSE){
             $this->img = $this->configs["image"];
         }else{
-            if(mb_strpos($this->configs["image"], $_SERVER["DIR"])!==FALSE){ 
+            if(strpos($this->configs["image"], $_SERVER["DIR"])!==FALSE){ 
                 $this->img = 'http://'.$_SERVER["HTTP_HOST"].$this->configs["image"];
             }else{ 
                 if($this->configs["image"][0]=="/"){
@@ -128,22 +128,22 @@ function site($compact=0){
             if(!$data["mode"]) $this->description .= $data["description"];
             else $this->description = $data["description"];
         }
-        if(mb_strlen($this->description) > 200) $this->description = mb_substr($this->description, 0, 200).'..';
+        if(strlen($this->description) > 200) $this->description = mb_substr($this->description, 0, 200).'..';
         $this->title = trim(strip_tags($this->title));
         if(!empty($data)){ 
             if(!$data["mode"]) $this->title .= $data["title"];
             else $this->title = $data["title"];
         }
-        if(mb_strlen($this->title) > 100) $this->title = mb_substr($this->title, 0, 100).'..';
+        if(strlen($this->title) > 100) $this->title = mb_substr($this->title, 0, 100).'..';
         foreach($this->keywords as $keyword) $keywords .= $keyword.', ';   
-        $keywords = mb_substr($keywords,0,mb_strlen($keywords)-2);
+        $keywords = mb_substr($keywords,0,strlen($keywords)-2);
         if(empty($keywords)) $keywords = str_replace (' ', ', ', $this->description);
         $keywords = trim(strip_tags($keywords));
         if(!empty($data)){ 
             if(!$data["mode"]) $keywords .= $data["keywords"];
             else $keywords = $data["keywords"];
         }
-        if(mb_strlen($keywords) > 300)
+        if(strlen($keywords) > 300)
             $keywords = mb_substr($keywords, 0, 300).'..';
         $fout = '<!DOCTYPE html> <!-- Powered by Nodes Studio -->
 <html itemscope itemtype="http://schema.org/WebSite" lang="'.$_SESSION["Lang"].'" style="background: url('.$_SERVER["DIR"].'/img/load.gif) no-repeat center center fixed; min-heigth: 400px;">
@@ -154,6 +154,7 @@ function site($compact=0){
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Cache-control" content="no-cache" />
 <meta name="robots" content="index, follow" />
+<meta http-equiv="content-language" content="'.$_SESSION["lang"].'" />
 <meta name="description" itemprop="description" content="'.$this->description.'" />
 <meta property="og:title" itemprop="name" content="'.$this->title.'" />
 <meta property="og:image" itemprop="image" content="'.$this->img.'" />
@@ -174,8 +175,8 @@ function site($compact=0){
     $fout .= $this->content.'
 <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />
 <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'";</script>
-<script src="'.$_SERVER["DIR"].'/script/jquery-1.11.1.js" type="text/javascript"></script>
+<script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'"; var submit_patterns = '.$this->configs["catch_patterns"].';</script>
+<script src="'.$_SERVER["DIR"].'/script/jquery.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript"></script>';
     if(!empty($_SESSION["user"]["id"])){

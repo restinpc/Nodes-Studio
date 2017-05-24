@@ -3,9 +3,9 @@
 * Do not edit directly.
 * @path /script/admin.source.js
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 //------------------------------------------------------------------------------
 /**
@@ -70,26 +70,6 @@ function confirm_order(id, text, shipment, soldout){
             }
         }, ""); 
     }}, ""); 
-}
-//------------------------------------------------------------------------------
-/**
-* Removes a comment.
-* 
-* @param {string} text Text of message.
-* @param {int} id @mysql[nodes_order]->id.
-*/
-function delete_comment(text, id){
-    if(confirm(text)){
-        jQuery.ajax({
-            type: "POST",
-            data: {	"comment_id" : id },
-            url: root_dir+"/bin.php",
-            success: function(data){ 
-                console.log("comment deleted: "+data);
-                window.location.reload();
-            }
-        });
-    }
 }
 //------------------------------------------------------------------------------
 /**

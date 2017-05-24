@@ -3,9 +3,9 @@
 * Print admin pages file.
 * @path /engine/core/admin/print_admin_pages.php
 * 
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Virtual    <developing@nodes-tech.ru>
-* @license http://nodes-studio.com/license.txt GNU Public License
+* @name    Nodes Studio    @version 2.0.3
+* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -103,7 +103,7 @@ function print_admin_pages($cms){
         $opt = array();
         $opt[$data["interval"]] = "selected";
         $url = str_replace("http://".$_SERVER["HTTP_HOST"], "", $data["url"]);
-        if(mb_strlen($url)>25) $url = mb_substr($url,0,25).'..';
+        if(strlen($url)>25) $url = mb_substr($url,0,25).'..';
         $table .= '
         <tr>
             <td align=left valign=middle>
