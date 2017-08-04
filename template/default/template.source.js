@@ -3,8 +3,8 @@
 * Do not edit directly.
 * @path /template/default/template.source.js
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 //------------------------------------------------------------------------------
@@ -45,8 +45,8 @@ function show_bin(){
 function showHideMenu() {
     jQuery('#bigNav').fadeToggle(150);
     jQuery('#menuIcon').toggleClass('x');
+    jQuery('#mainHead').toggleClass('popupMenu');
     jQuery('#menuIcon .nav_button').toggleClass('hidden');
-    navScroll();
 }
 //------------------------------------------------------------------------------
 /**
@@ -55,12 +55,14 @@ function showHideMenu() {
 function hideMenu() {
     jQuery('#bigNav').fadeOut(150);
     jQuery('#menuIcon').removeClass('x');
-    navScroll();
+    jQuery('#mainHead').removeClass('popupMenu');
+    jQuery('#menuIcon .nav_button').removeClass('hidden');
 }
 //------------------------------------------------------------------------------
 /**
 * Displays "Up to top".
 */
+var lastPos = 0;
 function navScroll() {
     if(jQuery(window).scrollTop() > 0){
         jQuery('#floater').show();
@@ -68,10 +70,27 @@ function navScroll() {
         jQuery('#floater').hide();
     }
     if(jQuery(window).scrollTop() > 0 || jQuery("#menuIcon").hasClass("x")){
-        jQuery('#mainHead').addClass('scrollDown');
+        if(lastPos > jQuery(window).scrollTop()){
+            jQuery('#mainHead').addClass('scrollDown');
+            $i = 0;
+            while($i <= 100){
+                setTimeout(function(){jQuery('#mainHead').css('opacity', ($i/100));}, $i);
+                $i++;
+            }
+        }else{
+            $i = 100;
+            while($i >= 0){
+                setTimeout(function(){jQuery('#mainHead').css('opacity', ($i/100));}, $i);
+                $i--;
+            }
+            jQuery('#mainHead').removeClass('scrollDown');
+            hideMenu();
+        }
     }else{
         jQuery('#mainHead').removeClass('scrollDown');
+        jQuery('#mainHead').css('opacity', '1');
     }
+    lastPos = jQuery(window).scrollTop();
 }
 //------------------------------------------------------------------------------
 /**
@@ -93,8 +112,10 @@ function search(text){
 */
 jQuery(function() {
     navScroll();
-    jQuery(window).scroll(navScroll).resize(navScroll);
-    jQuery('#menuIcon').click(function() { showHideMenu(); });
-    jQuery('#floater').click(function() { scrolltoTop(); });
+    if(load_events){
+        jQuery(window).scroll(navScroll).resize(navScroll);
+        jQuery('#menuIcon').click(function() { showHideMenu(); });
+        jQuery('#floater').click(function() { scrolltoTop(); });
+    }
 });
 }

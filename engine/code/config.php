@@ -4,7 +4,7 @@
 * @path /engine/code/config.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 if(!empty($_POST["admin_email"])){
@@ -27,7 +27,7 @@ if(!empty($_POST["admin_email"])){
 * Config file.
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 ';

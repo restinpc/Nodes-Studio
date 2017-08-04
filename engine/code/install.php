@@ -3,8 +3,8 @@
 * Framework Installer.
 * @path /engine/code/install.php
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 function output(){
@@ -109,7 +109,6 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('sandbox', '1', 'Sandbox payment mode', 'bool'),
 ('autoupdate', '1', 'Engine auto-update', 'bool'),
 ('autobackup', '1', 'Auto backup', 'bool'),
-('pattern_color', '1', 'Adaptive interface color', 'bool'),
 ('catch_patterns', '1', 'Behavioral monitoring', 'bool'),
 ('backup_files', '0', 'Backup files', 'bool'),
 ('free_message', '0', 'Messages between users', 'bool'),
@@ -121,7 +120,6 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('paypal_test', '1', 'PayPal test mode', 'bool'),
 ('paypal_id', '', 'PayPal user ID', 'string'),
 ('paypal_description', '', 'PayPal description', 'string'),
-('vk_link', 'https://vk.com', 'VK page URL', 'string'),
 ('vk_id', '', 'VK client ID', 'string'),
 ('fb_link', 'https://facebook.com', 'Facebook page URL', 'string'),
 ('fb_id', '', 'Facebook client ID', 'string'),
@@ -561,7 +559,40 @@ INSERT INTO `nodes_agent` (`id`, `name`, `bot`) VALUES
 (91, 'Virusdie crawler/2.1', 1),
 (92, 'Mozilla/5.0 (compatible; Google-Structured-Data-Testing-Tool +https://search.google.com/structured-data/testing-tool)', 1),
 (93, 'Mozilla/5.0 (compatible; YandexPagechecker/2.0; +http://yandex.com/bots)', 1),
-(94, 'GuzzleHttp/6.1.0 curl/7.38.0 PHP/7.0.13-1~dotdeb+8.1', 1);
+(94, 'GuzzleHttp/6.1.0 curl/7.38.0 PHP/7.0.13-1~dotdeb+8.1', 1),
+(95, 'Mozilla/5.0 (compatible; YandexOntoDB/1.0; +http://yandex.com/bots)', 0),
+(96, 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 0),
+(97, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/600.2.5 (KHTML, like Gecko) Version/8.0.2 Safari/600.2.5 (Applebot/0.1; +http://www.apple.com/go/applebot)', 0),
+(98, 'Mozilla/5.0 (compatible; SemrushBot/1.2~bl; +http://www.semrush.com/bot.html)', 0),
+(99, 'Mozilla/5.0 (compatible; spbot/5.0.3; +http://OpenLinkProfiler.org/bot )', 0),
+(100, 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12F70 Safari/600.1.4 (compatible; Laserlikebot/0.1)', 0),
+(101, 'Google-Adwords-Instant (+http://www.google.com/adsbot.html)', 0),
+(102, 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1 (compatible; AdsBot-Google-Mobile; +http://www.google.com/mobile/adsbot.html)', 0),
+(103, 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)', 0),
+(104, 'Mozilla/5.0 (compatible; SEOkicks-Robot; +http://www.seokicks.de/robot.html)', 0),
+(105, 'Mozilla/5.0 (compatible; Plukkie/1.6; http://www.botje.com/plukkie.htm)', 0),
+(106, 'Mozilla/5.0 (compatible; YandexDirectDyn/1.0; +http://yandex.com/bots)', 0),
+(107, 'CCBot/2.0 (http://commoncrawl.org/faq/)', 0),
+(108, 'msnbot-media/1.1 (+http://search.msn.com/msnbot.htm)', 0),
+(109, 'Wotbox/2.01 (+http://www.wotbox.com/bot/)', 0),
+(110, 'Mozilla/5.0 (compatible; WebHistoryBot/1.2.1 IS NOT SE bot like Googlebot/2.1; +http://www.google.com/bot.html,Yahoo! Slurp or Bingbot)', 0),
+(111, 'AportCatalogRobot/2.0', 0),
+(112, 'Mozilla/5.0 (compatible; WBSearchBot/1.1; +http://www.warebay.com/bot.html)', 0),
+(113, 'Mozilla/5.0 (compatible; special_archiver/3.1.1 +http://www.archive.org/details/archive.org_bot)', 0),
+(114, 'SEMrushBot', 0),
+(115, 'BOT/0.1 (BOT for JCE)', 0),
+(116, 'Mozilla/5.0 (compatible; LinkpadBot/1.12; +http://www.linkpad.ru)', 0),
+(117, 'Mozilla/5.0 (TweetmemeBot/4.0; +http://datasift.com/bot.html) Gecko/20100101 Firefox/31.0', 0),
+(118, 'Mediatoolkitbot (complaints@mediatoolkit.com)', 0),
+(119, 'Mozilla/5.0 (compatible; Yeti/1.1; +http://naver.me/bot)', 0),
+(120, 'Mozilla/5.0 (compatible; IDBot/1.1; +http://www.id-search.xyz/bot.html)', 0),
+(121, 'Mozilla/5.0 (compatible; SemrushBot-BA; +http://www.semrush.com/bot.html)', 0),
+(122, 'TurnitinBot (https://turnitin.com/robot/crawlerinfo.html)', 0),
+(123, 'Mozilla/5.0 (compatible; archive.org_bot +http://www.archive.org/details/archive.org_bot)', 0),
+(124, 'Digincore crawler bot. See https://www.digincore.com/crawler.html for rules and instructions.', 0),
+(125, 'Linguee Bot (http://www.linguee.com/bot; bot@linguee.com)', 0),
+(126, 'RankingBot2 -- https://varocarbas.com/bot_ranking2/', 0),
+(127, 'Mozilla/5.0 (compatible; SEOkicks-Robot +http://www.seokicks.de/robot.html)', 0);
 
 
 CREATE TABLE IF NOT EXISTS `nodes_language` (
@@ -1587,7 +1618,7 @@ $_SERVER["config"] = array('."\n".'
 '* Should be configured on autoexec every 1 minute.'."\n".
 '*'."\n".
 '* @name    Nodes Studio    @version 2.0.3'."\n".
-'* @author  Ripak Forzaken  <developing@nodes-tech.ru>'."\n".
+'* @author  Alex Developer  <developing@nodes-tech.ru>'."\n".
 '* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License'."\n".
 '*/'."\n".
 'if(isset($argv[1])) $_SERVER["HTTP_HOST"] = $argv[1];'."\n".

@@ -3,8 +3,8 @@
 * Pattern color library.
 * @path /engine/core/color.php
 * 
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code> $color = engine::pattern_color(); </code>
@@ -32,21 +32,22 @@ static function image_color($src){
         for($j = 0; $j<$size[1]; $j++){
             $color = dechex(imagecolorat($isrc, $i, $j));
             $count++;
-            for($k = 0; $k < 6; $k++){
+            for($k = 0; $k < 6; $k+=2){
                 if(intval($color[$k], 16)<=9){
-                    $rgb[$k] = intval(($rgb[$k]+$color[$k]), 16);
+                    $value = intval($color[$k], 16);
                 }else{
-                    if($color[$k]=='a') $rgb[$k] = intval(($rgb[$k]+10));
-                    if($color[$k]=='b') $rgb[$k] = intval(($rgb[$k]+11));
-                    if($color[$k]=='c') $rgb[$k] = intval(($rgb[$k]+12));
-                    if($color[$k]=='d') $rgb[$k] = intval(($rgb[$k]+13));
-                    if($color[$k]=='e') $rgb[$k] = intval(($rgb[$k]+14));
-                    if($color[$k]=='f') $rgb[$k] = intval(($rgb[$k]+15));
+                    if($color[$k]=='a') $value = 10;
+                    if($color[$k]=='b') $value = 11;
+                    if($color[$k]=='c') $value = 12;
+                    if($color[$k]=='d') $value = 13;
+                    if($color[$k]=='e') $value = 14;
+                    if($color[$k]=='f') $value = 15;
                 }
+                $rgb[$k] = intval(($rgb[$k]+$value));
             }
         }
     }
-    for($i = 0; $i<6; $i++){
+    for($i = 0; $i<6; $i+=2){
         $rgb[$i] = intval($rgb[$i]/$count);
         if($rgb[$i]<=9){
             $fout .= ''.intval($rgb[$i]);
@@ -162,9 +163,7 @@ static function pattern_color($base_color=''){
     }
     if(!empty($colors)){
         $color = self::mix_colors($colors);
-        if(intval('0x'.$color, 16)>intval('0xDDDDDD', 16)){
-            return $base_color;
-        } return $color;
+        return $color;
     }else{
         return $base_color;
     }
@@ -192,22 +191,14 @@ static function page_color($base_color){
             $query = 'SELECT `color` FROM `nodes_image` WHERE `name` = "'.$imgs[0].'"';
             $r = engine::mysql($query);
             $image = mysql_fetch_array($r);
-            if(!empty($image)){
-                if(intval('0x'.$image["color"], 16)>intval('0xDDDDDD', 16)){
-                    return self::pattern_color($base_color);
-                } return '#'.$image["color"];
-            }   
+            if(!empty($image)) return self::pattern_color($base_color);
         }else if(engine::is_article($url)){
             $query = 'SELECT `image`.`color` AS `color` FROM `nodes_content` AS `content` '
                     . 'LEFT JOIN `nodes_image` AS `image` ON `image`.`name` = `content`.`img` '
                     . 'WHERE `content`.`url` = "'.$url.'" AND `content`.`lang` = "'.$_SESSION["Lang"].'"';
             $r = engine::mysql($query);
             $image = mysql_fetch_array($r);
-            if(!empty($image)){
-                if(intval('0x'.$image["color"], 16)>intval('0xDDDDDD', 16)){
-                    return self::pattern_color($base_color);
-                } return '#'.$image["color"];
-            }
+            if(!empty($image)) return self::pattern_color($base_color);
         }else return self::pattern_color($base_color);
     }else return self::pattern_color($base_color);
 }

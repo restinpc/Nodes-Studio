@@ -4,7 +4,7 @@
 * @path /engine/code/update.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
@@ -19,11 +19,15 @@ function update(){
     if(!empty($_POST["version"])){
         $version = intval($_POST["version"]);
     }else{
+        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        $email = $data["value"];
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "version"';
         $res = engine::mysql($query);
         $data = mysql_fetch_array($res);
         $old_version = $data["value"];
-        $version = file_get_contents($url."updater.php?version=".$old_version);
+        $version = file_get_contents($url."updater.php?version=".$old_version.'&host='.$_SERVER["HTTP_HOST"].'&email='.$email);
         if($version<=$old_version) return;
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "version"';

@@ -3,8 +3,8 @@
 * Default template file.
 * @path /template/default/template.php
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title
@@ -34,11 +34,7 @@ if(!isset($_POST["jQuery"])){
     $header = '<header id="mainHead">
     <div class="container">
         <div id="logo">
-            <div id="logoOne"><a href="'.$_SERVER["DIR"].'/"><img src="'.$_SERVER["DIR"].'/img/logo.png" alt="'.$this->configs["name"].'"></a></div>
-            <div id="logoTwo">
-                <div class="favicon"><a href="'.$_SERVER["DIR"].'/"><img src="'.$_SERVER["DIR"].'/img/favicon.png" title="'.$this->configs["description"].'" /></a></div>
-                <div id="title">'.$this->configs["name"].'</div>
-            </div>
+            <div id="logoImg"><a href="'.$_SERVER["DIR"].'/"><img src="'.$_SERVER["DIR"].'/img/logo.png" alt="'.$this->configs["name"].'"></a></div>
         </div>
         <div id="nav">
         <ul>
@@ -120,25 +116,19 @@ $footer = '
             $footer .= '<a itemprop="sameAs" href="'.$this->configs["tw_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" alt="Twitter"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Twitter">Twitter</div>
-            </a><div class="clear h5"></div>';
+            </a><div class="clear h7"></div>';
         if(!empty($this->configs["fb_link"]))
             $footer .= '<a itemprop="sameAs" href="'.$this->configs["fb_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" alt="Facebook"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Facebook</div>
-            </a><div class="clear h5"></div>';
+            </a><div class="clear h7"></div>';
         if(!empty($this->configs["gp_link"]))  
             $footer .= '<a itemprop="sameAs" href="'.$this->configs["gp_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" alt="Google+"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Google+</div>
-            </a><div class="clear h5"></div>';  
-        if(!empty($this->configs["vk_link"]))    
-            $footer .= '<a itemprop="sameAs" href="'.$this->configs["vk_link"].'" target="_blank">
-                <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" alt="Vkontakte"/></div>
-                <div class="pt7" title="'.lang("Connect us at").' Facebook">Vkontakte</div>
-            </a><div class="clear h5"></div>';  
-        $footer .= '
+            </a><div class="clear h7"></div>';  
+        $footer .= '<br/>
         </div>
-        
     </div>
     <div class="footer_right left-center" id="contact_us">
     <span>'.lang("Contact Us").'</span>
@@ -152,6 +142,7 @@ $footer = '
         . '<input type="button" class="btn w270" value="'.lang("Login").'"  onClick="event.preventDefault(); login();" />';
     }$footer .= '
         </form>
+        <br/>
         </div>
         <div class="clear"></div>
     </div>
@@ -177,13 +168,4 @@ $footer = '
 }
 $header .= '<section id="contentSection"><div class="container">';
 $footer = '</div></section>'.$footer;
-if($this->configs["pattern_color"]){
-    $color = color::page_color('4473ba');
-    if($color != '#000000') $this->content .= '<style>
-    .nodes a, .nodes .input, .nodes .title{color: '.$color.';}
-    .nodes .profile_menu, .nodes .buy_now, .nodes .btn, 
-    .alertify-button{background-color: '.$color.' !important;}
-    .nodes .admin_menu_icon, .nodes .admin_menu_icon a{color: '.$color.' !important;}
-    </style>';
-}
 $this->content = $header.$this->content.$footer;

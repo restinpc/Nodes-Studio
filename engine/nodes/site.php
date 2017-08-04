@@ -3,8 +3,8 @@
 * Framework site primary class.
 * @path /engine/nodes/site.php
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 class site{
@@ -175,7 +175,13 @@ function site($compact=0){
     $fout .= $this->content.'
 <link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />
 <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'"; var submit_patterns = '.$this->configs["catch_patterns"].';</script>
+<script type="text/javascript">
+    var root_dir = "'.$_SERVER["DIR"].'"; 
+    var submit_patterns = '.$this->configs["catch_patterns"].';';
+    if(!isset($_POST["jQuery"])) $fout .= '
+    var load_events = true; '; 
+    $fout .= '
+</script>
 <script src="'.$_SERVER["DIR"].'/script/jquery.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript"></script>
 <script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript"></script>';
@@ -205,12 +211,12 @@ function site($compact=0){
         $fout .= '
     <script type="text/javascript">
         function display(){ if(!window.jQuery) setTimeout(function(){ document.body.style.opacity = "1";}, 1000); else jQuery("html, body").animate({opacity: 1}, 1000); }'.
-        'var tm = setTimeout(display, 5000); window.onload = function(){ try{ preload(); }catch(e){}; clearTimeout(tm); display(); }; function preload(){ '.$this->onload.'; return 0; }
+        'var tm = setTimeout(display, 5000); window.onload = function(){ try{ preload(); }catch(e){}; clearTimeout(tm); display(); }; function preload(){ '.$this->onload.';  return 0; }
     </script>
 </body>
 </html>';
-    }else if(!empty($this->onload)){
-        $fout .= '<script type="text/javascript">'.$this->onload.'</script>';
+    }else{
+        $fout .= '<script type="text/javascript">load_events = false; '.$this->onload.'</script>';
     }
     if($this->configs["compress"] || $_POST["nocache"]){
         $search = array('#>[\s]+<#si', '#>[\s]+([^\s]+)#si', '#([^\s]+)[\s]+<#si');

@@ -3,8 +3,8 @@
 * AJAX requsts processor.
 * @path /engine/code/bin.php
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/session.php");
@@ -35,7 +35,25 @@ if(!empty($_POST["id"])){
         echo engine::print_cart($count);
     }
 }else if(!empty($_SESSION["user"]["id"])){
-    if(!empty($_GET["message"])){
+    if(!empty($_POST["check_message"])){
+        $query = 'SELECT * FROM `nodes_inbox` WHERE `to` = "'.intval($_SESSION["user"]["id"]).'" '
+                . 'AND `readed` = 0 AND `inform` = 0 ORDER BY `date` DESC LIMIT 0, 1';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        if(!empty($data)){
+            $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["from"].'"';
+            $res = engine::mysql($query);
+            $d = mysql_fetch_array($res);
+            $message = array();
+            $message["id"] = $d["id"];
+            $message["name"] = $d["name"];
+            $message["text"] = $data["text"];
+            $message["date"] = date("d-m-Y H:i", $data["date"]);
+            $query = 'UPDATE `nodes_inbox` SET `inform` = 1  WHERE `to` = "'.intval($_SESSION["user"]["id"]).'"';
+            engine::mysql($query);
+            die(json_encode($message));
+        }else die();
+    }else if(!empty($_GET["message"])){
         if(!empty($_POST["text"])){
             $text = trim(str_replace('"', "'", htmlspecialchars(strip_tags($_POST["text"]))));
             $text = engine::encrypt(str_replace("\n", "<br/>", $text), $_SERVER["HTTP_HOST"]);

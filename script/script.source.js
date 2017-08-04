@@ -3,8 +3,8 @@
 * Do not edit directly.
 * @path /script/script.source.js
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 var ua = navigator.userAgent.toLowerCase();         // Navigator
@@ -88,6 +88,24 @@ function addHandler(object, event, handler, useCapture) {
      } else if (object.attachEvent) {
          object.attachEvent('on' + event, handler);
      } else alert("Add handler is not supported");
+}
+//------------------------------------------------------------------------------
+/*
+* Check is element exist in array.
+* 
+* @param {mixed} needle
+* @param {array} haystack
+* @param {bool} strict
+* @usage <code> in_array('1', ['1','2','3'], false); </code>
+*/
+function in_array(needle, haystack, strict) {
+    var found = false, key, strict = !!strict;
+    for (key in haystack) {
+        if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
+            found = true;
+            break;
+        }
+    } return found;
 }
 //------------------------------------------------------------------------------
 /**
@@ -403,7 +421,7 @@ jQuery(function() {
 */
 function submitPatterns() {
     if(pattern[0]){
-        console.log("Pattern => Submit["+pattern_size+" patterns]");
+        //console.log("Pattern => Submit["+pattern_size+" patterns]");
         jQuery.ajax({
             url: root_dir+'/brain.php',
             data: { "patterns" : pattern },
@@ -812,7 +830,7 @@ function nodes_galery(src){
 }
 //------------------------------------------------------------------------------
 function capture_click(e){
-    console.log("Pattern => Click[x="+e.clientX+";y="+e.clientY+']');
+    //console.log("Pattern => Click[x="+e.clientX+";y="+e.clientY+']');
     pattern[pattern_size++] = Array("1", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight());
 }
 //------------------------------------------------------------------------------
@@ -820,7 +838,7 @@ function capture_mousemove(e){
     if(!pattern_catch){
         pattern_catch = 1;
         pattern[pattern_size++] = Array("2", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight());
-        console.log("Pattern => Pointer[x="+e.clientX+";y="+e.clientY+']');
+        //console.log("Pattern => Pointer[x="+e.clientX+";y="+e.clientY+']');
         setTimeout( function(){
             pattern_catch = 0;
         }, 1000);

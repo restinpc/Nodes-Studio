@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_templates.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -68,15 +68,6 @@ $footer = \'
     .$_SERVER["HTTP_HOST"].\'</a>, 2016.</nobr> <nobr>\'.lang("All rights reserved").\'</nobr>.</p>
 </footer>\';
 //  Footer End
-}
-if($this->configs["pattern_color"]){
-    $color = color::page_color(\'4473ba\');
-    if($color != \'#000000\') $this->content .= \'<style>
-    .nodes a, .nodes .input, .nodes .title{color: \'.$color.\';}
-    .nodes .profile_menu, .nodes .buy_now, .nodes .btn, 
-    .alertify-button{background-color: \'.$color.\' !important;}
-    .nodes .admin_menu_icon, .nodes .admin_menu_icon a{color: \'.$color.\' !important;}
-    </style>\';
 }
 $this->content = $header.$this->content.$footer;';
         

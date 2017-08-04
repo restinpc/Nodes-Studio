@@ -4,7 +4,7 @@
 * @path /engine/core/account/print_inbox.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Ripak Forzaken  <developing@nodes-tech.ru>
+* @author  Alex Developer  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
@@ -86,7 +86,7 @@ function print_inbox($site){
                             . '(`from` = "'.intval($u["id"]).'" AND `to` = "'.intval($_SESSION["user"]["id"]).'")';
                     $r = engine::mysql($query);
                     $d = mysql_fetch_array($r);
-                    if(!intval($d[0]) && $_SESSION["user"]["id"]!="1") continue;
+                    if(!intval($d[0]) && $_SESSION["user"]["id"]!="1" && intval($u["id"]) != 1) continue;
                 }
                 $count++;
                 $query = 'SELECT COUNT(*) FROM `nodes_inbox` WHERE `to` = "'.intval($_SESSION["user"]["id"]).'" AND `readed` = 0 AND `from` = "'.$u["id"].'"';
