@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_templates.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -199,7 +199,7 @@ a:hover{
 </table><br/>
 </div>';
      }
-     $fout .= '<input id="button" type="button" name="load" value="'.lang("New template").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block";\' />
+     $fout .= '<input id="button" type="button" name="load" value="'.lang("New template").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block"; jQuery("#form").removeClass("hidden");\' />
     <form method="POST" ENCTYPE="multipart/form-data" id="form" class="hidden">
         '.lang("New template").'<br/><br/>
         <input type="text" class="input w280 pointer" required placeHolder="'.lang("Template name").'" title="'.lang("Template name").'" name="new_template" /><br/><br/>

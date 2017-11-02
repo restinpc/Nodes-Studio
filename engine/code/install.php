@@ -4,7 +4,7 @@
 * @path /engine/code/install.php
 *
 * @name    Nodes Studio    @version 2.0.4
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 function output(){
@@ -113,6 +113,7 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('backup_files', '0', 'Backup files', 'bool'),
 ('free_message', '0', 'Messages between users', 'bool'),
 ('daily_report', '1', 'Daily report to email', 'bool'),
+('confirm_signup_email', '1', 'Email confirmation while sign up', 'bool'),
 ('send_comments_email', '1', 'Email admin on comment', 'bool'),
 ('send_registration_email', '1', 'Email user on sign up', 'bool'),
 ('send_message_email', '1', 'Email user on message', 'bool'),
@@ -1618,7 +1619,7 @@ $_SERVER["config"] = array('."\n".'
 '* Should be configured on autoexec every 1 minute.'."\n".
 '*'."\n".
 '* @name    Nodes Studio    @version 2.0.3'."\n".
-'* @author  Alex Developer  <developing@nodes-tech.ru>'."\n".
+'* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>'."\n".
 '* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License'."\n".
 '*/'."\n".
 'if(isset($argv[1])) $_SERVER["HTTP_HOST"] = $argv[1];'."\n".

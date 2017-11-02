@@ -4,7 +4,7 @@
 * @path /engine/nodes/admin.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 class admin{
@@ -27,7 +27,7 @@ function admin($site){
         if($data["email"]==$_SESSION["user"]["email"]){
             $this->statistic = array();
             $this->statistic["version"] = "2.0.".$site->configs["version"];
-            $query = 'SELECT COUNT(`id`) FROM `nodes_cache` WHERE 1';
+            $query = 'SELECT COUNT(`id`) FROM `nodes_cache` WHERE `title` <> ""';
             $res = engine::mysql($query);
             $d = mysql_fetch_array($res);
             $this->statistic["pages"] = $d[0];

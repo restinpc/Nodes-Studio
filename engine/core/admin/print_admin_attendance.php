@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_attendance.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -264,7 +264,7 @@ function print_admin_attendance($cms){
                     }$count += $v;
                     $f .= '<td width=50>'.$v.'</td></tr>';  
                 }                
-                $fout .= '<tr><td align=left class="pointer" onClick=\'document.getElementById("'.$data.'").style.display="block";\'>'.$data.'</td>'
+                $fout .= '<tr><td align=left class="pointer" onClick=\'document.getElementById("'.$data.'").style.display="block"; jQuery("#'.$data.'").removeClass("hidden");\'>'.$data.'</td>'
                         . '<td align=left>'.$count.'</td></tr>'
                         . '<tr><td colspan=2>'
                             . '<table id="'.$data.'" class="hidden">'.$f.'</table>'

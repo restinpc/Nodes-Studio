@@ -4,7 +4,7 @@
 * @path /engine/core/image.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code>
@@ -216,5 +216,22 @@ static function resize_image($src, $dest, $width, $height, $rgb=0x1d1d1d, $quali
     imagedestroy($isrc);
     imagedestroy($idest);
     return true;
+}
+//------------------------------------------------------------------------------
+/**
+* Saves base64 encoded image string to jpg file.
+* 
+* @param string $base64_string Base64 encoded image string.
+* @param string $output_file Destination image path.
+* @usage <code> 
+*  image::base64_to_jpg('data:image/png;base64,iVBORw0KGgo..', 'img/file.jpg'); 
+* </code>
+*/
+static function base64_to_jpg($base64_string, $output_file) {
+    $ifp = fopen( $output_file, 'wb' ); 
+    $data = explode( ',', $base64_string );
+    fwrite( $ifp, base64_decode( $data[ 1 ] ) );
+    fclose( $ifp ); 
+    return $output_file; 
 }
 }

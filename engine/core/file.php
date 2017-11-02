@@ -4,7 +4,7 @@
 * @path /engine/core/file.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code>
@@ -72,16 +72,34 @@ static function delete($dir) {
 * @usage <code> file::upload("new_image", "/img", true); </code>
 */
 static function upload($filename, $path, $md5=0){
-    if (is_uploaded_file($_FILES[$filename]['tmp_name'])){
-        if(!$md5){
-            $a = $_FILES[$filename]["name"];
-        }else{
-            $a = md5($_FILES[$filename]["name"]).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"])));;
-        }$f_name = $path."/".$a;
-        if (move_uploaded_file($_FILES[$filename]["tmp_name"], $f_name)){
-            return $a;
+    if(!is_array($_FILES[$filename])){
+        if (is_uploaded_file($_FILES[$filename]['tmp_name'])){
+            if(!$md5){
+                $a = $_FILES[$filename]["name"];
+            }else{
+                $a = md5($_FILES[$filename]["name"]).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"])));;
+            }$f_name = $path."/".$a;
+            if (move_uploaded_file($_FILES[$filename]["tmp_name"], $f_name)){
+                return $a;
+            } return 'error';
         } return 'error';
-    } return 'error';
+    }else{
+        $fout = '';
+        for($i = 0; $i < count($_FILES[$filename]['tmp_name']); $i++){
+            if (is_uploaded_file($_FILES[$filename]['tmp_name'][$i])){
+                if(!$md5){
+                    $a = $_FILES[$filename]["name"][$i];
+                }else{
+                    $a = md5($_FILES[$filename]["name"][$i]).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"][$i])));;
+                }
+                $f_name = $path."/".$a;
+                if (move_uploaded_file($_FILES[$filename]["tmp_name"][$i], $f_name)){
+                    $fout .= $a.';';
+                }else{
+                }
+            } 
+        }return $fout;
+    }
  }
 //------------------------------------------------------------------------------
 /**

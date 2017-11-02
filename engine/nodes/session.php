@@ -4,22 +4,24 @@
 * @path /engine/nodes/session.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
-ini_set('session.name', 'token');
+ini_set('session.name', 'session_id');
 ini_set('session.save_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/session');
 ini_set('session.gc_maxlifetime', 604800);
 ini_set('session.entropy_file', '/dev/urandom');
 ini_set('session.entropy_length', '512');
-if(empty($_SERVER["DIR"])) session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
-session_name('token');
+session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
+session_name('session_id');
 session_start();
 require_once("engine/nodes/mysql.php");
 if(!empty($_COOKIE["token"])){
     if($_GET["mode"]=="logout"){
         unset($_COOKIE['token']);
+        unset($_COOKIE['session_id']);
         setcookie('token', null, -1, '/');
+        setcookie('session_id', null, -1, '/');
     }else if(empty($_SESSION["user"])){
         $query = 'SELECT * FROM `nodes_user` WHERE `token` = "'.$_COOKIE["token"].'" '
                 . 'AND `ip` = "'.$_SERVER["REMOTE_ADDR"].'"';
@@ -34,11 +36,13 @@ if(!empty($_COOKIE["token"])){
         }
     }
 }else{
-    if(!empty($_SESSION["user"])){
-        $query = 'UPDATE `nodes_user` SET `token` = "'.session_id().'", '
-            . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
-        engine::mysql($query);
-    }
+    setcookie("token", session_id(), time() + 2592000, '/');
+    $_COOKIE["token"] = session_id();
+}
+if(!empty($_SESSION["user"])){
+    $query = 'UPDATE `nodes_user` SET `token` = "'.session_id().'", '
+        . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
+    engine::mysql($query);
 }
 if(!empty($_POST["template"])){
     $_SESSION["template"] = $_POST["template"];

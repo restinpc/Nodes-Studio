@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_pages.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -112,22 +112,22 @@ function print_admin_pages($cms){
             </td>
             <td align=left valign=middle>
                 <input type="text" class="input" name="title" id="title_'.$data["id"].'" placeHolder="'.$data["tit"].'" value="'.$data["title"].'"
-                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block";\'
+                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\'
                 />
             </td>
             <td align=left valign=middle>
                 <input type="text" class="input" name="description" id="description_'.$data["id"].'" placeHolder="'.$data["desc"].'" value="'.$data["description"].'"
-                   onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block";\' 
+                   onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\' 
                 />
             </td>
             <td align=left valign=middle>
                 <input type="text" class="input" name="keywords" id="keywords_'.$data["id"].'"  placeHolder="'.$data["key"].'" value="'.$data["keywords"].'" 
-                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block";\'
+                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\'
                 />
             </td>
             <td align=left valign=middle>
                 <select name="mode" class="input" id="mode_'.$data["id"].'"
-                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block";\' >
+                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\' >
                     <option value="0">'.lang("Add").'</option>
                     <option value="1" '.(($data["mode"]||is_null($data["mode"]))?'selected':'').'>'.lang("Replace").'</option>
                 </select>

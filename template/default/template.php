@@ -4,7 +4,7 @@
 * @path /template/default/template.php
 *
 * @name    Nodes Studio    @version 2.0.4
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title
@@ -127,8 +127,9 @@ $footer = '
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" alt="Google+"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Google+</div>
             </a><div class="clear h7"></div>';  
-        $footer .= '<br/>
+        $footer .= '
         </div>
+        
     </div>
     <div class="footer_right left-center" id="contact_us">
     <span>'.lang("Contact Us").'</span>
@@ -142,9 +143,8 @@ $footer = '
         . '<input type="button" class="btn w270" value="'.lang("Login").'"  onClick="event.preventDefault(); login();" />';
     }$footer .= '
         </form>
-        <br/>
         </div>
-        <div class="clear"></div>
+        <div class="clear"><br/></div>
     </div>
     <div id="copyright">
         <div class="line">

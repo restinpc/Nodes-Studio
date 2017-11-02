@@ -4,7 +4,7 @@
 * @path /engine/nodes/site.php
 *
 * @name    Nodes Studio    @version 2.0.4
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 class site{
@@ -126,13 +126,13 @@ function site($compact=0){
         $this->description = trim(strip_tags($this->description));
         if(!empty($data)){ 
             if(!$data["mode"]) $this->description .= $data["description"];
-            else $this->description = $data["description"];
+            else if(!empty($data["description"])) $this->description = $data["description"];
         }
         if(strlen($this->description) > 200) $this->description = mb_substr($this->description, 0, 200).'..';
         $this->title = trim(strip_tags($this->title));
         if(!empty($data)){ 
             if(!$data["mode"]) $this->title .= $data["title"];
-            else $this->title = $data["title"];
+            else if(!empty($data["title"])) $this->title = $data["title"];
         }
         if(strlen($this->title) > 100) $this->title = mb_substr($this->title, 0, 100).'..';
         foreach($this->keywords as $keyword) $keywords .= $keyword.', ';   
@@ -141,7 +141,7 @@ function site($compact=0){
         $keywords = trim(strip_tags($keywords));
         if(!empty($data)){ 
             if(!$data["mode"]) $keywords .= $data["keywords"];
-            else $keywords = $data["keywords"];
+            else if(!empty($data["keywords"])) $keywords = $data["keywords"];
         }
         if(strlen($keywords) > 300)
             $keywords = mb_substr($keywords, 0, 300).'..';

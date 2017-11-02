@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_content.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -88,13 +88,13 @@ function print_admin_content($cms){
                 }
             }else{
                 // checking url before adding content
-                $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$url.'"';
+                $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
                 $r = engine::mysql($query);
                 $d = mysql_fetch_array($r);
                 $i = 0;
                 while(!empty($d)){
                     $newurl = $url."-".(++$i);
-                    $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$newurl.'"';
+                    $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$newurl.'" AND `lang` = "'.$_SESSION["Lang"].'"';
                     $r = engine::mysql($query);
                     $d = mysql_fetch_array($r);
                     if(empty($d)){
@@ -110,13 +110,13 @@ function print_admin_content($cms){
             }
         }else{
             // checking url before adding catalog
-            $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$url.'"';
+            $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
             $r = engine::mysql($query);
             $d = mysql_fetch_array($r);
             $i = 0;
             while(!empty($d)){
                 $newurl = $url."-".(++$i);
-                $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$newurl.'"';
+                $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$newurl.'" AND `lang` = "'.$_SESSION["Lang"].'"';
                 $r = engine::mysql($query);
                 $d = mysql_fetch_array($r);
                 if(empty($d)){
@@ -124,9 +124,11 @@ function print_admin_content($cms){
                 }
             }$visible = $_POST["visible"];
             if(!empty($img)){
-                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, img, visible, date, public_date) VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$img.'", "'.$visible.'", "'.date("U").'", "'.date("U").'")';
+                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, img, visible, date, public_date) '
+                        . 'VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$img.'", "'.$visible.'", "'.date("U").'", "'.date("U").'")';
             }else{
-                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, visible, date, public_date) VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$visible.'", "'.date("U").'", "'.date("U").'")';
+                $query = 'INSERT INTO `nodes_catalog`(caption, text, url, lang, visible, date, public_date) '
+                        . 'VALUES("'.$caption.'", "'.$text.'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$visible.'", "'.date("U").'", "'.date("U").'")';
             }engine::mysql($query);
         }
     }
@@ -241,18 +243,6 @@ function print_admin_content($cms){
                $query = 'DELETE FROM `nodes_comment` WHERE `id` = "'.$_POST["delete_comment"].'"';
                engine::mysql($query);
             }
-            /*
-            $query = 'SELECT * FROM `nodes_comment` WHERE `url` = "/'.$data["url"].'"';
-            $res = engine::mysql($query);
-            while($d = mysql_fetch_array($res)){
-                if(intval($d["id"])>0){
-                    $fout .= '<center><table width=100% align=center border=0 class="table comments">';
-                    $fout .= engine::print_comment($d["id"]);
-                    $fout .= '</table></center><br/><br/>';
-                }
-            }
-             * 
-             */
             $fout .= '<input type="submit" class="btn w280" value="'.lang("Save changes").'" /><br/><br/>
             <a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$_GET["cat_id"].'&act=list"><input type="submit" class="btn w280" value="'.lang("Back to list").'" /></a><br/>
             </form>';
@@ -260,6 +250,8 @@ function print_admin_content($cms){
     }else if(!empty($_GET["cat_id"])){
         if($_GET["act"] == "remove"){
             $query = 'DELETE FROM `nodes_catalog` WHERE `id` = "'.$_GET["cat_id"].'"';
+            engine::mysql($query);
+            $query = 'DELETE FROM `nodes_content` WHERE `cat_id` = "'.$_GET["cat_id"].'"';
             engine::mysql($query);
             $fout = '<script type="text/javascript">window.location = "'.$_SERVER["DIR"].'/admin/?mode=content";</script>';
             return $fout; 
@@ -328,20 +320,6 @@ function print_admin_content($cms){
                     engine::mysql($query);                  
                 }
             }
-            /*
-            $flag = 0;
-            $query = 'SELECT * FROM `nodes_comment` WHERE `url` = "'.$url.'"';
-            $res = engine::mysql($query);
-            while($data = mysql_fetch_array($res)){
-                if(intval($data["id"])>0){
-                    $fout .= '<center><table width=100% align=center border=0 class="table comments">';
-                    $fout .= engine::print_comment($data["id"]);
-                    $fout .= '</table></center>';
-                    $flag = 1;
-                }
-            }
-             * 
-             */
         }else if($_GET["act"] == "list"){
             $query = 'SELECT * FROM `nodes_catalog` WHERE `id` = "'.$_GET["cat_id"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
             $res = engine::mysql($query);
@@ -584,7 +562,7 @@ function print_admin_content($cms){
             $fout .= '<div class="clear_block">'.lang("Content not found").'</div>';
         }
         $fout .= '<br/>
-        <input type="button" onClick=\'document.getElementById("new_directory").style.display="block"; this.style.display="none";\' value="'.lang("Add a new directory").'" class="btn w280" />
+        <input type="button" onClick=\'document.getElementById("new_directory").style.display="block"; jQuery("#new_directory").removeClass("hidden"); this.style.display="none";\' value="'.lang("Add a new directory").'" class="btn w280" />
         <div id="new_directory" class="hidden document" >
         <form method="POST"  ENCTYPE="multipart/form-data">
         <center>

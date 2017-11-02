@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_products.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -141,7 +141,7 @@ function print_admin_products($cms){
                 $res = engine::mysql($query);
                 while($data=  mysql_fetch_array($res)){
                     $flag = 0;
-                    $select = '<select class="input w280" style="margin-bottom: 15px;" name="property_'.$data["id"].'" onChange=\'if(this.value=="-1"){document.getElementById("new_value_'.$data["id"].'").style.display="block"; this.style.display="none";}\'>'
+                    $select = '<select class="input w280" style="margin-bottom: 15px;" name="property_'.$data["id"].'" onChange=\'if(this.value=="-1"){document.getElementById("new_value_'.$data["id"].'").style.display="block"; jQuery("#new_value_'.$data["id"].'").removeClass("hidden"); this.style.display="none";}\'>'
                     . '<option disabled selected>'.$data["value"].'</option>';
                     $query = 'SELECT * FROM `nodes_product_data` WHERE `cat_id` = "'.$data["id"].'"';
                     $r = engine::mysql($query);
@@ -163,6 +163,7 @@ function print_admin_products($cms){
                     </div>
                     <input type="button" value="'.lang("Add new property").'" class="btn small w280" 
                         onClick=\'document.getElementById("nodes_new_properties").style.display="block";
+                        jQuery("#nodes_new_properties").removeClass("hidden");
                         this.style.display="none";\' 
                     /><br/><br/>';
                 $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
@@ -325,7 +326,7 @@ function print_admin_products($cms){
                     $res = engine::mysql($query);
                     while($fdata=  mysql_fetch_array($res)){
                         $flag = 0;
-                        $fout .= '<select class="input w280" name="property_'.$fdata["id"].'" title="'.$fdata["value"].'" onChange=\'if(this.value=="-1"){document.getElementById("new_value_'.$fdata["id"].'").style.display="block"; this.style.display="none";}\' >'
+                        $fout .= '<select class="input w280" name="property_'.$fdata["id"].'" title="'.$fdata["value"].'" onChange=\'if(this.value=="-1"){document.getElementById("new_value_'.$fdata["id"].'").style.display="block"; jQuery("#new_value_'.$fdata["id"].'").removeClass("hidden"); this.style.display="none";}\' >'
                                 . '<option value="0">'.$fdata["value"].'</option>';
                         $query = 'SELECT * FROM `nodes_product_data` WHERE `cat_id` = "'.$fdata["id"].'"';
                         $r = engine::mysql($query);
@@ -351,6 +352,7 @@ function print_admin_products($cms){
                         </div>
                         <input type="button" value="'.lang("Add new property").'" class="btn small w280" 
                             onClick=\'document.getElementById("nodes_new_properties").style.display="block";
+                            jQuery("#nodes_new_properties").removeClass("hidden");
                             this.style.display="none";\' 
                         /><br/><br/>
                     </section>
@@ -459,8 +461,10 @@ function print_admin_products($cms){
                         . '<select id="select_'.$data["id"].'" class="input" name="action" onChange=\'
                             if(this.value=="1"){
                                 document.getElementById("li_'.$data["id"].'").style.display = "block"; 
+                                    jQuery("#li_'.$data["id"].'").removeClass("hidden");
                             }else if(this.value=="2"){
                                 document.getElementById("input_'.$data["id"].'").style.display = "block";
+                                    jQuery("#input_'.$data["id"].'").removeClass("hidden");
                                 document.getElementById("value_'.$data["id"].'").style.display = "none";
                                 document.getElementById("select_'.$data["id"].'").style.display = "none";    
                             }else if(this.value=="3"){
@@ -505,6 +509,7 @@ function print_admin_products($cms){
                             <span id="category_public_'.$d["id"].'">'.$d["value"].' '.
                             '<input type="button" class="btn small" value="'.lang("Edit").'" onClick=\'
                                 document.getElementById("category_edit_'.$d["id"].'").style.display = "block";
+                                    jQuery("#category_edit_'.$d["id"].'").removeClass("hidden");
                                 document.getElementById("category_public_'.$d["id"].'").style.display = "none";
                                 \' /> ';
 
@@ -556,7 +561,7 @@ function print_admin_products($cms){
             }
             $fout .= '<br/></div>
                 <input type="button" class="btn w280 mb10" value="'.lang("Add new property").'" 
-                    onClick=\'document.getElementById("new_prop").style.display = "block"; this.style.display = "none";\' 
+                    onClick=\'document.getElementById("new_prop").style.display = "block"; jQuery("#new_prop").removeClass("hidden"); this.style.display = "none";\' 
                 />';
             $fout .= '
                 <form method="POST" class="hidden" id="new_prop">

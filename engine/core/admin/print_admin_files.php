@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_files.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -71,7 +71,7 @@ function print_admin_files($cms){
 </table></div>
 </div>';
      }
-     $fout .= '<input id="button" type="button" name="load" value="'.lang("Upload files").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block";\' /><br/>
+     $fout .= '<input id="button" type="button" name="load" value="'.lang("Upload files").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block"; jQuery("#form").removeClass("hidden");\' /><br/>
     <form method="POST" ENCTYPE="multipart/form-data" id="form" class="hidden">
         <input id="file" type="file" onChange=\'document.getElementById("form").submit();\' required placeHolder="'.lang("File").'" title="'.lang("File").'" name="photo_1" class="input pointer w280" /><br/><br/>
     </form>

@@ -4,13 +4,15 @@
 * @path /engine/code/paypal.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
-if(!empty($_GET["deposit"]) || !empty($_POST["payment_gross"])){
-    $amount = $_POST["payment_gross"];
+require_once("engine/nodes/session.php");
+require_once("engine/nodes/mysql.php");
+if(!empty($_GET["deposit"]) || !empty($_POST["mc_gross"])){
+    $amount = $_POST["mc_gross"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$_GET["deposit"].'"';
     $res = engine::mysql($query);
     $user = mysql_fetch_array($res);
@@ -30,6 +32,11 @@ if(!empty($_GET["deposit"]) || !empty($_POST["payment_gross"])){
         $postdata = ""; 
         foreach ($_POST as $key=>$value) $postdata .= $key."=".urlencode($value)."&"; 
         $postdata .= "cmd=_notify-validate";  
+        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_test"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        if($data["value"]) $domain = 'ipnpb.sandbox.paypal.com';
+        else $domain = 'ipnpb.paypal.com';
         $curl = curl_init("https://".$domain."/cgi-bin/webscr"); 
         curl_setopt ($curl, CURLOPT_HEADER, 0);  
         curl_setopt ($curl, CURLOPT_POST, 1); 
@@ -77,7 +84,7 @@ if(!empty($_GET["order_id"])){
         $res = engine::mysql($query);
         $d = mysql_fetch_array($res);
         if(!$d["value"]){ 
-            $domain = 'www.paypal.com';
+            $domain = 'ipnpb.paypal.com';
             $postdata = ""; 
             foreach ($_POST as $key=>$value) $postdata .= $key."=".urlencode($value)."&"; 
             $postdata .= "cmd=_notify-validate";  
@@ -85,7 +92,7 @@ if(!empty($_GET["order_id"])){
                 $query = 'SELECT * FROM `nodes_transaction` WHERE `id` = "'.intval($data["id"]).'"';
                 $res = engine::mysql($query);
                 $d = mysql_fetch_array($res);
-                $query = 'UPDATE `nodes_transaction` SET `amount` = "'.($d["amount"]+$_POST["payment_gross"]).'", '
+                $query = 'UPDATE `nodes_transaction` SET `amount` = "'.($d["amount"]+$_POST["mc_gross"]).'", '
                         . '`txn_id` = "'.$_POST["txn_id"].'", '
                         . '`payment_date` = "'.$_POST["payment_date"].'", '
                         . '`status` = "2", '
@@ -97,7 +104,7 @@ if(!empty($_GET["order_id"])){
                 email::new_purchase($_GET["order_id"]);
             } 
         }else{
-            $query = 'UPDATE `nodes_transaction` SET `amount` = "'.($data["amount"]+$_POST["payment_gross"]).'", '
+            $query = 'UPDATE `nodes_transaction` SET `amount` = "'.($data["amount"]+$_POST["mc_gross"]).'", '
                     . '`txn_id` = "'.$_POST["txn_id"].'", '
                     . '`payment_date` = "'.$_POST["payment_date"].'", '
                     . '`status` = "2", '

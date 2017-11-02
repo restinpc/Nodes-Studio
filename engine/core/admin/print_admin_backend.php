@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_backend.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -221,7 +221,7 @@ $table .= '
          $fout .= '
     </form>
     <div class="clear"></div>
-    <input type="button" class="btn w280" value="'.lang("New file").'" onClick=\' this.style.display = "none"; document.getElementById("new_file").style.display = "block";\' />
+    <input type="button" class="btn w280" value="'.lang("New file").'" onClick=\' this.style.display = "none"; document.getElementById("new_file").style.display = "block"; jQuery("#new_file").removeClass("hidden");\' />
     <div id="new_file" class="hidden">
         <form method="POST">
         '.lang("Path").': <input required placeHolder="'.lang("Path").'" type="text" class="input" name="mode" /><br/><br/>

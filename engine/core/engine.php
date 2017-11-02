@@ -4,7 +4,7 @@
 * @path /engine/core/engine.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code> engine::timezone_list(); </code>
@@ -296,6 +296,11 @@ static function curl_post_query($url, $query, $format=0){
         $html = str_replace("\n", "", $html);
         $html = str_replace("\t", "", $html);
     }return $html;
+}
+//------------------------------------------------------------------------------
+static function redirect($url){
+    header( 'Location: '.$url );
+    die('<script>window.location = "'.$url.'";</script>');
 }
 //------------------------------------------------------------------------------
 static function encrypt($encrypt, $key){

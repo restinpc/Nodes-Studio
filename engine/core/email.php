@@ -4,7 +4,7 @@
 * @path /engine/core/email.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code> email::daily_report(); </code>
@@ -125,6 +125,24 @@ static function registration($email, $name){
             .lang('We are glad to confirm successful registration at').' '
             . '<a href="'.$_SERVER["PUBLIC_URL"].'/">'.$_SERVER["HTTP_HOST"].'</a>';
     engine::send_mail($email, "no-reply@".$_SERVER["HTTP_HOST"], $caption, email::email_template($body));
+}
+//----------------------------------------------------
+/**
+* Sends a message with confirmation code.
+* 
+* @param string $email User email.
+* @param string $name User name.
+* @param string $code Confirmation code
+*/
+static function confirmation($email, $name, $code){
+    $caption = lang('Registration at').' '.$_SERVER["HTTP_HOST"];
+    $body = lang('Dear').' '.$name.',<br/><br/>'
+    .lang('We are glad to confirm successful registration at').' '
+    . '<a href="'.$_SERVER["PUBLIC_URL"].'/">'.$_SERVER["HTTP_HOST"].'</a>
+    '.lang("To confirm your email, please enter or click on the following code").':<br/>
+    <br/>
+    <a href="'.$_SERVER["PUBLIC_URL"].'/account/'.$code.'" target="_blank" style="font-size: 24px;"><b>'.$code.'</b></a><br/>';
+    engine::send_mail($email, "donotreply@".$_SERVER["HTTP_HOST"], $caption, email::email_template($body));
 }
 //----------------------------------------------------
 /**

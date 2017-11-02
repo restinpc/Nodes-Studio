@@ -3,8 +3,8 @@
 * Do not edit directly.
 * @path /template/nodes.source.css
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Alex Developer  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.4
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 @charset "UTF-8";
@@ -695,7 +695,6 @@ h1,h2,h3,h4,h5,h6{
     padding-right: 60px;
     border-radius: 2px;
     margin: 0px auto;
-    text-transform: uppercase;
     transition: all .2s ease-in;
     -webkit-transition: all .2s ease-in;
     font-size: 14px;
