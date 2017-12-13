@@ -3,8 +3,8 @@
 * Print admin attendance page.
 * @path /engine/core/admin/print_admin_attendance.php
 * 
-* @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.6
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -22,15 +22,16 @@ function print_admin_attendance($cms){
     if($_GET["action"]=="stat" || empty($_GET["action"])){
         $stat = '<b>'.lang("Statistic").'</b>';
         $pages = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
-        $referrers = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=ref&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Referrers").'</a>';
+        $users = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=users&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Users").'</a>';
     }else if($_GET["action"]=="pages"){
         $stat = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
         $pages = '<b>'.lang("Pages").'</b>';
-        $referrers = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=ref&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Referrers").'</a>';
-    }else if($_GET["action"]=="ref"){
+        $users = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=users&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Users").'</a>';
+    }else if($_GET["action"]=="users"){
         $stat = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
         $pages = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
-        $referrers = '<b>'.lang("Referrers").'</b>';
+        $referrers = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=ref&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Referrers").'</a>';
+        $users = '<b>'.lang("Users").'</b>';
     }
     $from = '';
     $to = '';
@@ -153,7 +154,7 @@ function print_admin_attendance($cms){
             <tr>
                 <td align=center>'.$stat.'</td> 
                 <td align=center>'.$pages.'</td>
-                <td align=center>'.$referrers.'</td>  
+                <td align=center>'.$users.'</td>  
             </tr>
             </table>
         </div>
@@ -220,57 +221,73 @@ function print_admin_attendance($cms){
                 $min_val = $count;
             }
         }$fout .= $table.'</table></div>';
-    }else if($_GET["action"]=="ref"){
-        $query = 'SELECT *, `ref`.`name` as `ref` FROM `nodes_attendance` LEFT JOIN `nodes_referrer` AS `ref` ON `ref`.`id` = `ref_id` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
+    }else if($_GET["action"]=="users"){
+        $tokens = array();
+        $query = 'SELECT * FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1" ORDER BY `date` ASC';
         $res = engine::mysql($query);
-        $ref = array();
-        while($data = mysql_fetch_array($res)){
-            if(intval($data['ref_id'])>0){
-                $url = parse_url($data["ref"]);
-                if($url["host"]==$_SERVER["HTTP_HOST"])
-                    continue;
-                if(!is_array($ref[$url["host"]])) 
-                    $ref[$url["host"]] = array();
-                $ref[$url["host"]][$data["ref"]]++;
-            }else $ref[0]++;
-        }
         $fout .= '<div class="table">
-        <table width=100% id="table">
+        <table width=100% id="table" style="max-width: 640px;">
         <thead>
         <tr>
-            <th>URL</th>
-            <th width=50>'.lang("Amount").'</th>
+            <th>'.lang("Date").'</th>
+            <th>'.lang("Referrer").'</th>
+            <th>'.lang("User").'</th>
+            <th>'.lang("Pages").'</th>
+            <th>'.lang("Actions").'</th>
+            <th width=80>&nbsp;</th>
         </tr>';
-        array_multisort($ref);
-        foreach($ref as $data=>$value){
-            if(!is_array($value)){
-                if(!empty($data)){
-                    $fout .= '<tr><td align=left>'.$data.'" target="_blank">'.$data.'</a></td>';
+        while($data = mysql_fetch_array($res)){
+            if(!in_array($data["token"], $tokens)){
+                $query = 'SELECT COUNT(*) FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["id"].'" ORDER BY `id` ASC';
+                $r = engine::mysql($query);
+                $d = mysql_fetch_array($r);
+                $query = 'SELECT COUNT(*) FROM `nodes_attendance` WHERE `token` = "'.$data["token"].'"';
+                $rr = engine::mysql($query);
+                $dd = mysql_fetch_array($rr);
+                array_push($tokens, $data["token"]);
+                $query = 'SELECT * FROM `nodes_attendance` WHERE `token` = "'.$data["token"].'" AND `user_id` <> 0';
+                $kr = engine::mysql($query);
+                $kd = mysql_fetch_array($kr);
+                if(empty($kd)){ 
+                    $user_name = "Anonim";
                 }else{
-                    $fout .= '<tr><td align=left>'.lang("Blank").'</td>';
+                    $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$kd["user_id"].'"';
+                    $dr = engine::mysql($query);
+                    $user = mysql_fetch_array($dr);
+                    $user_name = $user["name"];
                 }
-                $fout .= '<td>'.$value.'</td></tr>'; 
-            }else{
-                $f = '';
-                $count = 0;
-                foreach($value as $d=>$v){
-                    if(!empty($d)){
-                        $url = parse_url($d);
-                        $f .= '<tr><td align=left class="pl10">'
-                                . '<a href="'.$d.'" target="_blank">'.$url["path"].'</a>'
-                            . '</td>';
-                    }else{
-                        $f .= '<tr><td align=left class="pl10">'.lang("Blank").'</td>';
-                    }$count += $v;
-                    $f .= '<td width=50>'.$v.'</td></tr>';  
-                }                
-                $fout .= '<tr><td align=left class="pointer" onClick=\'document.getElementById("'.$data.'").style.display="block"; jQuery("#'.$data.'").removeClass("hidden");\'>'.$data.'</td>'
-                        . '<td align=left>'.$count.'</td></tr>'
-                        . '<tr><td colspan=2>'
-                            . '<table id="'.$data.'" class="hidden">'.$f.'</table>'
-                        . '</td></tr>';
+                $query = 'SELECT `width`, `height` FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["id"].'" ORDER BY `id` ASC';
+                $wr = engine::mysql($query);
+                $window = mysql_fetch_array($wr);
+                $query = 'SELECT `ref_id` FROM `nodes_attendance` WHERE `token` = "'.$data["token"].'" AND `ref_id` != 0';
+                $ref = engine::mysql($query);
+                $dref = mysql_fetch_array($ref);
+                if($dref){
+                    $query = 'SELECT * FROM `nodes_referrer` WHERE `id` = "'.$dref["ref_id"].'"';
+                    $ddref = engine::mysql($query);
+                    $ref_data = mysql_fetch_array($ddref);
+                    $url = parse_url($ref_data["name"]);
+                    $link = '<a href="'.$ref_data["name"].'" target="_blank">'.$url["host"].'</a>';
+                }else{
+                    $link = "Blank";
+                }
+                if($d[0]>0){
+                    $button = '<a onClick=\'window.open("/pattern.php?token='.$data["token"].'", "'.lang("View session").'", "width='.($window["width"]).',height='.($window["height"]+25).'");\' class="btn small">'.lang("View session").'</a>';
+                }else{
+                    $button = '&nbsp;';
+                }
+                $fout .= '<tr style="text-align:left;">
+                    <td>'.date("Y-m-d H:i:s", $data["date"]).'</td>
+                    <td>'.$link.'</td>
+                    <td>'.$user_name.'</td>
+                    <td>'.$dd[0].'</td>
+                    <td>'.$d[0].'</td>
+                    <td>'.$button.'</td>
+                </tr>';
             }
-        }$fout .= '</table></div>';
-    }$fout .= '</div><br/>';
+        }
+        $fout .= '</table></div>';
+    }
+    $fout .= '</div><br/>';
     return $fout;
 }

@@ -3,8 +3,8 @@
 * Framework session loader.
 * @path /engine/nodes/session.php
 * 
-* @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.6
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 ini_set('session.name', 'session_id');
@@ -12,14 +12,14 @@ ini_set('session.save_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/session
 ini_set('session.gc_maxlifetime', 604800);
 ini_set('session.entropy_file', '/dev/urandom');
 ini_set('session.entropy_length', '512');
-session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
-session_name('session_id');
+if(empty($_SERVER["DIR"])) session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
+session_name('token');
 session_start();
 require_once("engine/nodes/mysql.php");
 if(!empty($_COOKIE["token"])){
     if($_GET["mode"]=="logout"){
-        unset($_COOKIE['token']);
         unset($_COOKIE['session_id']);
+        unset($_COOKIE['token']);
         setcookie('token', null, -1, '/');
         setcookie('session_id', null, -1, '/');
     }else if(empty($_SESSION["user"])){
@@ -38,11 +38,11 @@ if(!empty($_COOKIE["token"])){
 }else{
     setcookie("token", session_id(), time() + 2592000, '/');
     $_COOKIE["token"] = session_id();
-}
-if(!empty($_SESSION["user"])){
-    $query = 'UPDATE `nodes_user` SET `token` = "'.session_id().'", '
-        . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
-    engine::mysql($query);
+    if(!empty($_SESSION["user"])){
+        $query = 'UPDATE `nodes_user` SET `token` = "'.session_id().'", '
+            . '`ip` = "'.$_SERVER["REMOTE_ADDR"].'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
+        engine::mysql($query);
+    }
 }
 if(!empty($_POST["template"])){
     $_SESSION["template"] = $_POST["template"];
@@ -51,6 +51,43 @@ if(!empty($_POST["template"])){
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
     $_SESSION["template"] = $template = $data["value"];
+}
+if(empty($_SESSION["Lang"])){ 
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "language"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    $_SESSION["Lang"] = $data["value"];
+}
+if(!empty($_GET["lang"])){
+    $_SESSION["Lang"] = strtolower ($_GET["lang"]);
+    $url = str_replace("&lang=".$_SESSION["Lang"], '',
+        str_replace("?lang=".$_SESSION["Lang"], '', $_SERVER["REQUEST_URI"]));
+    header('Location: '.$url);
+    die('<script>window.location = "'.$url.'"</script>');
+}else if(!empty($_POST["lang"])){
+    $_SESSION["Lang"] =  strtolower ($_POST["lang"]);
+}
+function lang($key){
+    $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$key.'" AND `lang` = "'.$_SESSION["Lang"].'"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    if(!empty($data["value"])){
+        return $data["value"];
+    }else{
+        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "language"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$key.'" AND `lang` = "en" AND `value` <> ""';
+        $res = engine::mysql($query);
+        $d = mysql_fetch_array($res);
+        if(!empty($d)){
+            return $d["value"];
+        }else{
+            $query = 'INSERT INTO `nodes_language`(name, lang, value) VALUES("'.$key.'", "en", "'.$key.'")';
+            engine::mysql($query);
+            return $key;
+        }
+    }
 }
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "token_limit"';
 $res = engine::mysql($query);

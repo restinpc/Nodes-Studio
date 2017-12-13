@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_users.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -75,7 +75,7 @@ function print_admin_users($cms){
             . '<form method="POST" id="delete_form"><input type="hidden" name="delete" id="delete_value" value="0" /></form>'
             . '<form method="POST" id="die_form"><input type="hidden" name="die"  id="die_value" value="0" /></form>'
             . '<form method="POST" id="confirm_form"><input type="hidden" name="confirm"  id="confirm_value" value="0" /></form>'
-            . '<select class="input" onChange=\'if(this.value=="1"){
+            . '<select class="input" onChange=\'if(confirm("'.lang("Are you sure?").'")){if(this.value=="1"){
 document.getElementById("unban_value").value="'.$data["id"].'";
 document.getElementById("unban_form").submit();
                 }else if(this.value=="2"){
@@ -91,7 +91,7 @@ document.getElementById("delete_value").value="'.$data["id"].'";
 document.getElementById("delete_form").submit();
                 }else if(this.value=="5"){
 new_transaction('.$data["id"].', "'.lang("Transfer amount").'");
-                } \'>';
+                } }else{this.selectedIndex=0;}\'>';
         if(intval($data["ban"])){ 
             $ban .= '<option value="0" selected disabled>'.lang("Banned").'</option>'
                     . '<option value="1">'.lang("Unban").'</option>'

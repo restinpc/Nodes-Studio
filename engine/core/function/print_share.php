@@ -4,7 +4,7 @@
 * @path /engine/core/function/print_share.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $site->title - Page title.
@@ -20,7 +20,7 @@
 * @return string Returns content of block on success, or die with error.
 * @usage <code> engine::print_share($site, "/", "Hello world"); </code>
 */
-require_once("engine/nodes/language.php");
+require_once("engine/nodes/session.php");
 function share_twitter($url, $caption){
  return '
 <a title="'.lang("Share friends in").' Twitter" onClick="window.open(\'http://twitter.com/share?text='.$caption.'&url='.urlencode($url).'\', \'Twitter\', \'toolbar=0,status=0,width=320,height=250\');" target="_parent" href="javascript: void(0);"><img src="'.$_SERVER["DIR"].'/img/social/tweeter.jpg" /></a>&nbsp;';

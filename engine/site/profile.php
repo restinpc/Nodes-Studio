@@ -4,7 +4,7 @@
 * @path /engine/site/profile.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title.
@@ -25,7 +25,7 @@ if(empty($_GET[1])||!empty($_GET[2])){
 $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.intval($_GET[1]).'"';
 $res = engine::mysql($query);
 $user = mysql_fetch_array($res);
-if(empty($user)){
+if(empty($user) || empty($user["pass"])){
     $this->content = engine::error();
     return;    
 }else{

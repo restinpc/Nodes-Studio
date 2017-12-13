@@ -4,7 +4,7 @@
 * @path /engine/site/account.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title.
@@ -29,7 +29,7 @@ if(!empty($_SESSION["user"]["id"])){
         return;
     }else if(!empty($_GET[1])){
         if($_GET[1] == "settings"){
-            if(!empty($_GET[2])){ $this->content = engine::error(); return; }
+            if(!empty($_GET[3])){ $this->content = engine::error(); return; }
             $title = lang("Settings");
             $this->title = $title.' - '.$this->title;
             $this->content .= engine::print_navigation($this, $title);

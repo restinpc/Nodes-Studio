@@ -4,12 +4,13 @@
 * @path /engine/nodes/autoload.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 error_reporting(0); 
 date_default_timezone_set('UTC');
 $GLOBALS["time"] = doubleval(microtime(1)); 
+$_SERVER["CONSOLE"] = array();
 $_SERVER["DIR"] = str_replace("/cron.php", "", str_replace("/index.php", "", 
     str_replace($_SERVER["DOCUMENT_ROOT"], "", $_SERVER["SCRIPT_FILENAME"])));
 $_SERVER["PUBLIC_URL"] = "http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"];

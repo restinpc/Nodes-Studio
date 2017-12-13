@@ -4,13 +4,11 @@
 * @path /engine/code/order.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once("engine/nodes/mysql.php");
-require_once("engine/nodes/language.php");
 echo '<!DOCTYPE html><html><body class="nodes">';
 if(empty($_SESSION["user"]["id"])){  
     $_SESSION["redirect"] = $_SERVER["DIR"]."/order.php";

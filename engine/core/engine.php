@@ -4,7 +4,7 @@
 * @path /engine/core/engine.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @example <code> engine::timezone_list(); </code>
@@ -24,6 +24,7 @@ class engine{
 * </code> 
 */
 public static function __callStatic($name, $arguments) {
+    array_push($_SERVER["CONSOLE"], "engine::".$name);
     $exec = function_exists($name);
     if(!$exec && !empty($_SERVER["CORE_PATH"])){
         if(is_file('engine/core/'.$_SERVER["CORE_PATH"].'/'.$name.'.php')){
@@ -91,6 +92,7 @@ public static function __callStatic($name, $arguments) {
 * @usage <code> engine::error(401); </code>
 */
 static function error($error_code='0'){
+    array_push($_SERVER["CONSOLE"], "engine::error(".$error_code.")");
     if($error_code != 0) $_GET[$error_code] = 1;
     if(!isset($_GET["204"]) && !isset($_GET["504"])){
         $_SERVER["SCRIPT_URI"] = str_replace("http://","\$h", $_SERVER["SCRIPT_URI"]);   
@@ -168,9 +170,10 @@ static function error($error_code='0'){
 * </code>
 */
 static function mysql($query){
+    array_push($_SERVER["CONSOLE"], "engine::mysql(".  str_replace('"', '\"', $query).")");
     require_once("engine/nodes/mysql.php");
     @mysql_query("SET NAMES utf8");
-    $res = mysql_query($query) or die(self::error());
+    $res = mysql_query($query) or die(self::error(500));
     return $res;
 }
 //------------------------------------------------------------------------------
@@ -187,6 +190,7 @@ static function mysql($query){
 * </code>
 */
 static function send_mail($email, $header, $theme, $message){
+    array_push($_SERVER["CONSOLE"], 'engine::send_mail("'.$email.'", "'.$header.'", "'.$theme.'")');
     $text = "To: ".$email."\n";
     $text .= "Theme: ".$theme."\n";
     $text .= "Text: ".$message;
@@ -210,6 +214,7 @@ static function send_mail($email, $header, $theme, $message){
 * @usage <code> engine::url_translit("Hello world!"); </code>
 */
 static function url_translit($str){
+    array_push($_SERVER["CONSOLE"], 'engine::url_translit("'.$str.'")');
     $translit = array(
         "А"=>"A", "Б"=>"B", "В"=>"V", "Г"=>"G", "Д"=>"D", "Е"=>"E", "Ж"=>"J", 
         "З"=>"Z", "И"=>"I", "Й"=>"Y", "К"=>"K", "Л"=>"L", "М"=>"M", "Н"=>"N", 
@@ -236,6 +241,7 @@ static function url_translit($str){
 * @usage <code> engine::curl_get_query("http://google.com"); </code>
 */
 static function curl_get_query($url, $format=0){
+    array_push($_SERVER["CONSOLE"], "engine::curl_get_query");
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 0);  
@@ -271,6 +277,7 @@ static function curl_get_query($url, $format=0){
 * @usage <code> engine::curl_post_query("http://google.com", 'foo=1&bar=2'); </code>
 */
 static function curl_post_query($url, $query, $format=0){
+    array_push($_SERVER["CONSOLE"], "engine::curl_post_query");
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 0);  
@@ -299,33 +306,9 @@ static function curl_post_query($url, $query, $format=0){
 }
 //------------------------------------------------------------------------------
 static function redirect($url){
+    array_push($_SERVER["CONSOLE"], "engine::redirect");
     header( 'Location: '.$url );
     die('<script>window.location = "'.$url.'";</script>');
-}
-//------------------------------------------------------------------------------
-static function encrypt($encrypt, $key){
-    $encrypt = serialize($encrypt);
-    $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC), MCRYPT_DEV_URANDOM);
-    $key = pack('H*', $key);
-    $mac = hash_hmac('sha256', $encrypt, mb_substr(bin2hex($key), -32));
-    $passcrypt = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $encrypt.$mac, MCRYPT_MODE_CBC, $iv);
-    $encoded = base64_encode($passcrypt).'|'.base64_encode($iv);
-    return $encoded;
-}
-//------------------------------------------------------------------------------
-static function decrypt($decrypt, $key){
-    $decrypt = explode('|', $decrypt.'|');
-    $decoded = base64_decode($decrypt[0]);
-    $iv = base64_decode($decrypt[1]);
-    if(strlen($iv)!==mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC)){ return false; }
-    $key = pack('H*', $key);
-    $decrypted = trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $decoded, MCRYPT_MODE_CBC, $iv));
-    $mac = mb_substr($decrypted, -64);
-    $decrypted = mb_substr($decrypted, 0, -64);
-    $calcmac = hash_hmac('sha256', $decrypted, mb_substr(bin2hex($key), -32));
-    if($calcmac!==$mac){ return false; }
-    $decrypted = unserialize($decrypted);
-    return $decrypted;
 }
 //------------------------------------------------------------------------------
 /**
@@ -335,6 +318,7 @@ static function decrypt($decrypt, $key){
 * @usage <code> engine::timezone_list(); </code>
 */
 static function timezone_list(){
+    array_push($_SERVER["CONSOLE"], "engine::timezone_list");
     $zones_array = array();
     $timestamp = time();
     $default = date_default_timezone_get();
@@ -354,6 +338,7 @@ static function timezone_list(){
 * @usage <code> engine::is_article(); </code>
 */
 static function is_article($url){
+    array_push($_SERVER["CONSOLE"], "engine::is_article");
     $url = str_replace($_SERVER["PUBLIC_URL"].'/', '', $url);
     if(strpos($url, "content/")!==FALSE) $url = mb_substr($url, 8);
     $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
@@ -374,6 +359,7 @@ static function is_article($url){
 * @usage <code> engine::is_product(); </code>
 */
 static function is_product($url){
+    array_push($_SERVER["CONSOLE"], "engine::is_product");
     $url = str_replace($_SERVER["PUBLIC_URL"].'/', '', $url);
     if(strpos($url, "product/")!==FALSE){
         $id = intval(mb_substr($url, 8));
@@ -395,6 +381,7 @@ static function is_product($url){
 * </code>
 */
 static function match_patterns($url){
+    array_push($_SERVER["CONSOLE"], "engine::match_patterns");
     $query = 'SELECT `cache`.`url` AS `value`, `att`.`date` AS `date`, `cache`.`id` as `cache_id` '
             . 'FROM `nodes_attendance` AS `att` '
             . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '

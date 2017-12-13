@@ -4,14 +4,14 @@
 * @path /engine/core/function/print_uploder.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @param int $count Images count.
 * @return string Returns content of form on success, or die with error.
 * @usage <code> engine::print_uploader(1); </code>
 */
-require_once ("engine/nodes/language.php");
+require_once ("engine/nodes/session.php");
 function print_uploader($count=1){
     for($i = 1; $i <= $count; $i++){
         $fout .= '<div id="new_img'.$i.'" class="uploader">

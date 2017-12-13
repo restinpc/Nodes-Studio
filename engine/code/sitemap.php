@@ -4,13 +4,11 @@
 * @path /engine/code/sitemap.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once("engine/nodes/mysql.php");
-require_once("engine/nodes/language.php");
 if(!strpos($_SERVER["REQUEST_URI"], ".xml")){
     header('Content-Type: text/html; charset=utf-8');
 echo '<!DOCTYPE html>

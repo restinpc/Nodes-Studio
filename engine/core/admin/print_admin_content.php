@@ -4,7 +4,7 @@
 * @path /engine/core/admin/print_admin_content.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $cms->site - Site object.
@@ -101,7 +101,6 @@ function print_admin_content($cms){
                         $url = $newurl;
                     }
                 }
-
                 $query = 'INSERT INTO `nodes_content`(cat_id, url, lang, caption, text, img, date, public_date) '
                         . 'VALUES("'.$_GET["cat_id"].'", "'.$url.'", "'.$_SESSION["Lang"].'", "'.$caption.'", "'.$text.'", "'.$img.'", "'.date("U").'", "'.date("U").'")';
                 engine::mysql($query);

@@ -4,14 +4,13 @@
 * @path /engine/core/function/print_login_form.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @return string Returns content of block on success, or die with error.
 * @usage <code> engine::print_login_form(); </code>
 */
-require_once("engine/nodes/mysql.php");
-require_once("engine/nodes/language.php");
+require_once("engine/nodes/session.php");
 function print_login_form(){
     $flag = 0;
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "vk_id"';

@@ -1,72 +1,100 @@
 <?php
-
-/*  Login request
-<?xml version='1.0' standalone='yes'?>
-<request>
-    <type>login</type>
-    <email>...</email>
-    <pass>...</pass>
-</request>
+/**
+* API file
+* @path /engine/code/api.php
 *
-*   Login result 
-<?xml version='1.0' standalone='yes'?>
-<response>
-    <type>login</type>
-    <status>ok, error</status>
-    <data>
-        <id></id>
-        <name></name>
-    </data>
-    <error>...</error>
-    <time>...</time>
-</response>
+* @name    Nodes Studio    @version 2.0.6
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
-
-/*  Send message request
-<?xml version='1.0' standalone='yes'?>
-<request>
-    <email>...</email>
-    <pass>...</pass>
-</request>
-*/
-
-$xmlstr = <<<XML
-<?xml version='1.0' standalone='yes'?>
-<movies>
-    <movie>
-        <title>Movies/movie/title</title>
-        <characters>
-            <character>
-                <name>Movies/movie/characters/character(1)/name</name>
-                <actor>Movies/movie/characters/character(1)/actor</actor>
-            </character>
-            <character>
-                <name>Movies/movie/characters/character(2)/name</name>
-                <actor>Movies/movie/characters/character(2)/actor</actor>
-            </character>
-        </characters>
-        <rating type="thumbs">7</rating>
-        <rating type="stars">5</rating>
-    </movie>
-</movies>
-XML;
-$movies = new SimpleXMLElement($xmlstr);
-
-/* Для каждого узла <character>, мы отдельно выведем имя <name>. */
-foreach ($movies->movie->characters->character as $character) {
-   echo $character->name, ' играет ', $character->actor, PHP_EOL;
-}
-/* Доступ к узлу <rating> первого фильма.
- * Так же выведем шкалу оценок. */
-foreach ($movies->movie[0]->rating as $rating) {
-    switch((string) $rating['type']) { // Получение атрибутов элемента по индексу
-    case 'thumbs':
-        echo $rating, ' thumbs up';
-        break;
-    case 'stars':
-        echo $rating, ' stars';
-        break;
+require_once("engine/nodes/session.php");
+header('Content-Type: application/json; charset=utf-8');
+$error = 'Errors not found';
+$fout = null;
+$status = null;
+if(!empty($_POST["email"]) && !empty($_POST["pass"])){
+    $email = strtolower(str_replace('"', "'", $_POST["email"]));
+    $pass = trim(strtolower($_POST["pass"]));
+    $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.$pass.'"';
+    $res = engine::mysql($query);
+    $user = mysql_fetch_array($res);
+    if(!empty($user)){
+        if($_GET["mode"] == "send_message"){
+            $name = mysql_real_escape_string($_POST["sender_name"]);
+            $email = strtolower(mysql_real_escape_string($_POST["sender_email"]));
+            $subject = "Message from ".$_SERVER["HTTP_HOST"];
+            $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"';
+            $res = engine::mysql($query);
+            $data = mysql_fetch_array($res);
+            engine::send_mail(
+               $data["value"],
+               '"'.$name.'" <'.$email.'>', 
+               $subject, 
+               str_replace("\n", "<br/>", $_POST["message"])
+           );
+            $status = "Ok";
+        }else{
+            $status = "Error";
+            $error = 'Request is not specified';
+        } 
+    }else{
+        $status = "Error";
+        $error = 'Invalid email or password';
     }
+}else if($_GET["mode"] == "reset_password"){
+    if(!empty($_POST["email"])){
+        $email = str_replace('"', "'", $_POST["email"]);
+        $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        if(!empty($data)){
+            $code = mb_substr(md5($email.date("Y-m-d")), 0, 4);
+            email::restore_password($data["email"], $code);
+            $status = "Ok"; 
+        }else{
+            $status = "Error";
+            $error = 'User not found'; 
+        }
+    }else{
+        $status = "Error";
+        $error = 'Email is not specified'; 
+    }
+}else if($_GET["mode"] == "userinfo"){
+    $email = strtolower(str_replace('"', "'", $_POST["email"]));
+    $pass = md5(trim(strtolower($_POST["password"])));
+    $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.$pass.'"';
+    $res = engine::mysql($query);
+    $user = mysql_fetch_array($res);
+    if(!empty($user)){
+        $fout .= '<user>';
+        foreach($user as $key=>$value){
+            if(!intval($key) && $key != '0'){
+                $fout .= '<'.$key.'>'.$value.'</'.$key.'>';
+            }
+        }
+        $fout .= '</user>';
+        $status = "Ok";
+    }else{
+        $status = "Error";
+        $error = 'User not found';
+    }
+}else{
+    $status = "Error";
+    $error = 'Email or password are not specified';
 }
-/* Вывод XML данных */
-echo $movies->asXML();
+$type = $_GET["mode"];
+$date = date("Y-m-d H:i:s");
+$string = <<<XML
+<?xml version='1.0'?> 
+<response>
+    <type>$type</type>
+    <status>$status</status>
+    <data>$fout</data>
+    <error>$error</error>
+    <time>$date</time>
+</response>
+XML;
+$xml = simplexml_load_string($string);
+$json = json_encode($xml);
+$json = str_replace('{}', 'null', $json);
+echo $json;

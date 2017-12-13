@@ -4,14 +4,14 @@
 * @path /engine/core/function/print_cart.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
 * @param int $count Number of items in cart.
 * @return string Returns content of block on success, or die with error.
 * @usage <code> engine::print_cart(1); </code>
 */
-require_once("engine/nodes/language.php");
+require_once("engine/nodes/session.php");
 function print_cart($count){
     $fout = '<div class="buy_cart">
         <div id="nodes_cart" class="'.($count>0?'':'hidden').'" onClick=\'show_order();\'>

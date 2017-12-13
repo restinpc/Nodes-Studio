@@ -4,7 +4,7 @@
 * @path /engine/code/perfomance.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 $W=600;     // Width
@@ -28,6 +28,7 @@ $county=10; // Lines count
 * @usage <code> draw_line($image, 0, 0, 100, 100, 0xf00, 20); </code>
 */
 function draw_line($image, $x1, $y1, $x2, $y2, $color, $thick = 1){
+    array_push($_SERVER["CONSOLE"], "draw_line(..)");
     $t = $thick / 2 - 0.5;
     if ($x1 == $x2 || $y1 == $y2) {
         return imagefilledrectangle($image, 

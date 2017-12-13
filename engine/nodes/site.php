@@ -4,7 +4,7 @@
 * @path /engine/nodes/site.php
 *
 * @name    Nodes Studio    @version 2.0.4
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 class site{
@@ -14,7 +14,6 @@ public $keywords;       // Array meta keywords.
 public $description;    // Page meta description.
 public $img;            // Page meta image.
 public $onload;         // Page executable JavaScript code.
-public $configs;        // Array MySQL configs.
 //------------------------------------------------------------------------------
 /**
 * Site class constructor.
@@ -23,9 +22,9 @@ public $configs;        // Array MySQL configs.
 * @param bool $compact "Compact" mode for async jQuery request output.
 */
 function site($compact=0){
+    array_push($_SERVER["CONSOLE"], "new site()");
     require_once("engine/nodes/headers.php");
     require_once("engine/nodes/session.php");
-    require_once("engine/nodes/language.php");
     require_once("engine/nodes/config.php");
     $this->keywords = array();
     $this->onload = '';
@@ -217,6 +216,13 @@ function site($compact=0){
 </html>';
     }else{
         $fout .= '<script type="text/javascript">load_events = false; '.$this->onload.'</script>';
+    }
+    if($this->configs["debug"]){
+        $fout .= '<script type="text/javascript">';
+        foreach($_SERVER["CONSOLE"] as $value){
+            $fout .= 'console.log("'.$value.'");'."\r\n";
+        }
+        $fout .= '</script>';
     }
     if($this->configs["compress"] || $_POST["nocache"]){
         $search = array('#>[\s]+<#si', '#>[\s]+([^\s]+)#si', '#([^\s]+)[\s]+<#si');

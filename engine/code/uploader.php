@@ -4,12 +4,11 @@
 * @path /engine/code/uploader.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once("engine/nodes/language.php");
 if(empty($_SESSION["user"]["id"])) die(engine::error(401));
 define("MAX_IMG_WIDTH", 1000);
 define("MAX_IMG_HEIGHT", 1000);

@@ -4,10 +4,10 @@
 * @path /engine/code/error.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
-require_once("engine/nodes/language.php");
+require_once("engine/nodes/session.php");
 $fout .= '
 <style>
 #div{
@@ -78,8 +78,22 @@ $fout .= '
         <span class="error_code">401</span><br/><br/>
         <span class="error_text">'.lang("Access denied").'</span>
         <br/><br/><br/>
-        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
+        <span id="redirect"><a href="'.$_SERVER["DIR"].'/login">'.lang("Login to website").'</a></span><br/>
                 ';  
+        }else if(isset($_GET["500"])){
+            if(empty($_POST["jQuery"])){
+                header('HTTP/1.1 500 Internal Server Error' );
+            }
+            $fout .= '
+        <span class="error_code">500</span><br/><br/>
+        <span class="error_text">'.lang("Internal Server Error").'</span>
+        <br/><br/><br/>
+        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
+<!--
+MySQL -> '.mysql_error().'; 
+PHP -> '.print_r(error_get_last(), 1).';
+-->
+        ';  
         }else{
             if(empty($_POST["jQuery"])){
                 header("HTTP/1.0 404 Not Found");

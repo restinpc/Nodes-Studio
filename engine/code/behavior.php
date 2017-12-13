@@ -3,8 +3,8 @@
 * Behavioral information input script.
 * @path /engine/code/behavior.php
 *
-* @name    Nodes Studio    @version 2.0.2
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @name    Nodes Studio    @version 2.0.6
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
@@ -20,9 +20,8 @@ if(!empty($_POST["patterns"])){
             $data = mysql_fetch_array($res);
             $query = 'INSERT INTO `nodes_pattern`(`attendance_id`, `action`, `x`, `y`, `top`, `width`, `height`, `date`) '
                 . 'VALUES("'.$data["id"].'", "'.$_POST["patterns"][$i][0].'", "'.$_POST["patterns"][$i][1].'", "'.$_POST["patterns"][$i][2].'", '
-                . '"'.$_POST["patterns"][$i][3].'", "'.$_POST["patterns"][$i][4].'", "'.$_POST["patterns"][$i][5].'", "'.date("U").'")';
+                . '"'.$_POST["patterns"][$i][3].'", "'.$_POST["patterns"][$i][4].'", "'.$_POST["patterns"][$i][5].'", "'.(date("U")-(10-intval($_POST["patterns"][$i][6]))).'")';
             engine::mysql($query);
         }
     }
 }else engine::error(404);
-

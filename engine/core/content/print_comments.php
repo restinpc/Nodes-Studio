@@ -4,7 +4,7 @@
 * @path /engine/core/content/print_comments.php
 * 
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @param string $url Page URL.
@@ -13,7 +13,6 @@
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once("engine/nodes/language.php");
 function print_comment($id, $noreply = 0){
     $query = 'SELECT * FROM `nodes_comment` WHERE `id` = "'.intval($id).'"';
     $rc = engine::mysql($query);

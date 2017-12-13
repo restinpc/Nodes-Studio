@@ -4,14 +4,15 @@
 * @path /engine/code/update.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
-require_once("engine/nodes/language.php");
+require_once("engine/nodes/session.php");
 $echo_to = 0;
 if(isset($fout)) $echo_to = 1;
 function update(){
+    array_push($_SERVER["CONSOLE"], "update()");
     $output = '';
     $url = "http://nodes-studio.com/source/";
     $query = 'UPDATE `nodes_config` SET `value` = "'.date("U").'" WHERE `name` = "checkupdate"';

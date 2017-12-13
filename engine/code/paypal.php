@@ -4,14 +4,14 @@
 * @path /engine/code/paypal.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
-if(!empty($_GET["deposit"]) || !empty($_POST["mc_gross"])){
+if(!empty($_GET["deposit"]) && !empty($_POST["mc_gross"])){
     $amount = $_POST["mc_gross"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$_GET["deposit"].'"';
     $res = engine::mysql($query);
@@ -57,8 +57,7 @@ if(!empty($_GET["deposit"]) || !empty($_POST["mc_gross"])){
             email::new_transaction($_GET["deposit"], $amount);
         }
     }  
-}
-if(!empty($_GET["order_id"])){
+}else if(!empty($_GET["order_id"])){
     $query = 'SELECT * FROM `nodes_transaction` WHERE `order_id` = "'.intval($_GET["order_id"]).'"';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
@@ -88,6 +87,15 @@ if(!empty($_GET["order_id"])){
             $postdata = ""; 
             foreach ($_POST as $key=>$value) $postdata .= $key."=".urlencode($value)."&"; 
             $postdata .= "cmd=_notify-validate";  
+            $curl = curl_init("https://".$domain."/cgi-bin/webscr"); 
+            curl_setopt ($curl, CURLOPT_HEADER, 0);  
+            curl_setopt ($curl, CURLOPT_POST, 1); 
+            curl_setopt ($curl, CURLOPT_POSTFIELDS, $postdata); 
+            curl_setopt ($curl, CURLOPT_SSL_VERIFYPEER, 0);  
+            curl_setopt ($curl, CURLOPT_RETURNTRANSFER, 1); 
+            curl_setopt ($curl, CURLOPT_SSL_VERIFYHOST, 1); 
+            $response = curl_exec ($curl); 
+            curl_close ($curl); 
             if($response == "VERIFIED"){
                 $query = 'SELECT * FROM `nodes_transaction` WHERE `id` = "'.intval($data["id"]).'"';
                 $res = engine::mysql($query);

@@ -4,7 +4,7 @@
 * @path /script/script.source.js
 *
 * @name    Nodes Studio    @version 2.0.4
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 var ua = navigator.userAgent.toLowerCase();         // Navigator
@@ -17,6 +17,7 @@ var error;                                          // Gateway Timeout HTML data
 var pattern = new Array();                          // Array of patterns to swap
 var pattern_catch = 0;                              // Pattern flag
 var pattern_size = 0;                               // Count of patterns
+var seconds;                                        // Timer of session
 window.stateChangeIsLocal = true;
 History.enabled = true; 
 //------------------------------------------------------------------------------
@@ -421,7 +422,6 @@ jQuery(function() {
 */
 function submitPatterns() {
     if(pattern[0]){
-        //console.log("Pattern => Submit["+pattern_size+" patterns]");
         jQuery.ajax({
             url: root_dir+'/behavior.php',
             data: { "patterns" : pattern },
@@ -429,6 +429,7 @@ function submitPatterns() {
             success: function (data) {
                 pattern = Array();
                 pattern_size = 0;
+                seconds = new Date().getTime() / 1000;
             }
         });
     }
@@ -487,13 +488,14 @@ function refresh_page(){
 function goto(href) {
     if(!window_state){
         if( href[0] != "#"){
-            document.documentElement.style.background = "#e8e8e8 url(/img/load.gif) no-repeat center 250px fixed";
+            submitPatterns();
+            document.documentElement.style.background = "#fff url(/img/load.gif) no-repeat center center fixed";
             window_state = 1;
             jQuery("#content").animate({opacity: 0}, 300);
             try{ scrolltoTop(); }catch(e){}
             var to = setTimeout(function(){ 
                 jQuery("#content").html(error); 
-                jQuery("#content").animate({opacity: 1}, 500) 
+                jQuery("#content").animate({opacity: 1}, 500);
             }, 30000);
             var anchor = '';
             var details = href.split('#');
@@ -509,9 +511,6 @@ function goto(href) {
             success: function (data) {
                 if(data[data.length-1]=="=") 
                     data = base64_decode(data);
-                if(submit_patterns){
-                    setTimeout(submitPatterns, 1);
-                }
                 setTimeout(ajaxing, 1);
                 setTimeout(checkAnchors, 1);
                 var title = jQuery(data).filter('title').text();
@@ -521,7 +520,9 @@ function goto(href) {
                     jQuery("#content").html(data); 
                     jQuery("#content").animate({opacity: 1}, 500); 
                     clearTimeout(to); 
-                    onload_print_footer();
+                    try{
+                        onload_print_footer();
+                    }catch(e){}
                     if(anchor != ''){
                         showAnchor(anchor);
                     }
@@ -530,7 +531,9 @@ function goto(href) {
             error: function(){
                 jQuery("#content").html(error); 
                 jQuery("#content").animate({opacity: 1}, 500);
-                onload_print_footer();
+                try{
+                    onload_print_footer();
+                }catch(e){}
             }
             });
         }else{
@@ -841,25 +844,35 @@ function nodes_galery(src){
     }
 }
 //------------------------------------------------------------------------------
+/**
+* Captures a click 
+*/
 function capture_click(e){
-    //console.log("Pattern => Click[x="+e.clientX+";y="+e.clientY+']');
-    pattern[pattern_size++] = Array("1", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight());
+    var left_seconds = new Date().getTime() / 1000;
+    pattern[pattern_size++] = Array("1", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight(), (left_seconds-seconds));
 }
 //------------------------------------------------------------------------------
+/**
+* Captures a mouse movement
+*/
 function capture_mousemove(e){
     if(!pattern_catch){
         pattern_catch = 1;
-        pattern[pattern_size++] = Array("2", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight());
-        //console.log("Pattern => Pointer[x="+e.clientX+";y="+e.clientY+']');
+        var left_seconds = new Date().getTime() / 1000;
+        pattern[pattern_size++] = Array("2", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight(), (left_seconds-seconds));
         setTimeout( function(){
             pattern_catch = 0;
         }, 1000);
     }
 }
 //------------------------------------------------------------------------------
+/**
+* Enabling handlers
+*/
 if(submit_patterns){
     addHandler(window, "click", capture_click);
     addHandler(window, "mousemove", capture_mousemove);
+    seconds = new Date().getTime() / 1000;
     setInterval(submitPatterns, 10000);
 }
 }

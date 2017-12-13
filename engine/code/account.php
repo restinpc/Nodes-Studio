@@ -4,13 +4,11 @@
 * @path /engine/code/account.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once("engine/nodes/mysql.php");
-require_once("engine/nodes/language.php");
 if($_GET["mode"] == "login"){
     $fout = '<!DOCTYPE html>
     <html>
@@ -103,7 +101,7 @@ if($_GET["mode"] == "login"){
         $res = engine::mysql($query);
         $data = mysql_num_rows($res);
         if($data){
-            $code = mb_substr(md5($email.date("Y-m-d")), 0, 6);
+            $code = mb_substr(md5($email.date("Y-m-d")), 0, 4);
             if($code == $_GET["code"]){
                 $new_pass = mb_substr(md5($email.date("Y-m-d")), 0, 8);
                 $query = 'UPDATE `nodes_user` SET `pass` = "'.md5($new_pass).'" WHERE `email` = "'.$email.'"';   
@@ -124,7 +122,7 @@ if($_GET["mode"] == "login"){
         $res = engine::mysql($query);
         $data = mysql_fetch_array($res);
         if(!empty($data)){
-            $code = mb_substr(md5($email.date("Y-m-d")), 0, 6);
+            $code = mb_substr(md5($email.date("Y-m-d")), 0, 4);
             $new_pass = mb_substr(md5($email.date("Y-m-d")), 0, 8);
             email::restore_password($data["email"], $new_pass, $code);
             $fout .= '<div class="center pt100">'.lang("Message with new password is sended to email").'</div><script>'

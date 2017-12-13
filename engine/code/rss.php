@@ -4,13 +4,11 @@
 * @path /engine/code/rss.php
 *
 * @name    Nodes Studio    @version 2.0.3
-* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-require_once("engine/nodes/mysql.php");
-require_once("engine/nodes/language.php");
 header('Content-Type: application/rss+xml; charset=utf-8');
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "name"';
 $res = engine::mysql($query);
