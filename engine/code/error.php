@@ -3,7 +3,7 @@
 * Error file.
 * @path /engine/code/error.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -77,9 +77,12 @@ $fout .= '
             $fout .= '
         <span class="error_code">401</span><br/><br/>
         <span class="error_text">'.lang("Access denied").'</span>
-        <br/><br/><br/>
-        <span id="redirect"><a href="'.$_SERVER["DIR"].'/login">'.lang("Login to website").'</a></span><br/>
-                ';  
+        <br/><br/><br/>';  
+            if(empty($_SESSION["user"])){
+                $fout .= '<span id="redirect"><a href="'.$_SERVER["DIR"].'/login">'.lang("Login to website").'</a></span><br/>';
+            }else{
+                $fout .= '<span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>';
+            }
         }else if(isset($_GET["500"])){
             if(empty($_POST["jQuery"])){
                 header('HTTP/1.1 500 Internal Server Error' );

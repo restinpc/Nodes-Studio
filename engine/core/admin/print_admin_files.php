@@ -20,24 +20,7 @@
 */
 function print_admin_files($cms){
     if(!empty($_FILES)){
-        for($i = 1; $i < 2; $i++){
-            if(!empty($_FILES["photo_".$i])){
-                $_FILES["photo_".$i]["name"];
-                $arr = explode(".", $_FILES["photo_".$i]["name"]);
-                if( $arr[count($arr)-1] == "exe" || 
-                    $arr[count($arr)-1] == "bat" || 
-                    $arr[count($arr)-1] == "php" || 
-                    $arr[count($arr)-1] == "cgi" ||
-                    $arr[count($arr)-1] == "js"){
-                    die("Unable to upload *.exe, *.bat, *.php, *.cgi, *.js files");
-                }
-                $f1 = file::upload("photo_".$i, 'file/', 1);
-                if($f1=="error"){ 
-                    $fout .= '<script>alert("'.lang("Error").'");</script>';
-                }
-                $_FILES["photo_".$i] = "";
-            }
-        }
+        file::upload("photo", "file");
     }if(!empty ($_POST["name"])){
         $name = trim(htmlspecialchars($_POST["name"]));
         $images = "file/".$name;
@@ -73,7 +56,7 @@ function print_admin_files($cms){
      }
      $fout .= '<input id="button" type="button" name="load" value="'.lang("Upload files").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block"; jQuery("#form").removeClass("hidden");\' /><br/>
     <form method="POST" ENCTYPE="multipart/form-data" id="form" class="hidden">
-        <input id="file" type="file" onChange=\'document.getElementById("form").submit();\' required placeHolder="'.lang("File").'" title="'.lang("File").'" name="photo_1" class="input pointer w280" /><br/><br/>
+        <input id="file" type="file" onChange=\'document.getElementById("form").submit();\' required placeHolder="'.lang("File").'" title="'.lang("File").'" name="photo[]" multiple class="input pointer w280" /><br/><br/>
     </form>
     ';
     return $fout;

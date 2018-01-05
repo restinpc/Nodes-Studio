@@ -19,10 +19,7 @@
 * @usage <code> engine::print_admin_finance($cms); </code>
 */
 function print_admin_finance($cms){
-    if($_POST["reset"]){
-        $query = 'DELETE FROM `nodes_transaction` WHERE 1';
-        engine::mysql($query);
-    }else if(!empty($_POST["id"])){
+    if(!empty($_POST["id"])){
         if($_POST["submit_btn"]=="Confirm payment"){
             $query = 'SELECT * FROM `nodes_transaction` WHERE `id` = "'.$_POST["id"].'"';
             $res = engine::mysql($query);
@@ -78,6 +75,7 @@ function print_admin_finance($cms){
         }else{
             $user = "Anonim";
         }if($data["order_id"]=="0"){
+            $data["amount"] = -$data["amount"];
             $type = lang("Withdrawal request");
         }else if($data["order_id"]=="-1"){
             $type = lang("Money deposit");  
@@ -89,7 +87,7 @@ function print_admin_finance($cms){
             <td align=left valign=middle>'.$type.'</td>
             <td align=left valign=middle>$'.$data["amount"].'</td>
             <td align=left valign=middle>'.date("d/m/Y H:i", $data["date"]).'</td>
-            <td width=20 align=left valign=middle>
+            <td width=30 align=left valign=middle class="nowrap">
                 <form method="POST">
                     <input type="hidden" name="id" value="'.$data["id"].'" />';
                     if(!$data["order_id"] && $data["status"]==1){
@@ -97,6 +95,9 @@ function print_admin_finance($cms){
                     }else{
                         $table .= '<input type="submit" name="submit_btn" value="'.lang("Delete").'" class="btn small" />';
                     }
+            if(intval($data["invoice_id"]) > 0){
+                $table .= ' <input type="button" onClick=\'window.open("/invoice.php?id='.$data["invoice_id"].'");\' class="btn small" value="'.lang("View invoice").'">';
+            }
         $table .= '</form>
             </td>
         </tr>';

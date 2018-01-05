@@ -3,7 +3,7 @@
 * Print admin attendance page.
 * @path /engine/core/admin/print_admin_attendance.php
 * 
-* @name    Nodes Studio    @version 2.0.6
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -192,13 +192,20 @@ function print_admin_attendance($cms){
         $fout .= '<span class="statistic_span blue">'.lang("Bots").": ".$bots_visit.'</span> ';
         $fout .= '<img width=100% class="w600" src="'.$_SERVER["DIR"].'/attandance.php?interval='.((!empty($_GET["interval"]))?$_GET["interval"]:"day").'&date='.$_GET["date"].'&rand='.rand(0,100).'" /></center>';
     }else if($_GET["action"]=="pages"){
-        $query = 'SELECT `cache`.`url` FROM `nodes_attendance` AS `att` '
+        $query = 'SELECT `cache`.`url`, `att`.`id` AS `act_id` FROM `nodes_attendance` AS `att` '
                 . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
                 . 'WHERE `att`.`date` >= "'.$from.'" AND `att`.`date` <= "'.$to.'" AND `att`.`display` = "1"';
         $res = engine::mysql($query);
         $pages = array();
+        $visitors = array();
+        $actions = array();
+        $sessions = array();
         while($data = mysql_fetch_array($res)){
             $pages[$data["url"]]++;
+            $query = 'SELECT COUNT(*) FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["act_id"].'"';
+            $r = engine::mysql($query);
+            $d = mysql_fetch_array($r);
+            $actions[$data["url"]]+=$d[0];
         }
         array_multisort($pages);
         $fout .= '<div class="table">
@@ -206,18 +213,22 @@ function print_admin_attendance($cms){
         <thead>
         <tr>
             <th>URL</th>
-            <th>'.lang("Amount").'</th>
+            <th>'.lang("Views").'</th>
+            <th>'.lang("Actions").'</th>
         </tr>';
         $max_val = 0;
         $table = '';
         foreach($pages as $page=>$count){
             if($count > $max_val){
                 $table = '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
-                        . '<td>'.$count.'</td></tr>'.$table;
+                        . '<td>'.$count.'</td>
+                            <td>'.$actions[$page].'</td>
+                            </tr>'.$table;
                 $max_val=$count;
             }else if($count < $min_val){
                 $table .= '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
-                        . '<td>'.$count.'</td></tr>';  
+                        . '<td>'.$count.'</td>
+                           <td>'.$actions[$page].'</td></tr>';  
                 $min_val = $count;
             }
         }$fout .= $table.'</table></div>';

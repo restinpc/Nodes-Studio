@@ -1,9 +1,9 @@
 <?php
 /**
-* Prints PayPal payment button.
+* Prints PayPal payment form.
 * @path /engine/core/function/print_paypal_form.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -15,29 +15,31 @@
 * @var $site->onload - Page executable JavaScript code.
 * @var $site->configs - Array MySQL configs.
 * 
-* @param object $site Site class object.
+* @param int $invoice_id @mysql[nodes_invoice->id].
 * @param double $sum Amount to pay via PayPal.
 * @param string $return URL for redirection after payment.
 * @param bool $autopay Autosubmit form flag.
 * @return string Returns content of block on success, or die with error.
 * @usage <code> 
 *   $return = "http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR]."/";
-*   engine::print_paypal_form($site, 100, $return); 
+*   engine::print_paypal_form(1, 100, $return); 
 * </code>
 */
-function print_paypal_form($site, $sum, $return, $autopay=0){
+function print_paypal_form($invoice_id, $sum, $return, $autopay=0){
     if(empty($_SESSION["user"]["id"])) return engine::error(401);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_test"';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
     if($data["value"]) $domain = 'www.sandbox.paypal.com';
     else $domain = 'www.paypal.com';
-    $return = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].$return;
+    if(strpos("http", $return) != 0){
+        $return = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].$return;
+    }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_id"';
     $res = engine::mysql($query);
     $paypal = mysql_fetch_array($res);
     $paypal_id = $paypal["value"];
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_description"';
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "payment_description"';
     $res = engine::mysql($query);
     $paypal = mysql_fetch_array($res);
     $paypal_desc = $paypal["value"];
@@ -50,11 +52,11 @@ function print_paypal_form($site, $sum, $return, $autopay=0){
         <input type="hidden" name="cancel_return" value="'.$return.'">
         <input type="hidden" name="return" value="'.$return.'">
         <input type="hidden" name="no_shipping" value="1">
-        <input type="hidden" name="notify_url" value="'.$_SERVER["PUBLIC_URL"].'/paypal.php?deposit='.$_SESSION["user"]["id"].'">
+        <input type="hidden" name="notify_url" value="'.$_SERVER["PUBLIC_URL"].'/paypal.php?invoice_id='.$invoice_id.'">
         <button type="submit" class="btn w280">'.lang("Make a payment").'</button>
     </form>';
     if($autopay){
-        $site->onload .= '; document.getElementById("paypal_form").submit(); ';
+        $fout.= '<script>document.getElementById("paypal_form").submit();</script>';
     }
     return $fout;
 }

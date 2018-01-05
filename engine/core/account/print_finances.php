@@ -24,14 +24,13 @@ function print_finances($site){
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$_SESSION["user"]["id"].'"';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
-    if(!empty($_POST["amount"])&&$site->configs["sandbox"]){
+    
+    if(doubleval($_POST["amount"])>0){
         $amount = doubleval($_POST["amount"]);
-        $query = 'INSERT INTO `nodes_transaction`(user_id, order_id, amount, status, date, comment, ip) '
-                . 'VALUES("'.$_SESSION["user"]["id"].'", "-1", "'.$amount.'", "2", "'.date("U").'", "Deposit", "'.$_SERVER["REMOTE_ADDR"].'")';
+        $query = 'INSERT INTO `nodes_invoice`(user_id, order_id, amount, date) '
+                . 'VALUES("'.$_SESSION["user"]["id"].'", "-1", "'.$amount.'", "'.date("Y-m-d H:i:s").'")';
         engine::mysql($query);
-        $query = 'UPDATE `nodes_user` SET `balance` = "'.  doubleval($data["balance"]+$amount).'" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
-        engine::mysql($query);
-        $data["balance"] += doubleval($_POST["amount"]);
+        return engine::redirect("/invoice.php?id=". mysql_insert_id());
     }
     $balance = $data["balance"];
     if($balance > $_SESSION["user"]["balance"]){
@@ -52,30 +51,11 @@ function print_finances($site){
     }
     $fout.= lang('Balance').': <b>$'.$balance."</b>";
     if($pending>0) $fout.= "  ".lang("Pending").": <b>$".$pending.'</b>';
-    $fout.= '<br/><br/>';
-    if($site->configs["sandbox"]){
-        $fout.= '
-            <form method="POST" class="hidden">
-            <input type="hidden" name="amount" id="paypal_price" value="'.$price.'">
-            <input type="submit" id="pay_button"  /><br/><br/>
-            </form>';
-    }else{
-        if($site->configs["paypal_test"]) $domain = 'www.sandbox.paypal.com';
-        else $domain = 'www.paypal.com';
-        $fout.= '
-            <form action="https://'.$domain.'/cgi-bin/webscr" method="post" class="hidden">			
-            <input type="hidden" name="cmd" value="_xclick">
-            <input type="hidden" name="business" value="'.$site->configs["paypal_id"].'">
-            <input type="hidden" name="item_name" value="'.$site->configs["paypal_description"].'">
-            <input type="hidden" name="currency_code" value="USD">
-            <input type="hidden" name="amount" id="paypal_price" value="'.$price.'">
-            <input type="hidden" name="cancel_return" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account/finances">
-            <input type="hidden" name="return" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account/finances">
-            <input type="hidden" name="no_shipping" value="1">
-            <input type="hidden" name="notify_url" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/paypal.php?deposit='.$_SESSION["user"]["id"].'">
-            <button type="submit" class="btn w280" id="pay_button" >PayPal</button><br/><br/>
-            </form>';
-    }
+    $fout.= '<br/><br/>'
+        . '<form method="POST" class="hidden">'
+            . '<input type="hidden" id="paypal_price" name="amount" value="0" />'
+            . '<input type="submit" id="pay_button" />'
+        . '</form>';
     if($_SESSION["order"]=="id") $_SESSION["order"] = "date";
     $arr_count = 0;    
     $from = ($_SESSION["page"]-1)*$_SESSION["count"]+1;
@@ -102,6 +82,7 @@ function print_finances($site){
                 $table .= '</th>';
             }
             $table .= '
+            <th></th>
         </tr>
         </thead>';
     $res = engine::mysql($query);
@@ -124,11 +105,16 @@ function print_finances($site){
         }else if($data["status"] == "2"){
             $status = lang("Finished");
         }
+        $button = '';
+        if(intval($data["invoice_id"]) > 0){
+            $button = '<a onClick=\'window.open("/invoice.php?id='.$data["invoice_id"].'");\' class="btn small">'.lang("View invoice").'</a>';
+        }
         $table .= '<tr>
             <td align=left valign=middle>'.$type.'</td>
             <td align=left valign=middle>'.$data["amount"].'$</td>
             <td align=left valign=middle>'.$status.'</td>
             <td align=left valign=middle title="'.date("d.m H:i", $data["date"]).'">'.date("d.m", $data["date"]).'</td>
+            <td>'.$button.'</td>
         </tr>';
     }$table .= '</table>
     </div>';

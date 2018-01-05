@@ -3,7 +3,7 @@
 * Do not edit directly.
 * @path /script/script.source.js
 *
-* @name    Nodes Studio    @version 2.0.4
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -18,6 +18,7 @@ var pattern = new Array();                          // Array of patterns to swap
 var pattern_catch = 0;                              // Pattern flag
 var pattern_size = 0;                               // Count of patterns
 var seconds;                                        // Timer of session
+var session_start = false;                          // Flag of submitting pattern
 window.stateChangeIsLocal = true;
 History.enabled = true; 
 //------------------------------------------------------------------------------
@@ -408,6 +409,8 @@ jQuery(function() {
             show_popup_window('<br/><p>'+text+'</p><br/><br/><input type="button" value="OK" onClick=\'js_hide_wnd();\' class="btn w130" /><br/><br/>');
             return false;
         };
+    }else{
+        alert = alertify.alert;
     }
     window.onpopstate = function() {              
         goto(window.location.href); 
@@ -678,29 +681,35 @@ function buy_now(id, t0, t1, t2){
 * Displays money withdrawal form.
 */
 function withdrawal(text){
-    alertify.prompt('<h3>'+text+'</h3><br/>', function (e, str) {if (e) {
-        jQuery.ajax({
-            type: "POST",
-            data: {"paypal" : str },
-            url: root_dir+"/bin.php",
-            success: function(data){ 
-                console.log("withdrawal: "+data);
-                alertify.alert(data);
-            }
-        });
-    }}, ""); 
+    alertify.prompt('', '<h3>'+text+'</h3><br/>', '', 
+        function(evt, value) {
+            jQuery.ajax({
+                type: "POST",
+                data: {"paypal" : value },
+                url: root_dir+"/bin.php",
+                success: function(data){ 
+                    jQuery('.alertify').remove();
+                    alert(data);
+                }
+            });
+        }, 
+        function() { jQuery('.alertify').remove(); }
+    ).set('closable', true);
 }
 //------------------------------------------------------------------------------
 /**
 * Displays money deposit form.
 */
 function deposit(text){
-    alertify.prompt('<h3>'+text+'</h3><br/>', function (e, str) {if (e) {
-        try{
-            document.getElementById("paypal_price").value = str;
-        }catch(err){}
-        document.getElementById("pay_button").click();
-    }}, ""); 
+    alertify.prompt('', '<h3>'+text+'</h3><br/>', '', 
+        function(evt, value) {
+            try{
+                document.getElementById("paypal_price").value = value;
+            }catch(err){}
+            document.getElementById("pay_button").click();
+        }, 
+        function() { jQuery('.alertify').remove(); }
+    ); 
 }
 //------------------------------------------------------------------------------
 /**
@@ -850,6 +859,10 @@ function nodes_galery(src){
 function capture_click(e){
     var left_seconds = new Date().getTime() / 1000;
     pattern[pattern_size++] = Array("1", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight(), (left_seconds-seconds));
+    if(!session_start){
+        submitPatterns();
+        session_start = true;
+    }
 }
 //------------------------------------------------------------------------------
 /**
@@ -863,6 +876,10 @@ function capture_mousemove(e){
         setTimeout( function(){
             pattern_catch = 0;
         }, 1000);
+    }
+    if(!session_start){
+        submitPatterns();
+        session_start = true;
     }
 }
 //------------------------------------------------------------------------------

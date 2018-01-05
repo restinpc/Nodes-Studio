@@ -3,7 +3,7 @@
 * Print email confirmation page.
 * @path /engine/core/account/print_email_confirm.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -20,8 +20,14 @@
 * @usage <code> engine::print_email_confirm($site); </code>
 */
 function print_email_confirm($site){
+    $code = '';
     if(!empty($_POST["code"])){
-        if($_POST["code"]==$user["code"]){
+        $code = $_POST["code"];
+    }else if(!empty($_GET[1])){
+        $code = $_GET[1];
+    }
+    if(!empty($code)){
+        if($code==$_SESSION["user"]["code"]){
             $query = 'UPDATE `nodes_user` SET `confirm` = 1 WHERE `id` = "'.$_SESSION["user"]["id"].'"';
             engine::mysql($query);
             die('<script>window.location = "'.$_SERVER["DIR"].'/account";</script>');
@@ -39,4 +45,3 @@ function print_email_confirm($site){
         . '</div>';
     return $fout;
 }
-

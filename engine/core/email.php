@@ -47,9 +47,11 @@ static function email_template($text){
 * @param array $data Array, based on @mysql[nodes_user_outbox].
 */
 static function bulk_mail($data){
-    $query = 'SELECT `id`,`name`,`email` FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
+    $language = $_SESSION["Lang"];
+    $query = 'SELECT `id`,`name`,`email`, `lang` FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
     $res = engine::mysql($query);
     $user = mysql_fetch_array($res);
+    $_SESSION["Lang"] = $user["lang"];
     $query = 'SELECT * FROM `nodes_outbox` WHERE `id` = "'.$data["outbox_id"].'"';
     $res = engine::mysql($query);
     $outbox = mysql_fetch_array($res);
@@ -75,6 +77,7 @@ static function bulk_mail($data){
     }
     $query = 'UPDATE `nodes_user_outbox` SET `status` = "'.$status.'", `date` = "'.date("U").'" WHERE `id` = "'.$data["id"].'"';
     engine::mysql($query);
+    $_SESSION["Lang"] = $language;
 }
 //----------------------------------------------------
 /**

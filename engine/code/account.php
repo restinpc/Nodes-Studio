@@ -3,7 +3,7 @@
 * User login window.
 * @path /engine/code/account.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -49,14 +49,12 @@ if($_GET["mode"] == "login"){
                     engine::mysql($query);
                     unset($data["pass"]);
                     unset($data[5]);
-                    unset($data["token"]);
-                    unset($data[9]);
                     $_SESSION["user"] = $data;
                     if(!empty($_SESSION["redirect"])){
-                        $fout .= '<script language="JavaScript">parent.window.location = "'.($_SESSION["redirect"]).'";</script>';
+                        $fout .= '<script language="JavaScript">setTimeout(function(){ parent.window.location = "'.($_SESSION["redirect"]).'"; }, 1);</script>';
                         unset($_SESSION["redirect"]);
                     }else{
-                        $fout .= '<script language="JavaScript">parent.window.location = "'.$_SERVER["DIR"].'/account";</script>';
+                        $fout .= '<script language="JavaScript">setTimeout(function(){ parent.window.location = "'.$_SERVER["DIR"].'/account"; }, 1);</script>';
                     }
                 }
             }else{

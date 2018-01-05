@@ -3,7 +3,7 @@
 * Framework engine class.
 * @path /engine/core/engine.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
@@ -80,6 +80,15 @@ public static function __callStatic($name, $arguments) {
                     $arguments[2], 
                     $arguments[3], 
                     $arguments[4]
+                    );
+        }else if($count==6){
+            return $name(
+                    $arguments[0], 
+                    $arguments[1], 
+                    $arguments[2], 
+                    $arguments[3], 
+                    $arguments[4],
+                    $arguments[5]
                     );
         }
     }else self::error();

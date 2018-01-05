@@ -72,12 +72,12 @@ static function delete($dir) {
 * @usage <code> file::upload("new_image", "/img", true); </code>
 */
 static function upload($filename, $path, $md5=0){
-    if(!is_array($_FILES[$filename])){
+    if(!is_array($_FILES[$filename]["name"])){
         if (is_uploaded_file($_FILES[$filename]['tmp_name'])){
             if(!$md5){
                 $a = $_FILES[$filename]["name"];
             }else{
-                $a = md5($_FILES[$filename]["name"]).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"])));;
+                $a = md5($_FILES[$filename]["name"].date("U")).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"])));;
             }$f_name = $path."/".$a;
             if (move_uploaded_file($_FILES[$filename]["tmp_name"], $f_name)){
                 return $a;
@@ -90,15 +90,14 @@ static function upload($filename, $path, $md5=0){
                 if(!$md5){
                     $a = $_FILES[$filename]["name"][$i];
                 }else{
-                    $a = md5($_FILES[$filename]["name"][$i]).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"][$i])));;
+                    $a = md5($_FILES[$filename]["name"][$i].date("U")).".".strtolower(array_pop(explode(".", $_FILES[$filename]["name"][$i])));;
                 }
                 $f_name = $path."/".$a;
                 if (move_uploaded_file($_FILES[$filename]["tmp_name"][$i], $f_name)){
                     $fout .= $a.';';
-                }else{
                 }
             } 
-        }return $fout;
+        } return $fout;
     }
  }
 //------------------------------------------------------------------------------

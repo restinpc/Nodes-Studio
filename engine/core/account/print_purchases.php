@@ -21,7 +21,7 @@
 */
 function print_purchases($site){
     $fout = '<div class="document640">';
-    $query = 'SELECT * FROM `nodes_order` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" AND `status` > 0 ORDER BY `date` DESC';
+    $query = 'SELECT * FROM `nodes_order` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `date` DESC';
     $res = engine::mysql($query);
     $flag = 0;
     while($data = mysql_fetch_array($res)){

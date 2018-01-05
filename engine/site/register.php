@@ -44,8 +44,8 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             engine::mysql($query);
             unset($_POST["email"]);
         }else if(strpos($email, "@")){
-            $query = 'INSERT INTO `nodes_user` (`name`, `photo`, `email`, `pass`, `online`, `confirm`, `code`) 
-                VALUES ("'.$name.'", "anon.jpg", "'.$email.'", "'.md5(trim(strtolower($_POST["pass"]))).'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
+            $query = 'INSERT INTO `nodes_user` (`name`, `photo`, `email`, `pass`, `lang`, `online`, `confirm`, `code`) 
+                VALUES ("'.$name.'", "anon.jpg", "'.$email.'", "'.md5(trim(strtolower($_POST["pass"]))).'", "'.$_SESSION["Lang"].'", "'.date("U").'", "'.$confirm.'", "'.$code.'")';
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(trim($_POST["pass"])).'"';
             $res = engine::mysql($query);

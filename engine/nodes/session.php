@@ -3,7 +3,7 @@
 * Framework session loader.
 * @path /engine/nodes/session.php
 * 
-* @name    Nodes Studio    @version 2.0.6
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -60,10 +60,6 @@ if(empty($_SESSION["Lang"])){
 }
 if(!empty($_GET["lang"])){
     $_SESSION["Lang"] = strtolower ($_GET["lang"]);
-    $url = str_replace("&lang=".$_SESSION["Lang"], '',
-        str_replace("?lang=".$_SESSION["Lang"], '', $_SERVER["REQUEST_URI"]));
-    header('Location: '.$url);
-    die('<script>window.location = "'.$url.'"</script>');
 }else if(!empty($_POST["lang"])){
     $_SESSION["Lang"] =  strtolower ($_POST["lang"]);
 }

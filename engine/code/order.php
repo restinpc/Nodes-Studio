@@ -3,7 +3,7 @@
 * Product purchase processor.
 * @path /engine/code/order.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.7
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -13,7 +13,7 @@ echo '<!DOCTYPE html><html><body class="nodes">';
 if(empty($_SESSION["user"]["id"])){  
     $_SESSION["redirect"] = $_SERVER["DIR"]."/order.php";
     require_once("engine/nodes/site.php");
-    echo '<div class="fs21 tal"><b>Step 1 \ 4</b></div><br/>';
+    echo '<div class="fs21 tal"><b>'.lang("Step").' 1 \ 5</b></div><br/>';
     $_GET[0] = "register";
     $_POST["jQuery"] = 1;
     $site = new site(1);
@@ -70,9 +70,6 @@ if(empty($_SESSION["user"]["id"])){
     }
     $query = 'UPDATE `nodes_order` SET `shipping` = "'.$shipment.'" WHERE `id` = "'.$_SESSION["order_confirm"].'"';
     engine::mysql($query);
-    $query = 'INSERT INTO `nodes_transaction`(user_id, order_id, amount, status, date) '
-    . 'VALUES("'.$_SESSION["user"]["id"].'", "'.$_SESSION["order_confirm"].'", "0", "0", "'.date("U").'")';
-    engine::mysql($query);
     $_SESSION["shipping_confirm"] = $data["id"];
 }else if(!empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
     $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.intval($_SESSION["order_confirm"]).'"';
@@ -85,7 +82,7 @@ if(empty($_SESSION["user"]["id"])){
     }
 }
 if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
-    echo '<div class="fs21 tal"><b>Step 2 \ 4</b></div><br/>';
+    echo '<div class="fs21 tal"><b>'.lang("Step").' 2 \ 5</b></div><br/>';
     $fout .= '<h1>'.lang("Confirmation").'</h1><br/><br/>
         <div class="document">
         <form method="POST">
@@ -103,7 +100,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
             $images = explode(";", $product["img"]);
             $fout .= '<div class="order_detail">
             <div class="order_detail_image" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
-                <b class="fs21">'.$product["title"].'</b><br/><br/>
+                <b class="fs18">'.$product["title"].'</b><br/><br/>
                 <font class="fs18">$ '.$product["price"].'</font><br/><br/>
                 '.lang("Shipping from").': <a title="'.$shipping["country"].', '.$shipping["state"].', '.$shipping["city"].', '.$shipping["street1"].', '.$shipping["street2"].' ">'.$shipping["country"].'</a><br/>
                 <div class="order_detail_button">
@@ -125,16 +122,21 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         </div>
         <br/><br/>';
 }else if(empty($_SESSION["shipping_confirm"]) && !empty($_SESSION["user"]["id"])){
-    echo '<div class="fs21 tal"><b>Step 3 \ 4</b></div><br/>';
+    echo '<div class="fs21 tal"><b>'.lang("Step").' 3 \ 5</b></div><br/>';
     $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
     $fout .= '<h1>'.lang("Shipping").'</h1><br/><br/>
+        <style>
+        .country-select{
+            width: 280px !important;
+        }
+        </style>
     <form method="POST">
         <input type="hidden" name="shipping_confirm" value="1" />
         <input type="text" class="input w280" placeHolder="'.lang("First name").'" name="fname" required value="'.$data["fname"].'" /><br/><br/>
         <input type="text" class="input w280" placeHolder="'.lang("Last name").'" name="lname" required value="'.$data["lname"].'" /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("Country").'" id="country_selector" name="country" required value="'.$data["country"].'"  /><br/><br/>
+        <input type="text" placeHolder="'.lang("Country").'" id="country_selector" name="country" required value="'.$data["country"].'" class="input w280"   /><br/><br/>
         <input type="text" class="input w280" placeHolder="'.lang("State").'" name="state" value="'.$data["state"].'" required /><br/><br/>
         <input type="text" class="input w280" placeHolder="'.lang("City").'" name="city" required value="'.$data["city"].'"  /><br/><br/>
         <input type="text" class="input w280" placeHolder="'.lang("Zip code").'" name="zip" required value="'.$data["zip"].'"  /><br/><br/>
@@ -144,9 +146,19 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         <input type="submit" class="btn w280" value="'.lang("Next").'" />
     </form><br/><br/>';
 }else if( !empty($_SESSION["user"]["id"])){
-    echo '<div class="fs21 tal"><b>Step 4 \ 4</b></div><br/>';
+    if(!empty($_POST["checkout"])){
+        unset($_SESSION["products"]);
+        $query = 'INSERT INTO `nodes_invoice`(`user_id`, `order_id`, `amount`, `date`) '
+                . 'VALUES("'.$_SESSION["user"]["id"].'", "'.$_SESSION["order_confirm"].'", "'.  doubleval($_POST["checkout"]).'", "'.date("Y-m-d H:i:s").'")';
+        engine::mysql($query);
+        echo '<script>
+            window.location = "'.$_SERVER["DIR"].'/invoice.php?id='. mysql_insert_id().'";
+        </script>';
+        die();
+    }
+    echo '<div class="fs21 tal"><b>'.lang("Step").' 4 \ 5</b></div><br/>';
     $fout .= '<div class="document">
-        <h1>'.lang("Payment").'</h1><br/>';       
+        <h1>'.lang("Checkout").'</h1><br/>';       
     $query = 'SELECT * FROM `nodes_product_order` WHERE `order_id` = "'.$_SESSION["order_confirm"].'"';
     $res = engine::mysql($query);
     $price = 0;
@@ -163,7 +175,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
             $images = explode(";", $product["img"]);
             $products .= '<div class="order_detail">
             <div class="order_detail_preview" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
-                <b class="fs21">'.$product["title"].'</b><br/><br/>
+                <b class="fs18">'.$product["title"].'</b><br/><br/>
                 <font class="fs18">$ '.$product["price"].'</font><br/>
             <div class="clear"></div>
             </div>';
@@ -186,40 +198,11 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         </div>';
     $fout .= $shipping.$products;
     $fout .= '<div class="clear"><br/></div>
-        <h6>'.lang("Total price").': $'.$price.'</h6><br/><br/>';
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "sandbox"';
-    $res = engine::mysql($query);
-    $configs = mysql_fetch_array($res);
-    if($configs["value"]){
-        $fout .= '
-            <button class="btn w280" onClick=\'process_payment("'.$_SESSION["order_confirm"].'","'.$price.'");\'>'.lang("Process payment").'</button><br/><br/>
-            ';
-    }else{
-        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_test"';
-        $res = engine::mysql($query);
-        $configs = mysql_fetch_array($res);
-        if($configs["value"]) $domain = 'www.sandbox.paypal.com';
-        else $domain = 'www.paypal.com';       
-        $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "paypal_id"';
-        $res = engine::mysql($query);
-        $paypal_id = mysql_fetch_array($res);
-        $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "paypal_description"';
-        $res = engine::mysql($query);
-        $paypal_desc = mysql_fetch_array($res);
-        $fout .= '
-            <form action="https://'.$domain.'/cgi-bin/webscr" method="post" target="top">			
-            <input type="hidden" name="cmd" value="_xclick">
-            <input type="hidden" name="business" value="'.$paypal_id["value"].'">
-            <input type="hidden" name="item_name" value="'.$paypal_desc["value"].'">
-            <input type="hidden" name="currency_code" value="USD">
-            <input type="hidden" name="amount" value="'.$price.'">
-            <input type="hidden" name="cancel_return" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/order.php">
-            <input type="hidden" name="return" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account/purchases">
-            <input type="hidden" name="no_shipping" value="1">
-            <input type="hidden" name="notify_url" value="http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/paypal.php?order_id='.$_SESSION["order_confirm"].'">
-            <button type="submit" class="btn w280">PayPal</button><br/><br/>
-            </form>';
-    }
+        <h6>'.lang("Total price").': $'.$price.'</h6><br/><br/>
+        <form method="POST">
+            <input type="hidden" name="checkout" value="'.$price.'" />
+            <input type="submit" class="btn w280" value="'.lang("Checkout").'" />
+        </form>';
     $fout .= '</div>';
 }
 $fout .= '<link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />

@@ -1,4 +1,12 @@
 <?php
+/**
+* Playbacker of user sessions.
+* @path /engine/code/pattern.php
+*
+* @name    Nodes Studio    @version 2.0.7
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+*/
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 if(!empty($_GET["token"]) && $_SESSION["user"]["id"]=="1"){
