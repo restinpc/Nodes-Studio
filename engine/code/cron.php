@@ -92,32 +92,6 @@ if(!$flag){
 }
 //------------------------------------------------------------------------------
 /*
-* Unlinks sessions with more than week age once a day.
-*/
-if(!$flag){
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "cron_session"';
-    $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
-    if($data["value"]<date("U")-86400){
-        $flag = 4;
-        $path = "session/";
-        $dir = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/'.$path;
-        $hdl = opendir($dir);
-        while ($file_name = readdir($hdl)){
-            if (($file_name != ".") && ($file_name != "..") && is_file($dir.$file_name)
-                    && ($file_name != ".htaccess")){
-                if(filemtime($dir.$file_name)<date("U")-604800){
-                    unlink($dir.$file_name);
-                }
-            }
-        }
-        closedir($hdl);
-        $query = 'UPDATE `nodes_config` SET `value` = "'.date("U").'" WHERE `name` = "cron_session"';
-        engine::mysql($query);
-    }
-}
-//------------------------------------------------------------------------------
-/*
 * Unlinks temp images once a day.
 */
 if(!$flag){
@@ -280,29 +254,35 @@ if(!$flag){
 * Updates a cache info for "cached" pages.
 */
 if(!$flag){
-    $query = 'SELECT COUNT(`id`) FROM `nodes_cache` WHERE `interval` > 0 AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%"';
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "cache"';
     $res = engine::mysql($query);
     $data = mysql_fetch_array($res);
-    $count = round($data[0]/1440);
-    if($count<1) $count = 1;
-    $query = 'SELECT * FROM `nodes_cache` WHERE `interval` > 0 AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY `date` ASC LIMIT 0, '.$count;
-    $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
-        if($data["date"]<=intval(date("U")-$data["interval"])){
-            $flag = 7;
-            $url = $data["url"];
-            cache::update_cache($url,0,$data["lang"]);
-        }
-    }
-    if(!$flag){
-        $query = 'SELECT * FROM `nodes_cache` WHERE `date` < '.(date("U")-86400).' AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY RAND() ASC LIMIT 0, 1';
+    $is_cache = intval($data["value"]);
+    if($is_cache){
+        $query = 'SELECT COUNT(`id`) FROM `nodes_cache` WHERE `interval` > 0 AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%"';
+        $res = engine::mysql($query);
+        $data = mysql_fetch_array($res);
+        $count = round($data[0]/1440);
+        if($count<1) $count = 1;
+        $query = 'SELECT * FROM `nodes_cache` WHERE `interval` > 0 AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY `date` ASC LIMIT 0, '.$count;
         $res = engine::mysql($query);
         while($data = mysql_fetch_array($res)){
-            $flag = 7;
-            $url = $data["url"];
-            $lang = $data["lang"];
-            cache::update_cache($url,0,$lang);
-        } 
+            if($data["date"]<=intval(date("U")-$data["interval"])){
+                $flag = 7;
+                $url = $data["url"];
+                cache::update_cache($url,0,$data["lang"]);
+            }
+        }
+        if(!$flag){
+            $query = 'SELECT * FROM `nodes_cache` WHERE `date` < '.(date("U")-86400).' AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY RAND() ASC LIMIT 0, 1';
+            $res = engine::mysql($query);
+            while($data = mysql_fetch_array($res)){
+                $flag = 7;
+                $url = $data["url"];
+                $lang = $data["lang"];
+                cache::update_cache($url,0,$lang);
+            } 
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -310,14 +290,20 @@ if(!$flag){
 * Updates a cache info for new pages.
 */
 if(!$flag){
-    $query = 'SELECT * FROM `nodes_cache` WHERE `title` = "" AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY `date` ASC LIMIT 0, 1';
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "cache"';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
-        $flag = 8;
-        $url = $data["url"];
-        $lang = $data["lang"];
-        cache::update_cache($url,0,$lang);
-    }  
+    $data = mysql_fetch_array($res);
+    $is_cache = intval($data["value"]);
+    if($is_cache){
+        $query = 'SELECT * FROM `nodes_cache` WHERE `title` = "" AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY `date` ASC LIMIT 0, 1';
+        $res = engine::mysql($query);
+        while($data = mysql_fetch_array($res)){
+            $flag = 8;
+            $url = $data["url"];
+            $lang = $data["lang"];
+            cache::update_cache($url,0,$lang);
+        }  
+    }
 }
 //------------------------------------------------------------------------------
 /*

@@ -64,7 +64,7 @@ if(!empty($_REQUEST["name"])){
     function callbackFunc(result) {
         document.getElementById("name").value = result.response[0].first_name+" "+result.response[0].last_name;
         document.getElementById("photo").value = result.response[0].photo;
-        document.getElementById("url").value = "http://vk.com/id"+result.response[0].uid;
+        document.getElementById("url").value = "https://vk.com/id"+result.response[0].uid;
         document.getElementById("form").submit();
     }
     var sub = document.location.hash.replace(/#/gi,"'.$_SERVER["DIR"].'/account.php?mode=social&method=vk&").split("&"); 

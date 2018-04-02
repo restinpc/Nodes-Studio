@@ -3,7 +3,7 @@
 * Framework Installer.
 * @path /engine/code/install.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -25,6 +25,8 @@ if(!empty($_POST["mysql_server"])){
     }if($flag){
         $output .= "Ok.<br/>";
         $query = "DROP TABLE IF EXISTS 
+        `nodes_access`,
+        `nodes_admin`,
         `nodes_agent`,
         `nodes_attendance`,
         `nodes_backend`,
@@ -34,11 +36,11 @@ if(!empty($_POST["mysql_server"])){
         `nodes_config`,
         `nodes_content`,
         `nodes_error`,
+        `nodes_firebase`, 
         `nodes_image`,
         `nodes_inbox`,
         `nodes_invoice`, 
         `nodes_language`,
-        `nodes_log`,
         `nodes_meta`,
         `nodes_order`,
         `nodes_outbox`,
@@ -56,8 +58,28 @@ if(!empty($_POST["mysql_server"])){
         `nodes_user_outbox`;
 
 
+CREATE TABLE IF NOT EXISTS `nodes_access` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `access` int(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `nodes_admin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) NOT NULL,
+  `url` varchar(40) NOT NULL,
+  `img` varchar(40) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
 CREATE TABLE IF NOT EXISTS `nodes_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin` int(1) NOT NULL,
   `name` varchar(25) NOT NULL,
   `photo` varchar(400) NOT NULL,
   `url` varchar(400) NOT NULL,
@@ -100,15 +122,54 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('invoice_image', '".$_SERVER["PUBLIC_URL"]."/img/logo.png', 'Invoice logo image', 'string');
 
 
-INSERT INTO `nodes_user` (`name`, `photo`, `url`, `email`, `pass`, `lang`, `balance`, `ip`, `ban`, `online`, `token`, `confirm`, `code`, `bulk_ignore`) VALUES
-('".mysql_real_escape_string(str_replace("'", "\'", $_POST["admin_name"]))."', 'admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".md5(trim(strtolower($_POST["admin_pass"])))."', '".$_POST["language"]."', 0, '', -1, 0, '', 1, 0, 0);
+INSERT INTO `nodes_user` (`admin`, `name`, `photo`, `url`, `email`, `pass`, `lang`, `balance`, `ip`, `ban`, `online`, `token`, `confirm`, `code`, `bulk_ignore`) VALUES
+('1', '".mysql_real_escape_string(str_replace("'", "\'", $_POST["admin_name"]))."', 'admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".md5(trim(strtolower($_POST["admin_pass"])))."', '".$_POST["language"]."', 0, '', -1, 0, '', 1, 0, 0);
      
+
+INSERT INTO `nodes_admin` (`id`, `name`, `url`, `img`) VALUES
+(1, 'Access', 'access', 'cms/access.jpg'),
+(2, 'Pages', 'pages', 'cms/pages.jpg'),
+(3, 'Content', 'content', 'cms/content.jpg'),
+(4, 'Products', 'products', 'cms/products.jpg'),
+(5, 'Users', 'users', 'cms/users.jpg'),
+(6, 'Orders', 'orders', 'cms/orders.jpg'),
+(7, 'Finance', 'finance', 'cms/finance.jpg'),
+(8, 'Language', 'language', 'cms/language.jpg'),
+(9, 'Attendance', 'attendance', 'cms/attendance.jpg'),
+(10, 'Files', 'files', 'cms/files.jpg'),
+(11, 'Config', 'config', 'cms/config.jpg'),
+(12, 'Backend', 'backend', 'cms/backend.jpg'),
+(13, 'Templates', 'templates', 'cms/templates.jpg'),
+(14, 'Perfomance', 'perfomance', 'cms/perfomance.jpg'),
+(15, 'Outbox', 'outbox', 'cms/outbox.jpg'),
+(16, 'Errors', 'errors', 'cms/errors.jpg');
+
+
+INSERT INTO `nodes_access` (`id`, `admin_id`, `user_id`, `access`) VALUES
+(1, 1, 1, 2),
+(2, 2, 1, 2),
+(3, 3, 1, 2),
+(4, 4, 1, 2),
+(5, 5, 1, 2),
+(6, 6, 1, 2),
+(7, 7, 1, 2),
+(8, 8, 1, 2),
+(9, 9, 1, 2),
+(10, 10, 1, 2),
+(11, 11, 1, 2),
+(12, 12, 1, 2),
+(13, 13, 1, 2),
+(14, 14, 1, 2),
+(15, 15, 1, 2),
+(16, 16, 1, 2);
+
 
 INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('template', 'default', 'Template', 'string'),
 ('default', 'content.php', 'System', 'string'),
 ('debug', '0', 'Debug mode', 'bool'),
 ('cron', '1', 'jQuery cron', 'bool'),
+('cache', '1', 'Allow cache', 'bool'),
 ('compress', '1', 'Compress HTML', 'bool'),
 ('sandbox', '1', 'Sandbox payment mode', 'bool'),
 ('autoupdate', '1', 'Engine auto-update', 'bool'),
@@ -122,6 +183,9 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('send_registration_email', '1', 'Email user on sign up', 'bool'),
 ('send_message_email', '1', 'Email user on message', 'bool'),
 ('send_paypal_email', '1', 'Email user on payment', 'bool'),
+('public_notifications', '1', 'Push notification for guests', 'bool'),
+('firebase_sender_id', '', '<a href=\"http://console.firebase.google.com/\" target=\"_blank\">Firebase Sender ID</a>', 'string'),
+('firebase_server_key', '', '<a href=\"http://console.firebase.google.com/\" target=\"_blank\">Firebase Server Key</a>', 'string'),
 ('yandex_money', '', '<a href=\"https://money.yandex.ru/\" target=\"_blank\">Yandex Money ID</a>', 'string'),
 ('paypal_test', '1', 'PayPal test mode', 'bool'),
 ('paypal_id', '', '<a href=\"https://www.paypal.com/\" target=\"_blank\">PayPal user ID</a>', 'string'),
@@ -145,7 +209,6 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('version', '1', 'System', 'int'),
 ('lastupdate', '0', 'System', 'int'),
 ('checkupdate', '0', 'System', 'int'),
-('cron_session', '0', 'System', 'int'),
 ('cron_images', '0', 'System', 'int'),
 ('cron_exec', '0', 'System', 'int'),
 ('cron_done', '0', 'System', 'int'),
@@ -164,7 +227,9 @@ CREATE TABLE IF NOT EXISTS `nodes_attendance` (
   `agent_id` int(11) NOT NULL,
   `date` int(11) NOT NULL,
   `display` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
+PRIMARY KEY (`id`),
+KEY `token` (`token`),
+KEY `display` (`display`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -185,6 +250,12 @@ CREATE TABLE IF NOT EXISTS `nodes_invoice` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+CREATE TABLE IF NOT EXISTS `nodes_firebase` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(400) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 INSERT INTO `nodes_backend` (`mode`, `file`) VALUES
 ('', 'main.php'),
@@ -210,7 +281,9 @@ CREATE TABLE IF NOT EXISTS `nodes_cache` (
   `keywords` varchar(300) NOT NULL DEFAULT '',
   `content` longtext NOT NULL,
   `time` double NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `interval` (`interval`),
+  KEY `lang` (`lang`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -226,18 +299,23 @@ CREATE TABLE IF NOT EXISTS `nodes_catalog` (
   `order` int(11) NOT NULL,
   `date` int(11) NOT NULL DEFAULT '0',
   `public_date` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `visible` (`visible`),
+  KEY `lang` (`lang`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
 
 
 CREATE TABLE IF NOT EXISTS `nodes_comment` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `url` text NOT NULL,
+  `url` varchar(400) NOT NULL,
   `reply` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `text` text NOT NULL,
   `date` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `url` (`url`),
+  KEY `reply` (`reply`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -252,7 +330,9 @@ CREATE TABLE IF NOT EXISTS `nodes_content` (
   `img` varchar(100) NOT NULL,
   `date` int(11) NOT NULL DEFAULT '0',
   `public_date` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `cat_id` (`cat_id`),
+  KEY `lang` (`lang`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -266,7 +346,9 @@ CREATE TABLE IF NOT EXISTS `nodes_error` (
   `post` text NOT NULL,
   `session` text NOT NULL,
   `count` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `url` (`url`),
+  KEY `lang` (`lang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -289,18 +371,9 @@ CREATE TABLE IF NOT EXISTS `nodes_inbox` (
   `readed` int(11) NOT NULL,
   `inform` tinyint(1) NOT NULL,
   `system` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
-
-CREATE TABLE IF NOT EXISTS `nodes_log` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `action` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `ip` varchar(20) NOT NULL,
-  `date` int(11) NOT NULL,
-  `details` text NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `from` (`from`),
+  KEY `to` (`to`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -312,7 +385,9 @@ CREATE TABLE IF NOT EXISTS `nodes_meta` (
   `description` varchar(200) NOT NULL,
   `keywords` varchar(300) NOT NULL,
   `mode` int(1) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `url` (`url`),
+  KEY `lang` (`lang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -323,7 +398,8 @@ CREATE TABLE IF NOT EXISTS `nodes_order` (
   `status` int(11) NOT NULL,
   `shipping` int(11) NOT NULL,
   `payment` int(1) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -347,7 +423,8 @@ CREATE TABLE IF NOT EXISTS `nodes_pattern` (
   `width` int(11) NOT NULL,
   `height` int(11) NOT NULL,
   `date` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `attendance_id` (`attendance_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -370,6 +447,7 @@ CREATE TABLE IF NOT EXISTS `nodes_product` (
   `img` text NOT NULL,
   `shipping` int(11) NOT NULL,
   `price` double NOT NULL,
+  `order` int(11) NOT NULL,
   `date` int(11) NOT NULL,
   `status` int(11) NOT NULL,
   `views` int(11) NOT NULL,
@@ -384,7 +462,10 @@ CREATE TABLE IF NOT EXISTS `nodes_product_data` (
   `cat_id` int(11) NOT NULL,
   `value` varchar(100) NOT NULL,
   `url` varchar(40) NOT NULL,
-  PRIMARY KEY (`id`)
+  `order` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cat_id` (`cat_id`),
+  KEY `value` (`value`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -397,7 +478,9 @@ CREATE TABLE IF NOT EXISTS `nodes_product_order` (
   `track` varchar(100) NOT NULL,
   `status` int(11) NOT NULL,
   `date` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `product_id` (`product_id`),
+  KEY `order_id` (`order_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -418,7 +501,9 @@ CREATE TABLE IF NOT EXISTS `nodes_property_data` (
   `product_id` int(11) NOT NULL,
   `property_id` int(11) NOT NULL,
   `data_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `product_id` (`product_id`),
+  KEY `property_id` (`property_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -441,7 +526,8 @@ CREATE TABLE IF NOT EXISTS `nodes_shipping` (
   `street1` varchar(100) NOT NULL,
   `street2` varchar(100) NOT NULL,
   `phone` varchar(20) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -462,7 +548,11 @@ CREATE TABLE IF NOT EXISTS `nodes_transaction` (
   `payment_date` varchar(100) NOT NULL,
   `comment` text NOT NULL,
   `ip` varchar(40) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `invoice_id` (`invoice_id`),
+  KEY `order_id` (`order_id`),
+  KEY `status` (`status`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -472,7 +562,8 @@ CREATE TABLE IF NOT EXISTS `nodes_user_outbox` (
   `outbox_id` int(11) NOT NULL,
   `date` int(11) NOT NULL,
   `status` tinyint(4) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -619,7 +710,8 @@ CREATE TABLE IF NOT EXISTS `nodes_language` (
   `name` text NOT NULL,
   `lang` varchar(3) NOT NULL,
   `value` text NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `lang` (`lang`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
@@ -1681,7 +1773,48 @@ INSERT INTO `nodes_language` (`id`, `name`, `lang`, `value`) VALUES
 (1055, 'Partially paid', 'ru', 'Частично оплачено'),
 (1056, 'Your cart is empty', 'ru', 'Ваша корзина пуста'),
 (1057, 'View invoice', 'ru', 'Счет на оплату'),
-(1058, 'Order payment', 'ru', 'Оплата заказа');
+(1058, 'Order payment', 'ru', 'Оплата заказа'),
+(1059, 'Select payment method', 'en', 'Select payment method'),
+(1060, 'Toggle navigation', 'en', 'Toggle navigation'),
+(1061, 'Select an image to upload', 'en', 'Select an image to upload'),
+(1097, 'Select payment method', 'ru', 'Выберите способ оплаты'),
+(1064, 'Administrators not found', 'en', 'Administrators not found'),
+(1099, 'Select an image to upload', 'ru', 'Выберите изображение для загрузки'),
+(1098, 'Toggle navigation', 'ru', 'Переключить навигацию'),
+(1081, 'Edit permission', 'en', 'Edit permission'),
+(1082, 'Delete from admin', 'en', 'Delete from admin'),
+(1083, 'Make admin', 'en', 'Make admin'),
+(1084, 'Manage permission', 'en', 'Manage permission'),
+(1085, 'Manage permission of', 'en', 'Manage permission of'),
+(1086, 'Back to access', 'en', 'Back to access'),
+(1087, 'Section', 'en', 'Section'),
+(1088, 'Permission', 'en', 'Permission'),
+(1089, 'No access', 'en', 'No access'),
+(1090, 'Read-only', 'en', 'Read-only'),
+(1091, 'Full access', 'en', 'Full access'),
+(1092, 'Primary admin', 'en', 'Primary admin'),
+(1093, 'Send as notification', 'en', 'Send as notification'),
+(1094, 'Bulk message is sending now', 'en', 'Bulk message is sending now'),
+(1095, 'Complete item description', 'en', 'Complete item description'),
+(1096, 'Add new admin', 'en', 'Add new admin'),
+(1100, 'Administrators not found', 'ru', 'Администраторы не найдены'),
+(1101, 'Edit permission', 'ru', 'Редактировать права'),
+(1102, 'Delete from admin', 'ru', 'Удалить из админов'),
+(1103, 'Make admin', 'ru', 'Сделать админом'),
+(1104, 'Manage permission', 'ru', 'Управление правами'),
+(1105, 'Manage permission of', 'ru', 'Управление правами пользователя'),
+(1106, 'Back to access', 'ru', 'Наза к доступу'),
+(1107, 'Section', 'ru', 'Секция'),
+(1108, 'Permission', 'ru', 'Права'),
+(1109, 'No access', 'ru', 'Нет доступа'),
+(1110, 'Read-only', 'ru', 'Только чтение'),
+(1111, 'Full access', 'ru', 'Полный доступ'),
+(1112, 'Primary admin', 'ru', 'Главный админ'),
+(1113, 'Send as notification', 'ru', 'Отправить уведомление'),
+(1114, 'Bulk message is sending now', 'ru', 'Массовое сообщение отправляется'),
+(1115, 'Complete item description', 'ru', 'Полное описание товара'),
+(1116, 'Add new admin', 'ru', 'Добавить администратора');
+
 
 INSERT INTO `nodes_catalog` (`caption`, `description`, `text`, `url`, `img`, `visible`, `lang`, `order`, `date`, `public_date`) VALUES
 ('Политика конфиденциальности', '', '<ul><li><a href=\"#1\">Сбор информации</a></li><li><a href=\"#2\">Использование информации</a></li><li><a href=\"#3\">Защита информации</a></li><li><a href=\"#4\">Использование cookie</a></li><li><a href=\"#5\">Раскрытие информации</a></li><li><a href=\"#6\">Сторонние ссылки</a></li><li><a href=\"#7\">CalOPPA</a></li><li><a href=\"#8\">COPPA</a></li><li><a href=\"#9\">Как с нами связаться</a></li></ul><p>&nbsp;</p><p>Данные положения касаются персональных данных клиентов (далее &ndash; &laquo;Персональные данные&raquo;, &laquo;Личная информация&raquo;, &laquo;Личные данные&raquo;), которые могут быть идентифицированы каким-либо образом, и которые посещают веб-сайт (далее - &ldquo;Сайт&rdquo;) и пользуются его услугами (далее - &ldquo;Сервисы&rdquo;). <br /> Поправки к настоящей Политике конфиденциальности будут размещены на Сайте и/или в Сервисах и будут являться действительными сразу после публикации. Ваше дальнейшее использование Сервисов после внесения любых поправок в Политике конфиденциальности означает Ваше принятие данных изменений. <br /> Регистрируясь на Сайте, Вы подтверждаете принятие Вами решения о предоставлении своих персональных данных и даете согласие на их обработку своей волей и в своем интересе, за исключением случаев, предусмотренных законодательством.</p><p><br /> <a name=\"1\"></a><strong>Какую личную информацию мы собираем от людей, которые посещают наш Сайт?</strong></p><p>Сайт собирает только личную информацию, которую Вы предоставляете добровольно при посещении или регистрации на Сайте. Понятие \"личная информация\" включает информацию, которая определяет Вас как конкретное лицо, например, Ваше имя или адрес электронной почты. Тогда как просматривать содержание Сайта можно без прохождения процедуры регистрации, Вам потребуется зарегистрироваться, чтобы воспользоваться некоторыми функциями, например, оставить свой комментарий к статье.</p><p><br /> <strong>Когда мы собираем информацию?</strong></p><p>Мы собираем информацию от вас, когда вы регистрируетесь на нашем сайте, оформиляете заказ, подписыветесь на рассылку или иным образом вводите информацию на нашем сайте.</p><p><br /> <a name=\"2\"></a><strong>Как мы используем вашу информацию?</strong></p><p>Мы можем использовать информацию, которую мы получаем от вас, следующими способами:</p><ul><li>Для того, чтобы улучшить качество сервиса.</li><li>Для администрирования контента и других функций сайта.</li><li>Чтобы быстро обрабатывать ваши транзакции.</li><li>Для того, чтобы составить рейтинги и обзоры услуг или продуктов.</li><li>Для дальнейшего взаимодействия после переписки (чат, электронную почту или телефон).</li></ul><p><br /> <a name=\"3\"></a><strong>Как мы защищаем вашу информацию?</strong></p><p>Мы будем стремиться предотвратить несанкционированный доступ к Вашей личной информации, однако, никакая передача данных через интернет, мобильное устройство или через беспроводное устройство не могут гарантировать 100%-ную безопасность. Мы будем продолжать укреплять систему безопасности по мере доступности новых технологий и методов.</p><p><br /> <a name=\"4\"></a><strong>Используем ли мы \'cookies\'?</strong></p><p>Да, мы используем &ldquo;куки&rdquo; (cookies) для отслеживания информации о пользователях. Cookies являются небольшими по объему данными, которые передаются веб-сервером через Ваш веб-браузер и хранятся на жестком диске Вашего компьютера. Мы используем cookies для отслеживания вариантов страниц, которые видел посетитель, для подсчета нажатий сделанных посетителем на том или ином варианте страницы, для мониторинга трафика и для измерения популярности сервисных настроек. Мы будем использовать данную информацию, чтобы предоставить Вам релевантные данные и услуги. Данная информация также позволяет нам убедиться, что посетители видят именно ту целевую страницу, которую они ожидают увидеть, в том случае, если они возвращаются через тот же URL-адрес, и это позволяет нам сказать, сколько людей нажимает на Ваши целевые страницы.</p><p><br /> <a name=\"5\"></a><strong>Раскрытие информации</strong></p><p>Мы будем раскрывать Вашу информацию третьим лицам только в соответствии с Вашими инструкциями или в случае необходимости для того, чтобы предоставить Вам определенный сервис, или по другим причинам в соответствии с действующим законодательством Российской Федерации. Мы не осуществляем, не продаем, не распространяем или раскрываем Вашу личную информацию без предварительного получения Вашего на то разрешения за исключением случаев, предусмотренных международным или федеральным законодательством.</p><p><br /> <a name=\"6\"></a><strong>Сторонние ссылки</strong></p><p>Сайт может содержать ссылки на другие сайты, и мы не несем ответственности за политику конфиденциальности или содержание данных сайтов. Мы рекомендуем Вам ознакомиться с политикой конфиденциальности связанных сайтов. Их политика конфиденциальности и деятельность отличаются от наших Политики конфиденциальности и деятельности.</p><p><br /> <a name=\"7\"></a><strong>CalOPPA (California Online Privacy Protection Act)</strong></p><p>Для того, чтобы отвечать требованиям CalOPPA, мы согласны на следующее:</p><ul><li>Пользователи могут посетить наш сайт анонимно.</li><li>Ссылка на эту страницу размещена на главной старницы сайта.</li><li>Вы будете уведомлены о любых изменениях политики конфиденциальности.</li><li>Пользователи могут изменить вашу личную информацию, войдя в свой аккаунт.</li></ul><p><br /> <a name=\"8\"></a><strong>COPPA (Children Online Privacy Protection Act)</strong></p><p>Мы стремимся защищать конфиденциальность информации о детях. Наш сайт предназначен для широкой общественности, и мы не получаем преднамеренно личную информацию от детей моложе 13 лет. Когда и если на нашем сайте запрашивается информация о возрасте, и пользователи указывают возраст до 13 лет, сайт автоматически блокирует получение личной информации от таких пользователей и блокирует их регистрацию в качестве пользователей сайта.</p><p><br /> <strong>CAN SPAM Act</strong></p><p>Для того, чтобы отвечать требованиям CAN SPAM (Для регулирования торговли между штатами путем введения ограничений и санкций на передачу нежелательной коммерческой электронной почты через Интернет., мы согласны на следующее: <br /> Если в любое время вы хотите отказаться от получения электронных сообщений, вы можете из личного кабинета.</p><p><br /> <a name=\"9\"></a><strong>Как с нами связаться</strong></p><p>Если есть какие-либо вопросы относительно политики конфиденциальности, вы можете связаться с нами, используя информацию на сайте.</p>', 'privacy_policy', '', 0, 'ru', 0, ".date("U").", ".date("U")."),
@@ -1878,6 +2011,14 @@ INSERT INTO `nodes_property_data` (`id`, `product_id`, `property_id`, `data_id`)
             unlink($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/data");
             $output .= 'Ok.<br/>';
         }
+        if($_POST["protocol"] == "https"){
+            $file = fopen("https.htaccess", "r");
+            $data = fread($file, filesize("https.htaccess"));
+            fclose($file);
+            $file = fopen(".htaccess", "w");
+            fwrite($file, $data);
+            fclose($file);
+        }
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "1"';
         @mysql_query("SET NAMES utf8");
         $res = mysql_query($query) or die(mysql_error());
@@ -1945,6 +2086,7 @@ function new_update(){
     <div style="width: 110px; float: left; margin-right: 10px;">Admin name</div> <input class="input" required="required" type="text" name="admin_name" value="Admin" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Admin email</div> <input class="input" required="required" type="text" name="admin_email" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Admin pass</div> <input class="input" required="required" type="text" name="admin_pass" ><br/>
+    <div style="width: 110px; float: left; margin-right: 10px;">Site protocol</div> <select class="input" style="width:160px;" required="required" type="text" name="protocol"> <option value="http">http</option> <option value="https">https</option> </select><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site name</div> <input class="input" required="required" type="text" name="name" value="Nodes Studio" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site description</div> <input class="input" required="required" type="text" name="description" value="Web 2.0 Framework" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site language</div> <input class="input" required="required" type="text" name="language" value="en" ><br/>

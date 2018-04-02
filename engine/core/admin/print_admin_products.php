@@ -3,7 +3,7 @@
 * Print admin products page.
 * @path /engine/core/admin/print_admin_products.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,8 +19,23 @@
 * @usage <code> engine::print_admin_products($cms); </code>
 */
 function print_admin_products($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "products" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     $cms->onload .= '; tinymce_init(); ';
     if($_GET["action"]=="add"){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         if(!empty($_POST["file1"]) && !empty($_SESSION["user"]["id"])){
             $_SESSION["photos"] = '';
             foreach($_POST as $key=>$file){
@@ -195,6 +210,10 @@ function print_admin_products($cms){
             $cms->onload .= '; jQuery("#country_selector").countrySelect({ defaultCountry: "us" }); ';
         }
     }else if($_GET["action"]=="edit"){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         if(!empty($_GET["id"])){
             if(!empty($_POST["title"])){
                 $query = 'DELETE FROM `nodes_property_data` WHERE `product_id` = "'.$_GET["id"].'"';
@@ -615,19 +634,23 @@ function print_admin_products($cms){
                 <td align=left valign=middle>$'.$data["price"].'</td>
                 <td align=left valign=middle>'.date("d/m/Y H:i", $data["date"]).'</td>
                 <td align=left valign=middle>'.$status.'</td>
-                <td width=60 align=left valign=middle>
-                    <form method="POST" id="edit_product_form_'.$data["id"].'" action="'.$_SERVER["DIR"].'/admin/?mode=products&action=edit&id='.$data["id"].'" >
-                        <input type="hidden" name="edit" value="1" />
-                        <select name="act" class="input" onChange=\'document.getElementById("edit_product_form_'.$data["id"].'").submit();\'>
-                            <option>'.lang("Choose action").'</option>
-                            <option value="1">'.lang("Edit item").'</option>';
+                <td width=60 align=left valign=middle>';
+            if($admin_access == 2){
+                $table .= '
+                        <form method="POST" id="edit_product_form_'.$data["id"].'" action="'.$_SERVER["DIR"].'/admin/?mode=products&action=edit&id='.$data["id"].'" >
+                            <input type="hidden" name="edit" value="1" />
+                            <select name="act" class="input" onChange=\'document.getElementById("edit_product_form_'.$data["id"].'").submit();\'>
+                                <option>'.lang("Choose action").'</option>
+                                <option value="1">'.lang("Edit item").'</option>';
 
-            if($data["status"]) $table .= '<option value="2">'.lang("Deactivate item").'</option>';
-            else $table .= '<option value="3">'.lang("Activate item").'</option>';
+                if($data["status"]) $table .= '<option value="2">'.lang("Deactivate item").'</option>';
+                else $table .= '<option value="3">'.lang("Activate item").'</option>';
 
+                $table .= '
+                            </select>
+                        </form>';
+            }
             $table .= '
-                        </select>
-                    </form>
                 </td>
             </tr>';
         }$table .= '</table>
@@ -695,9 +718,11 @@ function print_admin_products($cms){
         }else{
             $fout = '<div class="clear_block">'.lang("Products not found").'</div>';
         }
-        $fout .= '<br/>
+        if($admin_access == 2){
+            $fout .= '<br/>
             <a href="'.$_SERVER["DIR"].'/admin/?mode=products&action=add"><input type="button" class="btn w280" value="'.lang("List new Item").'" ></a><br/><br/>'
             . '<a href="'.$_SERVER["DIR"].'/admin/?mode=products&action=edit"><input type="button" class="btn w280" value="'.lang("Edit Properties").'" ></a><br/>';
+        }
     }
     return $fout;
 }   

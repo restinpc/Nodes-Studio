@@ -63,11 +63,13 @@ function print_navigation($site, $title){
     $fout .= '
     <span class="profile_menu_item '.($title == lang("Profile")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_0").click();\'>'
     . '<a id="profile_menu_link_0" href="'.$_SERVER["DIR"].'/account">'.lang("Profile").'</a></span>';
-    if($_SESSION["user"]["id"]=="1"){
+    if($_SESSION["user"]["admin"]=="1"){
         $fout .= '
             <span class="profile_menu_item" onClick=\'document.getElementById("profile_menu_link_1").click();\'>'
-            . '<a id="profile_menu_link_1" href="'.$_SERVER["DIR"].'/admin">'.lang("Admin").'</a></span>
-                <span class="profile_menu_item" onClick=\'document.getElementById("profile_menu_link_2").click();\'>'
+            . '<a id="profile_menu_link_1" href="'.$_SERVER["DIR"].'/admin">'.lang("Admin").'</a></span>';
+    }
+    if($_SESSION["user"]["id"] == "1"){
+        $fout .= '<span class="profile_menu_item" onClick=\'document.getElementById("profile_menu_link_2").click();\'>'
             . '<a id="profile_menu_link_2" href="http://nodes-studio.com" target="_blank">'.lang("About").'</a></span>';
     }else{
         $fout .= $button;

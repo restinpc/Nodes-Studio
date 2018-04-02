@@ -141,9 +141,6 @@ function update(){
     else if(empty($arr)) $output .= "Ok. File is empty.<br/>";
     else return($output.lang("Error").".<br/>".lang("Update aborted").".".$error_output);
     $output .= lang("Updating to version")." 2.0.".$version." ".lang("is complete")."!<br/>";
-    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-            . 'VALUES("8", "1", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "2.0.'.$version.'")';
-    engine::mysql($query);
     $query = 'UPDATE `nodes_config` SET `value` = "'.$version.'" WHERE `name` = "version"';
     engine::mysql($query);
     $query = 'UPDATE `nodes_config` SET `value` = "'.date("U").'" WHERE `name` = "lastupdate"';

@@ -3,7 +3,7 @@
 * Print admin finance page.
 * @path /engine/core/admin/print_admin_finance.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,7 +19,22 @@
 * @usage <code> engine::print_admin_finance($cms); </code>
 */
 function print_admin_finance($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+        . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "finance" '
+        . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+        . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(!empty($_POST["id"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         if($_POST["submit_btn"]=="Confirm payment"){
             $query = 'SELECT * FROM `nodes_transaction` WHERE `id` = "'.$_POST["id"].'"';
             $res = engine::mysql($query);
@@ -87,18 +102,21 @@ function print_admin_finance($cms){
             <td align=left valign=middle>'.$type.'</td>
             <td align=left valign=middle>$'.$data["amount"].'</td>
             <td align=left valign=middle>'.date("d/m/Y H:i", $data["date"]).'</td>
-            <td width=30 align=left valign=middle class="nowrap">
-                <form method="POST">
-                    <input type="hidden" name="id" value="'.$data["id"].'" />';
-                    if(!$data["order_id"] && $data["status"]==1){
-                        $table .= '<input onClick=\'if(!confirm("'.lang("Please, confirm transaction").' $'.$data["amount"].' - PayPal '.$data["comment"].'")){ return; }\' type="submit" name="submit_btn"  class="btn small" value="'.lang("Confirm payment").'" />';
-                    }else{
-                        $table .= '<input type="submit" name="submit_btn" value="'.lang("Delete").'" class="btn small" />';
-                    }
-            if(intval($data["invoice_id"]) > 0){
-                $table .= ' <input type="button" onClick=\'window.open("/invoice.php?id='.$data["invoice_id"].'");\' class="btn small" value="'.lang("View invoice").'">';
+            <td width=30 align=left valign=middle class="nowrap">';
+            if($admin_access == 2){
+                $table .= '<form method="POST">
+                        <input type="hidden" name="id" value="'.$data["id"].'" />';
+                        if(!$data["order_id"] && $data["status"]==1){
+                            $table .= '<input onClick=\'if(!confirm("'.lang("Please, confirm transaction").' $'.$data["amount"].' - PayPal '.$data["comment"].'")){ return; }\' type="submit" name="submit_btn"  class="btn small" value="'.lang("Confirm payment").'" />';
+                        }else{
+                            $table .= '<input type="submit" name="submit_btn" value="'.lang("Delete").'" class="btn small" />';
+                        }
+                if(intval($data["invoice_id"]) > 0){
+                    $table .= ' <input type="button" onClick=\'window.open("/invoice.php?id='.$data["invoice_id"].'");\' class="btn small" value="'.lang("View invoice").'">';
+                }
+                $table .= '</form>';
             }
-        $table .= '</form>
+        $table .= '
             </td>
         </tr>';
     }$table .= '</table>

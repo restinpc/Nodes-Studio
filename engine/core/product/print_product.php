@@ -41,7 +41,7 @@ function print_product($site, $data){
                     </div>
                 </div>
                 <div class="share_block"><div>'.lang("Share friends").'</div><br/>'.
-                    engine::print_share($_SERVER["PUBLIC_URL"].'/product/'.$data["id"]).'</div>
+                    engine::print_share($site, $_SERVER["PUBLIC_URL"].'/product/'.$data["id"], $data["title"]).'</div>
                 <div class="clear"></div>
                 <p>'.$data["text"].'</p>
             </div>
@@ -96,7 +96,8 @@ function print_product($site, $data){
     $blocks = engine::print_more_products($site, $data["id"]);
     if(!empty($blocks)){
         $new_fout .= '<div class="clear"></div><br/>'
-            . '<div class="tal pl10 fs21"><b>'.lang("You might also be interested in").'</b><br/></div>
+            . '<div class="tal pl10 fs21"><b>'.lang("You might also be interested in").'</b></div>
+                <br/><br/>
             <div class="preview_blocks">'
             .$blocks.
             '<div class="clear"></div>

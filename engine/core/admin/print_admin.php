@@ -3,7 +3,7 @@
 * Print admin main page.
 * @path /engine/core/admin/print_admin.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,7 +19,7 @@
 * @usage <code> engine::print_admin($cms); </code>
 */
 function print_admin($cms){
-    return '
+    $fout = '
 <div class="document980">
 <div class="two_columns">
     <section class="top_right_column">
@@ -39,26 +39,18 @@ function print_admin($cms){
             </div>
         </div>
     </section>
-    <section class="left_column b0">'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=pages"><img src="'.$_SERVER["DIR"].'/img/cms/pages.jpg" /><br/>'.lang("Pages").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=content"><img src="'.$_SERVER["DIR"].'/img/cms/content.jpg" /><br/>'.lang("Content").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=products"><img src="'.$_SERVER["DIR"].'/img/cms/products.jpg" /><br/>'.lang("Products").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=users"><img src="'.$_SERVER["DIR"].'/img/cms/users.jpg" /><br/>'.lang("Users").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=orders"><img src="'.$_SERVER["DIR"].'/img/cms/orders.jpg" /><br/>'.lang("Orders").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=finance"><img src="'.$_SERVER["DIR"].'/img/cms/finance.jpg" /><br/>'.lang("Finance").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=language"><img src="'.$_SERVER["DIR"].'/img/cms/language.jpg" /><br/>'.lang("Language").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=attendance"><img src="'.$_SERVER["DIR"].'/img/cms/attendance.jpg" /><br/>'.lang("Attendance").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=files"><img src="'.$_SERVER["DIR"].'/img/cms/files.jpg" /><br/>'.lang("Files").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=config"><img src="'.$_SERVER["DIR"].'/img/cms/config.jpg" /><br/>'.lang("Config").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=backend"><img src="'.$_SERVER["DIR"].'/img/cms/backend.jpg" /><br/>'.lang("Backend").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=templates"><img src="'.$_SERVER["DIR"].'/img/cms/templates.jpg" /><br/>'.lang("Templates").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=perfomance"><img src="'.$_SERVER["DIR"].'/img/cms/perfomance.jpg" /><br/>'.lang("Perfomance").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=outbox"><img src="'.$_SERVER["DIR"].'/img/cms/outbox.jpg" /><br/>'.lang("Outbox").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=logs"><img src="'.$_SERVER["DIR"].'/img/cms/logs.jpg" /><br/>'.lang("Logs").'</a></div>'
-    . '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode=errors"><img src="'.$_SERVER["DIR"].'/img/cms/errors.jpg" /><br/>'.lang("Errors").'</a></div>'
-    . '</section>
+    <section class="left_column b0">';
+    $query = 'SELECT `admin`.*, `access`.`access` FROM `nodes_access` AS `access` LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`id` = `access`.`admin_id` WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `admin`.`id` ASC';
+    $res = engine::mysql($query);
+    while($data = mysql_fetch_array($res)){
+        if($data["access"]){
+            $fout .= '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode='.$data["url"].'"><img src="'.$_SERVER["DIR"].'/img/'.$data["img"].'" /><br/>'.lang($data["name"]).'</a></div>';
+        }
+    }
+    $fout .= '</section>
     <div class="clear"></div>
 </div>
 </div>';
+    return $fout;
 }
 

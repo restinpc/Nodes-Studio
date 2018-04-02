@@ -3,7 +3,7 @@
 * Do not edit directly.
 * @path /template/android/template.source.js
 *
-* @name    Nodes Studio    @version 2.0.4
+* @name    Nodes Studio    @version 2.0.8
 * @license http://nodes-studio.com/license.txt GNU Public License
 */
 //------------------------------------------------------------------------------
@@ -3200,7 +3200,7 @@ MaterialLayout.prototype.Constant_ = {
     MAX_WIDTH: '(max-width: 1024px)',
     TAB_SCROLL_PIXELS: 100,
     RESIZE_TIMEOUT: 100,
-    MENU_ICON: '&#xE5D2;',
+    MENU_ICON: '123;',
     CHEVRON_LEFT: 'chevron_left',
     CHEVRON_RIGHT: 'chevron_right'
 };
@@ -3480,9 +3480,10 @@ MaterialLayout.prototype.init = function () {
                 drawerButton.setAttribute('role', 'button');
                 drawerButton.setAttribute('tabindex', '0');
                 drawerButton.classList.add(this.CssClasses_.DRAWER_BTN);
-                var drawerButtonIcon = document.createElement('i');
-                drawerButtonIcon.classList.add(this.CssClasses_.ICON);
-                drawerButtonIcon.innerHTML = this.Constant_.MENU_ICON;
+                var drawerButtonIcon = document.createElement('div');
+                drawerButtonIcon.classList.add('nav_button');
+                drawerButtonIcon.innerHTML = '&nbsp;';
+                drawerButtonIcon.style.margin = "15px";
                 drawerButton.appendChild(drawerButtonIcon);
             }
             if (this.drawer_.classList.contains(this.CssClasses_.ON_LARGE_SCREEN)) {

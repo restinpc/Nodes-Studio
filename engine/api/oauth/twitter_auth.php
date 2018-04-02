@@ -18,7 +18,7 @@ $res = engine::mysql($query);
 $secret = mysql_fetch_array($res);
 define ('TWITTER_CONSUMER_KEY', $key["value"]);
 define ('TWITTER_CONSUMER_SECRET', $secret["value"]);
-define ('TWITTER_URL_CALLBACK', 'http://'.$_SERVER["HTTP_HOST"].''.$_SERVER["DIR"].'/account.php?mode=social&method=tw&auth=1');
+define ('TWITTER_URL_CALLBACK', $_SERVER["PROTOCOL"].'://'.$_SERVER["HTTP_HOST"].''.$_SERVER["DIR"].'/account.php?mode=social&method=tw&auth=1');
 define ('URL_REQUEST_TOKEN', 'https://api.twitter.com/oauth/request_token');
 define ('URL_AUTHORIZE', 'https://api.twitter.com/oauth/authorize');
 define ('URL_ACCESS_TOKEN', 'https://api.twitter.com/oauth/access_token');

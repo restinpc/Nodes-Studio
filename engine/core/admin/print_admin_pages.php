@@ -3,7 +3,7 @@
 * Print admin pages file.
 * @path /engine/core/admin/print_admin_pages.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,14 +19,29 @@
 * @usage <code> engine::print_admin_pages($cms); </code>
 */
 function print_admin_pages($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "pages" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(!empty($_POST["id"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         if($_POST["date"] == "-3"){
             $query = 'DELETE FROM `nodes_cache` WHERE `id` = "'.$_POST["id"].'"';
         }else{
             $query = 'UPDATE `nodes_cache` SET `interval` = "'.$_POST["date"].'", `title` = "", `html` = "", `content` = "" WHERE `id` = "'.$_POST["id"].'"';
         }engine::mysql($query);
     }
-    $fout = '<div class="document980">
+    $fout = '<div class="document980" style="max-width: 1200px;">
         <form method="POST" id="admin_lang_select">'.lang("Select your language").': 
         <select class="input" name="lang" onChange=\'document.getElementById("admin_lang_select").submit();\'>';
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "languages"';
@@ -102,7 +117,7 @@ function print_admin_pages($cms){
         $arr_count++;
         $opt = array();
         $opt[$data["interval"]] = "selected";
-        $url = str_replace("http://".$_SERVER["HTTP_HOST"], "", $data["url"]);
+        $url = str_replace($_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"], "", $data["url"]);
         if(strlen($url)>25) $url = mb_substr($url,0,25).'..';
         $table .= '
         <tr>
@@ -111,22 +126,22 @@ function print_admin_pages($cms){
                 <a href="'.$data["url"].'" target="_blank" class="nowrap" >'.$url.'</a>
             </td>
             <td align=left valign=middle>
-                <input type="text" class="input" name="title" id="title_'.$data["id"].'" placeHolder="'.$data["tit"].'" value="'.$data["title"].'"
+                <input type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="title" id="title_'.$data["id"].'" placeHolder="'.$data["tit"].'" value="'.$data["title"].'"
                     onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\'
                 />
             </td>
             <td align=left valign=middle>
-                <input type="text" class="input" name="description" id="description_'.$data["id"].'" placeHolder="'.$data["desc"].'" value="'.$data["description"].'"
+                <input type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="description" id="description_'.$data["id"].'" placeHolder="'.$data["desc"].'" value="'.$data["description"].'"
                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\' 
                 />
             </td>
             <td align=left valign=middle>
-                <input type="text" class="input" name="keywords" id="keywords_'.$data["id"].'"  placeHolder="'.$data["key"].'" value="'.$data["keywords"].'" 
+                <input type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="keywords" id="keywords_'.$data["id"].'"  placeHolder="'.$data["key"].'" value="'.$data["keywords"].'" 
                     onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\'
                 />
             </td>
             <td align=left valign=middle>
-                <select name="mode" class="input" id="mode_'.$data["id"].'"
+                <select name="mode" '.($admin_acces!=2?'disabled':'').' class="input" id="mode_'.$data["id"].'"
                     onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\' >
                     <option value="0">'.lang("Add").'</option>
                     <option value="1" '.(($data["mode"]||is_null($data["mode"]))?'selected':'').'>'.lang("Replace").'</option>
@@ -134,7 +149,7 @@ function print_admin_pages($cms){
             </td>
             <td align=left valign=middle>
                 <form method="POST" id="form_'.$data["id"].'"><input type="hidden" name="id" value="'.$data["id"].'" />
-                <select name="date" class="table_selector input w120" onChange=\'document.getElementById("form_'.$data["id"].'").submit();\'>
+                <select name="date" '.($admin_acces!=2?'disabled':'').' class="table_selector input w120" onChange=\'document.getElementById("form_'.$data["id"].'").submit();\'>
                     <option value="-1" '.$opt[-1].'>'.lang("Not cathing").'</option>
                     <option value="0" '.$opt[0].'>'.lang("Not refreshing").'</option>
                     <option value="60" '.$opt[60].'>1 '.lang("minut").'</option>
@@ -146,8 +161,13 @@ function print_admin_pages($cms){
                 </select>
                 </form>
             </td>
-            <td width=40 align=left valign=middle>
-                <input id="button_'.$data["id"].'" type="button" onClick=\'edit_seo("'.intval($data["id"]).'");\' class="btn small hidden" value="&#10004;" />
+            <td width=40 align=left valign=middle>';
+        if($admin_access == 2){
+        $table .= '
+            <input id="button_'.$data["id"].'" type="button" onClick=\'edit_seo("'.intval($data["id"]).'");\' class="btn small hidden" value="&#10004;" />
+                ';
+        }
+        $table .= '
             </td>
         </tr>';
     }$table .= '</table>

@@ -3,7 +3,7 @@
 * Print admin orders page.
 * @path /engine/core/admin/print_admin_orders.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,6 +19,17 @@
 * @usage <code> engine::print_admin_orders($cms); </code>
 */
 function print_admin_orders($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "orders" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     $fout = '<div class="document640">';
     $query = 'SELECT * FROM `nodes_product` WHERE `user_id` = "'.$_SESSION["user"]["id"].'"';
     $res = engine::mysql($query);

@@ -28,7 +28,7 @@ $apiConfig = array(
     'application_name' => $name["value"],
     'oauth2_client_id' => $gp_id["value"],
     'oauth2_client_secret' => $gp_secret["value"],
-    'oauth2_redirect_uri' => 'http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account.php?mode=social&method=gp',
+    'oauth2_redirect_uri' => $_SERVER["PROTOCOL"].'://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account.php?mode=social&method=gp',
     'developer_key' => $gp_dev["value"],
     'site_name' => $_SERVER["HTTP_HOST"],
     'authClass'    => 'Google_OAuth2',
@@ -74,7 +74,7 @@ $oauth2 = new Google_Oauth2Service($client);
 if (!empty($_GET["code"])) {
     $client->authenticate($_GET["code"]);
     $_SESSION['token'] = $client->getAccessToken();
-    $redirect = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account.php?mode=social&method=gp';
+    $redirect = $_SERVER["PROTOCOL"].'://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].'/account.php?mode=social&method=gp';
     header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));
     return;
 }if (isset($_SESSION['token'])) {

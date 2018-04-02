@@ -8,7 +8,6 @@
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 ini_set('session.name', 'session_id');
-ini_set('session.save_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/session');
 ini_set('session.gc_maxlifetime', 604800);
 ini_set('session.entropy_file', '/dev/urandom');
 ini_set('session.entropy_length', '512');
@@ -134,6 +133,7 @@ if(date("U")-$date<60){
             && strpos($_SERVER["SCRIPT_URI"], "/admin")===false
             && strpos($_SERVER["SCRIPT_URI"], ".php")===false
             && strpos($_SERVER["SCRIPT_URI"], ".xml")===false
+            && strpos($_SERVER["SCRIPT_URI"], ".js")===false
             && strpos($_SERVER["SCRIPT_URI"], ".txt")===false){
             if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]='/';
             $cache = new cache();

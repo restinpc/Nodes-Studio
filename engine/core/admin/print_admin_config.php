@@ -3,7 +3,7 @@
 * Print admin config page.
 * @path /engine/core/admin/print_admin_config.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,7 +19,22 @@
 * @usage <code> engine::print_admin_config($cms); </code>
 */
 function print_admin_config($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+        . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "config" '
+        . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+        . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(!empty($_POST)){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         foreach($_POST as $arr=>$value){
             $query = 'UPDATE `nodes_config` SET `value` = "'.mysql_real_escape_string($value).'" WHERE `name` = "'.$arr.'"';
             engine::mysql($query);
@@ -36,7 +51,7 @@ function print_admin_config($cms){
                 <tr>
                     <td width=100 align=left class="p5">'.$data["text"].'</td>
                     <td class="p5" align=left >
-                    <select class="input w100p" name="'.$data["name"].'">';
+                    <select '.($admin_access != 2?'disabled':'').' class="input w100p" name="'.$data["name"].'">';
             if($data["value"]){
                 $fout .= '<option value="0">'.lang("No").'</option>'
                         . '<option value="1" selected>'.lang("Yes").'</option>';
@@ -53,15 +68,18 @@ function print_admin_config($cms){
                 <tr>
                     <td width=100 align=left class="p5">'.$data["text"].'</td>
                     <td class="p5" align=left >
-                    <input class="input w100p" type="text" name="'.$data["name"].'" value="'.$data["value"].'" />
+                    <input '.($admin_access != 2?'disabled':'').' class="input w100p" type="text" name="'.$data["name"].'" value="'.$data["value"].'" />
                     </td>
                 </tr>';
         }
     }
     $fout .= '</table>'
-            . '</div><br/>'
-            . '<input type="submit" class="btn w280" value="'.lang("Save settings").'" />'
-            . '</form>'
+            . '</div>';
+    if($admin_access == 2){
+        $fout .= '<br/>'
+            . '<input type="submit" class="btn w280" value="'.lang("Save settings").'" />';
+    }
+    $fout .= '</form>'
             . '</div>';
     return $fout;
 }

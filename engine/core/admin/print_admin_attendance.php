@@ -3,7 +3,7 @@
 * Print admin attendance page.
 * @path /engine/core/admin/print_admin_attendance.php
 * 
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,6 +19,17 @@
 * @usage <code> engine::print_admin_attendance($cms); </code>
 */
 function print_admin_attendance($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+        . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "attendance" '
+        . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+        . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if($_GET["action"]=="stat" || empty($_GET["action"])){
         $stat = '<b>'.lang("Statistic").'</b>';
         $pages = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';

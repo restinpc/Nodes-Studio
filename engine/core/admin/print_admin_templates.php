@@ -3,7 +3,7 @@
 * Print admin templates page.
 * @path /engine/core/admin/print_admin_templates.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,17 +19,36 @@
 * @usage <code> engine::print_admin_templates($cms); </code>
 */
 function print_admin_templates($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "templates" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(!empty($_POST["template"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'UPDATE `nodes_config` SET `value` = "'.$_POST["template"].'" WHERE `name` = "template"';
         engine::mysql($query);
         die('<script>window.location = "'.$_SERVER["DIR"].'/admin/?mode=templates&'.rand(0,1000).'";</script>');
     }else if(!empty($_POST["new_template"])){
+        if($admin_access != 2){
+            engine::error();
+            return;
+        }
         $php = '<?php
 /**
 * '.ucfirst($_POST["new_template"]).' template file.
 * @path /template/'.$_POST["new_template"].'/template.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var $this->title - Page title
@@ -65,7 +84,7 @@ $footer = \'
 <!-- /content -->
 <footer>
     <p><nobr>\'.lang("Copyright").\' <a href="\'.$_SERVER["PUBLIC_URL"].\'">\'
-    .$_SERVER["HTTP_HOST"].\'</a>, 2016.</nobr> <nobr>\'.lang("All rights reserved").\'</nobr>.</p>
+    .$_SERVER["HTTP_HOST"].\'</a>, 2018.</nobr> <nobr>\'.lang("All rights reserved").\'</nobr>.</p>
 </footer>\';
 //  Footer End
 }
@@ -75,7 +94,7 @@ $this->content = $header.$this->content.$footer;';
 * '.ucfirst($_POST["new_template"]).' template stylesheets file.
 * @path /template/'.$_POST["new_template"].'/template.css
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 @charset "UTF-8";
@@ -97,16 +116,21 @@ a:hover{
 .nodes header{
     padding-bottom: 20px;
     padding-top: 15px;
-    background: #efefef;
+    background: #fefeff;
 }
 .nodes header ul{
     display: table;
     margin: 0px auto;
+    width: 100%;
+    max-width: 1000px;
 }
 .nodes header li{
     display: table-cell;
     text-align: center;
     padding: 10px;
+}
+.nodes header a{
+    color: #001;
 }
 .nodes footer{
     padding-bottom: 20px;
@@ -136,7 +160,7 @@ a:hover{
 *  '.ucfirst($_POST["new_template"]).' template JavaScript file.
 * @path /template/'.$_POST["new_template"].'/template.js
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
 (function() {
@@ -159,6 +183,10 @@ a:hover{
         fwrite($file, $js);
         fclose($file);
     }else if(!empty($_POST["name"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         file::delete('template/'.$_POST["name"]);
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';   
@@ -177,13 +205,14 @@ a:hover{
         if (($file_name != ".") && ($file_name != "..") && is_dir($dirct.$file_name)){
             $i++;
             if($file_name==$template) $name = '<b>'.$file_name.'</b>';
-            else $name = '<a href="#" onClick=\'document.getElementById("new_template").value="'.$file_name.'"; document.getElementById("template").submit();\'>'.$file_name.'</a>';
+            else if($admin_access == 2) $name = '<a href="#" onClick=\'document.getElementById("new_template").value="'.$file_name.'"; document.getElementById("template").submit();\'>'.$file_name.'</a>';
+            else $name = $file_name;
             $fout .= '<tr><td align=left class="fs16"><form method="POST" id="form_'.$i.'"><input type="hidden" name="name" value="'.$file_name.'" /></form>'.$name;
             $fout .= '</td>'
                     . '<td align=left>'
                     . '<select class="input w100p" onChange=\'if(this.value==1){if(confirm("'.lang("Are you sure?").'")){document.getElementById("form_'.$i.'").submit();}}else if(this.value!=0){show_editor(this.value);}\'>
                         <option value="0">'.lang("Select an action").'</option>';
-            if($file_name!="default"){
+            if($file_name!="default" && $admin_access == 2){
                 $fout .= '<option value="1">'.lang("Delete template").'</option>';
             }
             $fout .= '  <option value="template/'.$file_name.'/template.php">'.lang("View source").' PHP</option>
@@ -199,12 +228,15 @@ a:hover{
 </table><br/>
 </div>';
      }
-     $fout .= '<input id="button" type="button" name="load" value="'.lang("New template").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block"; jQuery("#form").removeClass("hidden");\' />
-    <form method="POST" ENCTYPE="multipart/form-data" id="form" class="hidden">
-        '.lang("New template").'<br/><br/>
-        <input type="text" class="input w280 pointer" required placeHolder="'.lang("Template name").'" title="'.lang("Template name").'" name="new_template" /><br/><br/>
-        <input type="submit" class="btn w280" value="'.lang("Submit").'" />
-    </form><br/>
+     if($admin_access == 2){
+        $fout .= '<input id="button" type="button" name="load" value="'.lang("New template").'" class="btn w280" onClick=\'this.style.display="none";document.getElementById("form").style.display="block"; jQuery("#form").removeClass("hidden");\' />
+       <form method="POST" ENCTYPE="multipart/form-data" id="form" class="hidden">
+           '.lang("New template").'<br/><br/>
+           <input type="text" class="input w280 pointer" required placeHolder="'.lang("Template name").'" title="'.lang("Template name").'" name="new_template" /><br/><br/>
+           <input type="submit" class="btn w280" value="'.lang("Submit").'" />
+       </form><br/>';
+     }
+     $fout .= '
     </div>
     ';
     return $fout;

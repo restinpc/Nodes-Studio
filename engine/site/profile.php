@@ -49,7 +49,7 @@ if(empty($user) || empty($user["pass"])){
             </div>
         </div>
         <div class="share_block fr m15"><div>'.lang("Share friends").'</div><br/>'.
-            engine::print_share($_SERVER["PUBLIC_URL"].'/product/'.$data["id"]).'</div>
+            engine::print_share($this, $_SERVER["PUBLIC_URL"].'/product/'.$data["id"]).'</div>
         <div class="clear"></div>
         <div class="document">
             <div class="clear_block">

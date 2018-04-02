@@ -1,4 +1,4 @@
-<?php /* Nodes Studio 2.0.2 script. Do not edit directly. 25/08/2017 */
+<?php
 /**
 * Android template file.
 * @path /template/android/template.php
@@ -26,7 +26,7 @@ $header = '<form method="POST" id="lang_select"><input type="hidden" id="lang_va
     <div class="android-header-spacer mdl-layout-spacer"></div>
     <div class="android-search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width">
     <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field" onClick="search(event);">
-        <i class="material-icons">search</i>
+        <noindex class="material-icons">search</noindex>
     </label>
     <div class="mdl-textfield__expandable-holder">
         <form onSubmit="search(event);"><input class="mdl-textfield__input" type="text" id="search-field"></form>
@@ -51,7 +51,7 @@ $header = '<form method="POST" id="lang_select"><input type="hidden" id="lang_va
         <a href="/"><img class="android-logo-image" src="'.$_SERVER["DIR"].'/img/logo.png" /></a>
     </span>
     <button class="android-more-button mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect" id="more-button">
-        <i class="material-icons">more_vert</i>
+        <noindex class="material-icons">language</noindex>
     </button>
     <ul class="mdl-menu mdl-js-menu mdl-menu--bottom-right mdl-js-ripple-effect" for="more-button">';
 $languages = explode(";", $this->configs["languages"]);
@@ -113,13 +113,13 @@ $footer = '
         $footer .= '
         </div>
         <div class="mdl-mega-footer--right-section floater">
-            <i class="material-icons">expand_less</i><br/>'.lang("Back to Top").'
+            <noindex class="material-icons">expand_less</noindex><br/>'.lang("Back to Top").'
         </div>
     </div>
     <div class="mdl-mega-footer--middle-section">
         <p class="mdl-typography--font-light">
         '.lang("Copyright").' <a href="http://'.$_SERVER["HTTP_HOST"].$_SERVER["DIR"].'" title="'.$this->configs["description"].'">'
-        .$_SERVER["HTTP_HOST"].'</a>, 2015.<br/><br/>'.lang("All rights reserved").'.
+        .$_SERVER["HTTP_HOST"].'</a>, 2018.<br/><br/>'.lang("All rights reserved").'.
         </p><br/>
     </div>
     <div class="mdl-mega-footer--bottom-section">

@@ -3,7 +3,7 @@
 * Framework engine class.
 * @path /engine/core/engine.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 * 
@@ -90,6 +90,16 @@ public static function __callStatic($name, $arguments) {
                     $arguments[4],
                     $arguments[5]
                     );
+        }else if($count==7){
+            return $name(
+                    $arguments[0], 
+                    $arguments[1], 
+                    $arguments[2], 
+                    $arguments[3], 
+                    $arguments[4],
+                    $arguments[5],
+                    $arguments[6]
+                    );
         }
     }else self::error();
 }
@@ -104,10 +114,10 @@ static function error($error_code='0'){
     array_push($_SERVER["CONSOLE"], "engine::error(".$error_code.")");
     if($error_code != 0) $_GET[$error_code] = 1;
     if(!isset($_GET["204"]) && !isset($_GET["504"])){
-        $_SERVER["SCRIPT_URI"] = str_replace("http://","\$h", $_SERVER["SCRIPT_URI"]);   
+        $_SERVER["SCRIPT_URI"] = str_replace($_SERVER["PROTOCOL"]."://","\$h", $_SERVER["SCRIPT_URI"]);   
         while($_SERVER["SCRIPT_URI"][strlen($_SERVER["SCRIPT_URI"])-1]=="/"){
             $_SERVER["SCRIPT_URI"] = mb_substr($_SERVER["SCRIPT_URI"], 0, strlen($_SERVER["SCRIPT_URI"])-1);
-        }$_SERVER["SCRIPT_URI"] = str_replace("\$h", "http://", $_SERVER["SCRIPT_URI"]);
+        }$_SERVER["SCRIPT_URI"] = str_replace("\$h", $_SERVER["PROTOCOL"]."://", $_SERVER["SCRIPT_URI"]);
         if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]="/";
         $get = $session = $post = '';
         foreach($_GET as $key=>$value) $get .= ' | '.$key.'='.$value;
@@ -208,11 +218,54 @@ static function send_mail($email, $header, $theme, $message){
     $header = "From: {$header}\nContent-Type: text/html; charset=utf-8";
     $theme = '=?utf-8?B?' . base64_encode($theme) . '?=';
     if(mail($email, "{$theme}\n", $message, $header)){
-        $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-                . 'VALUES("9", "-1", "127.0.0.1", "'.date("U").'", "'.$text.'")';
-        self::mysql($query);
         return true;
     } return false;
+}
+//------------------------------------------------------------------------------
+/**
+* Sends a push notification.
+* 
+* @param string $token Firebase token of user.
+* @param string $title Notification title.
+* @param string $body Notification text.
+* @param string $image Notification image.
+* @param string $url Notification URL.
+* @return string Returns response of Firebase server.
+* @usage <code>
+*  engine::send_notification("..", "Test notification", "Text text text", "http://../image.png", "http://../");
+* </code>
+*/
+//------------------------------------------------------------------------------
+static function send_notification($token, $title, $body, $image, $url){
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "firebase_server_key"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    $api_key = $data["value"];
+    if(!empty($api_key)){
+        $request_body = array(
+            'notification' => array(
+                'title' => $title,
+                'body' => $body,
+                'icon' => $image,
+                'click_action' => $url
+            ),
+            'to' => $token
+        );
+        $request_headers = array(
+            'Content-Type: application/json',
+            'Authorization: key=' . $api_key,
+        );
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request_body));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        return $response;
+    }else return 'Firebase API Key is not defined';
 }
 //------------------------------------------------------------------------------
 /**
@@ -327,14 +380,12 @@ static function redirect($url){
 * @usage <code> engine::timezone_list(); </code>
 */
 static function timezone_list(){
-    array_push($_SERVER["CONSOLE"], "engine::timezone_list");
     $zones_array = array();
     $timestamp = time();
     $default = date_default_timezone_get();
     foreach(timezone_identifiers_list() as $key => $zone) {
       date_default_timezone_set($zone);
-      $zones_array[$key]['zone'] = $zone;
-      $zones_array[$key]['diff_from_GMT'] = 'UTC/GMT ' . date('P', $timestamp);
+      $zones_array[$zone] = date('Z', $timestamp);
     }
     date_default_timezone_set($default);
     return $zones_array;

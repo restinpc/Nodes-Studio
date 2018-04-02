@@ -28,7 +28,7 @@ function print_login_form(){
     $fout = '<div class="left w200">'
     . '<script>parent.document.getElementById("nodes_iframe").style.height="290px";'
     . '</script>'
-    . '<center><h3 class="c555">'.lang("Login").'</h3></center><br/>'
+    . '<center><h4 class="c555 fs21">'.lang("Login").'</h4></center><br/>'
     . '<div class="center nowrap">';  
     if(!empty($fb_id["value"])){ $flag++;
         $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" class="m10 ml0"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
@@ -45,7 +45,7 @@ function print_login_form(){
     . '<form method="POST" action="'.$_SERVER["DIR"].'/account.php?mode=login">'
     . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w200 p5" placeHolder="Email" /><br/><br/>'
     . '<input type="password" required name="pass" class="input w200 p5" value="'.$_POST["pass"].'" placeHolder="'.lang("Password").'" /><br/>'
-    . '<div class="nowrap pt17 pb20 center fs14">'
+    . '<div class="login_links">'
     . '<a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a> | <a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php?mode=remember">'.lang("Lost password").'?</a>'
     . '</div>'
     . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form>'

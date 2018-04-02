@@ -24,8 +24,8 @@ class cache{
 * $usage <code> cache::update_cache("/", TRUE); </code>
 */
 public static function update_cache($url, $jQuery = 0, $lang="en"){
-    if(strpos($url, "http://".$_SERVER["HTTP_HOST"])===FALSE) 
-        $path = "http://".$_SERVER["HTTP_HOST"].$url;
+    if(strpos($url, $_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"])===FALSE) 
+        $path = $_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"].$url;
     else $path = $url;
     $current = doubleval(microtime(1));
     $html = engine::curl_post_query($path, "nocache=1&lang=".$lang);
@@ -75,6 +75,10 @@ public static function update_cache($url, $jQuery = 0, $lang="en"){
 * $usage <code> $cache = new cache(); </code>
 */
 public function cache(){
+    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "cache"';
+    $res = engine::mysql($query);
+    $data = mysql_fetch_array($res);
+    $is_cache = intval($data["value"]);
     $fout = ''; 
     if( empty($_POST) || !empty($_POST["cache"]) ){
         $query = 'SELECT * FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
@@ -99,16 +103,18 @@ public function cache(){
             . 'VALUES("'.$_SERVER["SCRIPT_URI"].'", "'.date("U").'", "'.$_SESSION["Lang"].'", -1, "", "")';
             engine::mysql($query);
         }else if($data["interval"]=="0"){
-            if(empty($data["html"]) || !empty($_POST["cache"])){
-                die(self::update_cache($_SERVER["SCRIPT_URI"], 0, $data["lang"]));
-            }
-            if(empty($data["content"])){
-                $html = $data["html"];
-            }else{
-                $html = str_replace('<content/>', $data["content"], $data["html"]);
-            }
-            die($html."
+            if($is_cache){
+                if(empty($data["html"]) || !empty($_POST["cache"])){
+                    die(self::update_cache($_SERVER["SCRIPT_URI"], 0, $data["lang"]));
+                }
+                if(empty($data["content"])){
+                    $html = $data["html"];
+                }else{
+                    $html = str_replace('<content/>', $data["content"], $data["html"]);
+                }
+                die($html."
 <!-- Time loading form cache: ".(doubleval(microtime(1))-$GLOBALS["time"])." -->");
+            }
         }
     // cacheing for asinc jquery requests
     }else if(count($_POST)==1 && isset($_POST["jQuery"])){
@@ -129,10 +135,12 @@ public function cache(){
             . 'VALUES("'.$_SERVER["SCRIPT_URI"].'", "'.date("U").'", "'.$_SESSION["Lang"].'", -1, "", "")';
             engine::mysql($query);
         }else if($data["interval"]=="0"){
-            if(empty($data["html"]) || !empty($_POST["cache"])){
-                die(self::update_cache($_SERVER["SCRIPT_URI"], 1, $data["lang"]));
-            }die(base64_encode('<title>'.$data["title"].'</title>'.$data["content"]."
+            if($is_cache){
+                if(empty($data["html"]) || !empty($_POST["cache"])){
+                    die(self::update_cache($_SERVER["SCRIPT_URI"], 1, $data["lang"]));
+                }die(base64_encode('<title>'.$data["title"].'</title>'.$data["content"]."
 <!-- Time loading form cache: ".(doubleval(microtime(1))-$GLOBALS["time"])." -->"));
+            }
         }
     }return $fout;
 }

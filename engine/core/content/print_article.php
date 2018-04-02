@@ -22,18 +22,18 @@
 */
 function print_article($site, $data){
     if(!empty($data["img"])) 
-        $site->img = $_SERVER["DIR"]."/img/data/big/".$data["img"];
+        $site->img = $_SERVER["PUBLIC_URL"]."/img/data/big/".$data["img"];
     $site->description = $data["text"];
     $query = 'SELECT * FROM `nodes_catalog` WHERE `id` = "'.$data["cat_id"].'"';
     $r = engine::mysql($query);
     $d = mysql_fetch_array($r);
     $fout .= '<h1>'.$data["caption"].'</h1><br/>';
     $fout .= '<div class="article">';
-    preg_match_all('#<img[^>]+src="(.*?)"#',$data["text"],$images);
+    preg_match_all('#<img[^>]+src="(.*?)"([^>]+alt="(.*?)")?#',$data["text"],$images);
     if(!empty($images)){
-        $text = engine::print_image_viewer($site, $data["text"], $data["caption"], $images);
+        $text = engine::print_image_viewer($site, $data["text"], $data["caption"], $images[1], $images[3]);
     }
-    $fout .= '<div class="fr">'.engine::print_share($_SERVER["PUBLIC_URL"].'/content/'.$data["url"]).'</div>';
+    $fout .= '<div class="fr">'.engine::print_share($site, $_SERVER["PUBLIC_URL"].'/content/'.$data["url"], $data["caption"]).'</div>';
     $fout .= '
     <div class="cr"><br/></div>
     <div class="text"> '.$text.' </div>
@@ -57,7 +57,8 @@ function print_article($site, $data){
     $blocks = engine::print_more_articles($site, $data["url"]);
     if(!empty($blocks)){
         $new_fout .= '<div class="clear"></div><br/>'
-            . '<div class="tal pl10 fs21"><b>'.lang("You might also be interested in").'</b><br/></div>
+            . '<div class="tal pl10 fs21"><b>'.lang("You might also be interested in").'</b></div>
+            <br/><br/>
             <div class="preview_blocks">'
             .$blocks.
             '<div class="clear"></div>

@@ -23,55 +23,27 @@ if($_GET["mode"] == "login"){
     <body style="background: #fff; opacity: 1; min-width: 200px;" class="nodes">';
     if(!empty($_POST["email"]) && !empty($_POST["pass"])){
         $email = strtolower(str_replace('"', "'", $_POST["email"]));
-        $query = 'SELECT * FROM `nodes_log` WHERE `details` = "'.$_POST["email"].'" AND `action` = 4 ORDER BY `date` DESC LIMIT 2, 1';
+        $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(trim(strtolower($_POST["pass"]))).'"';
         $res = engine::mysql($query);
-        $data= mysql_fetch_array($res);
-        $date = $data["date"];
-        if(date("U")-$date<180){
-            $fout .= '<div class="center pt100 w200">'.lang("Too many failed attempts").'.'
-                    . '<br/><br/>'.lang("Try again after").' <a id="tick">'.(180-(date("U")-$date)).'</a> '.lang("seconds").'.</div>'
-                    . '<script>var sec = '.(181-(date("U")-$date)).'; function tick(){sec--; document.getElementById("tick").innerHTML=sec;} setInterval(tick, 1000);'
-                    . 'function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, '.((180-(date("U")-$date))*1000).');</script>';
-        }else{
-            $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.md5(trim(strtolower($_POST["pass"]))).'"';
-            $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
-            if(!empty($data)){
-                if($data["ban"]=="1"){
-                    $fout .= '<div class="center pt100 w200">'.lang("Access denied").'.</div>'
-                            . '<script>function redirect(){parent.js_hide_wnd();}setTimeout(redirect, 3000);</script>';
-                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-                            . 'VALUES("4", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Ban")';
-                    engine::mysql($query);
-                }else{
-                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-                            . 'VALUES("3", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
-                    engine::mysql($query);
-                    unset($data["pass"]);
-                    unset($data[5]);
-                    $_SESSION["user"] = $data;
-                    if(!empty($_SESSION["redirect"])){
-                        $fout .= '<script language="JavaScript">setTimeout(function(){ parent.window.location = "'.($_SESSION["redirect"]).'"; }, 1);</script>';
-                        unset($_SESSION["redirect"]);
-                    }else{
-                        $fout .= '<script language="JavaScript">setTimeout(function(){ parent.window.location = "'.$_SERVER["DIR"].'/account"; }, 1);</script>';
-                    }
-                }
+        $data = mysql_fetch_array($res);
+        if(!empty($data)){
+            if($data["ban"]=="1"){
+                $fout .= '<div class="center pt100 w200">'.lang("Access denied").'.</div>'
+                        . '<script>function redirect(){parent.js_hide_wnd();}setTimeout(redirect, 3000);</script>';
             }else{
-                $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
-                $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
-                if(!empty($data)){
-                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-                            . 'VALUES("4", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
+                unset($data["pass"]);
+                unset($data[5]);
+                $_SESSION["user"] = $data;
+                if(!empty($_SESSION["redirect"])){
+                    $fout .= '<script language="JavaScript">setTimeout(function(){ parent.window.location = "'.($_SESSION["redirect"]).'"; }, 1);</script>';
+                    unset($_SESSION["redirect"]);
                 }else{
-                    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-                            . 'VALUES("4", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$email.'")';
-                }engine::mysql($query);
-
-                $fout .= '<div class="center pt100 w200">'.lang("Incorrect email of password").'.</div>'
-                        . '<script>function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, 3000);</script>';
+                    $fout .= '<script language="JavaScript">setTimeout(function(){ parent.window.location = "'.$_SERVER["DIR"].'/account"; }, 1);</script>';
+                }
             }
+        }else{
+            $fout .= '<div class="center pt100 w200">'.lang("Incorrect email of password").'.</div>'
+                    . '<script>function redirect(){window.location="'.$_SERVER["DIR"].'/account.php?mode=form";}setTimeout(redirect, 3000);</script>';
         }
     }else{
         if(intval($_SESSION["user"]['id'])>0){
@@ -131,8 +103,8 @@ if($_GET["mode"] == "login"){
         }
     }else{
         $fout .= '<div class="left w200"><script>parent.document.getElementById("nodes_iframe").style.height="235px";</script>'
-        . '<center><h4 class="c555 m5">'.lang("Restore password").'</h4></center><br/><form method="POST">'
-        . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w180 p5 mt5" placeHolder="Email" /><br/>'
+        . '<center><h4 class="c555 m5 fs21">'.lang("Restore password").'</h4></center><br/><form method="POST">'
+        . '<input type="text" required name="email" value="'.$_POST["email"].'" class="input w200 p5 mt5" placeHolder="Email" /><br/>'
         . '<div class="login_links"><a onClick=\'parent.window.location = "'.$_SERVER["DIR"].'/register";\'>'.lang("Sign Up").'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a rel="nofollow" href="'.$_SERVER["DIR"].'/account.php">'.lang("Login").'</a></div>'
         . '<input type="submit" class="btn w200" value="'.lang("Submit").'" /></form></div>';   
     }
@@ -148,9 +120,6 @@ if($_GET["mode"] == "login"){
         require_once("engine/api/oauth/google_auth.php");
     }
 }else if($_GET["mode"] == "logout"){  
-    $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-    . 'VALUES("5", "'.$_SESSION["user"]["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "")';
-    engine::mysql($query);
     unset($_SESSION["user"]);
     $fout = '<script language="JavaScript">parent.window.location = "'.$_SERVER["DIR"].'/";</script>';
 }else{

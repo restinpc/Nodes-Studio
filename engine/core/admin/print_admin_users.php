@@ -3,7 +3,7 @@
 * Print admin users page.
 * @path /engine/core/admin/print_admin_users.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,19 +19,50 @@
 * @usage <code> engine::print_admin_users($cms); </code>
 */
 function print_admin_users($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "users" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(!empty($_POST["delete"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'DELETE FROM `nodes_user` WHERE `id` = "'.intval($_POST["delete"]).'"';
         engine::mysql($query);
     }else if(!empty($_POST["ban"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'UPDATE `nodes_user` SET `ban` = "1" WHERE `id` = "'.intval($_POST["ban"]).'"';
         engine::mysql($query);
     }else if(!empty($_POST["die"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'UPDATE `nodes_user` SET `ban` = "-1" WHERE `id` = "'.intval($_POST["die"]).'"';
         engine::mysql($query);
     }else if(!empty($_POST["unban"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'UPDATE `nodes_user` SET `ban` = "0" WHERE `id` = "'.intval($_POST["unban"]).'"';
         engine::mysql($query);
     }else if(!empty($_POST["confirm"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'UPDATE `nodes_user` SET `confirm` = "1" WHERE `id` = "'.intval($_POST["confirm"]).'"';
         engine::mysql($query);
     }
@@ -40,9 +71,9 @@ function print_admin_users($cms){
     $arr_count = 0;    
     $from = ($_SESSION["page"]-1)*$_SESSION["count"]+1;
     $to = ($_SESSION["page"]-1)*$_SESSION["count"]+$_SESSION["count"];
-    $query = 'SELECT * FROM `nodes_user` WHERE `ban` >= 0'
+    $query = 'SELECT * FROM `nodes_user` WHERE `ban` >= 0 AND `admin` = 0'
             . ' ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"].' LIMIT '.($from-1).', '.$_SESSION["count"];
-    $requery = 'SELECT COUNT(*) FROM `nodes_user` WHERE `ban` >= 0';
+    $requery = 'SELECT COUNT(*) FROM `nodes_user` WHERE `ban` >= 0 AND `admin` = 0';
     $table = '
         <div class="table">
         <table width=100% id="table">
@@ -91,16 +122,17 @@ document.getElementById("delete_value").value="'.$data["id"].'";
 document.getElementById("delete_form").submit();
                 }else if(this.value=="5"){
 new_transaction('.$data["id"].', "'.lang("Transfer amount").'");
-                } }else{this.selectedIndex=0;}\'>';
-        if(intval($data["ban"])){ 
-            $ban .= '<option value="0" selected disabled>'.lang("Banned").'</option>'
-                    . '<option value="1">'.lang("Unban").'</option>'
-                    . '<option value="2">'.lang("Delete").'</option>';
-        }else{ 
-            $ban .= '<option value="0" selected disabled>'.lang("Active").'</option>'
-                    . '<option value="3">'.lang("Ban").'</option>'
-                    . '<option value="4">'.lang("Delete").'</option>';
-        }
+                }
+            }else{this.selectedIndex=0;}\'>';
+            if(intval($data["ban"])){ 
+                $ban .= '<option value="0" selected disabled>'.lang("Banned").'</option>'
+                        . '<option value="1">'.lang("Unban").'</option>'
+                        . '<option value="2">'.lang("Delete").'</option>';
+            }else{ 
+                $ban .= '<option value="0" selected disabled>'.lang("Active").'</option>'
+                        . '<option value="3">'.lang("Ban").'</option>'
+                        . '<option value="4">'.lang("Delete").'</option>';
+            }
         $ban .= '<option value="5">'.lang("New transaction").'</option>';
         $ban .= '</select>';
         if($data["confirm"]) $flag = '<input type="checkbox" checked disabled />';
@@ -111,7 +143,11 @@ new_transaction('.$data["id"].', "'.lang("Transfer amount").'");
                 . '<td align=left><a href="mailto:'.$data["email"].'">'.$data["email"].'</a></td>'
                 . '<td align=left>'.$data["balance"].'$</td>'
                 . '<td align=left>'.$online.'</td>'
-                . '<td width=45 align=left>'.$ban.'</td></tr>';
+                . '<td width=45 align=left>';
+        if($admin_access == 2){
+            $table .= $ban;
+        }
+        $table .= '</td></tr>';
     }$table .= '</table>
 </div>
 <br/>';

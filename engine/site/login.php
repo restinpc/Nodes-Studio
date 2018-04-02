@@ -20,4 +20,4 @@ if(!empty($_GET[1])){
     return; 
 }
 $this->title = lang("Login").' - '.$this->title;
-$this->content = '<iframe frameborder=0 width=200 height=260 class="login_frame" src="'.$_SERVER["DIR"].'/account.php"></iframe>';
+$this->content = '<iframe frameborder=0 width=200 height=300 class="login_frame" src="'.$_SERVER["DIR"].'/account.php"></iframe>';

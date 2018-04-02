@@ -49,7 +49,7 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
         $query = 'SELECT COUNT(*) FROM `nodes_content` WHERE `cat_id` = "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
         $res = engine::mysql($query);
         $d = mysql_fetch_array($res);
-        if($data['visible'])$this->content .= engine::print_navigation($this, $data["caption"]);
+        if($data['visible']) $this->content .= engine::print_navigation($this, $data["caption"]);
         $this->content .= '<div class="document980">';
         if($d[0]) $this->content .= engine::print_articles($this, $data);  
         else $this->content .= engine::print_catalog($this, $data);

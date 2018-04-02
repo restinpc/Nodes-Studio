@@ -9,15 +9,24 @@
 */
 //------------------------------------------------------------------------------
 /**
-* Redirects to search page at specified request.
+* jQuery-based redirects to search page at specified request.
 * 
 * @param {string} search Text to search.
 * @usage <code> search("Hello world!"); </code>
 */
 function search(search){
-    result = prompt(search, ""); 
-    if(result){ 
-        window.location=root_dir+"/search/"+encodeURIComponent(result);  
+    if(alertify){
+        alertify.prompt('', '<h3>'+search+'</h3><br/>', '', 
+            function(evt, value) {
+                window.location=root_dir+"/search/"+encodeURIComponent(value); 
+            }, 
+            function() { jQuery('.alertify').remove(); }
+        ).set('closable', true);
+    }else{
+        result = prompt(search, ""); 
+        if(result){ 
+            window.location=root_dir+"/search/"+encodeURIComponent(result);  
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -91,20 +100,6 @@ function navScroll() {
         jQuery('#mainHead').css('opacity', '1');
     }
     lastPos = jQuery(window).scrollTop();
-}
-//------------------------------------------------------------------------------
-/**
-* jQuery-based redirects to search page at specified request.
-* 
-* @param {string} search Text to search.
-* @usage <code> search("Hello world!"); </code>
-*/
-function search(text){
-    alertify.prompt('<h3>'+text+'</h3><br/>', function (e, str) {if (e) {
-        if(str){
-            window.location=root_dir+"/search/"+encodeURIComponent(str);  
-        }
-    }}, ""); 
 }
 //------------------------------------------------------------------------------
 /**

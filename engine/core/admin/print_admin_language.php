@@ -3,7 +3,7 @@
 * Print admin language page.
 * @path /engine/core/admin/print_admin_language.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,10 +19,25 @@
 * @usage <code> engine::print_admin_language($cms); </code>
 */
 function print_admin_language($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+        . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "language" '
+        . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+        . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(empty($_GET["l"])) $_GET["l"] = 'en';
     if(!empty($_POST)){
         $name = trim(str_replace('"', '\"', $_POST["name"]));
         if(!empty($name)){
+            if($admin_access != 2){
+                engine::error(401);
+                return;
+            }
             $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$name.'"';
             $res = engine::mysql($query);
             $data = mysql_fetch_array($res);
@@ -31,9 +46,17 @@ function print_admin_language($cms){
                 engine::mysql($query);
             }
         }else if(!empty($_POST["delete"])){
+            if($admin_access != 2){
+                engine::error(401);
+                return;
+            }
             $query = 'DELETE FROM `nodes_language` WHERE `name` LIKE "'. base64_decode($_POST["delete"]).'"';
             engine::mysql($query);
         }else if($_POST["language"]=="1"){
+            if($admin_access != 2){
+                engine::error(401);
+                return;
+            }
             foreach($_POST as $id=>$value){
                 if($id=="language") continue;
                 $id = base64_decode($id);
@@ -107,21 +130,27 @@ function print_admin_language($cms){
         $d = mysql_fetch_array($r);
 
         $table .= '<tr><td width=50% align=left>'.$data["name"].'</td>';
-        if($_GET["l"]=="en"){
+        if($_GET["l"]=="en" && $admin_access == 2){
             $table .= '<td width=50% align=left><input name="'.  base64_encode($data["name"]).'" type="text" value="'.$data["value"].'" class="input w100p" />'
                 . '</td><td width=20><div class="close_image"'
                 . 'onClick=\'if(confirm("'.lang("Delete").' \"'.$data["name"].'\"?")){document.getElementById("delete_value").value="'.base64_encode($data["name"]).'";'
                 . 'document.getElementById("delete_form").submit();}\''
                 . '> </div></td>';
         }else{
-            $table .= '<td width=50% align=left colspan=2><input name="'.base64_encode($data["name"]).'" type="text" value="'.$d["value"].'" class="input w270" /></td>'; 
+            $table .= '<td width=50% align=left colspan=2><input name="'.base64_encode($data["name"]).'" '.($admin_access!=2?'disabled':'').' type="text" value="'.$d["value"].'" class="input w270" /></td>'; 
         }
         $table .= '</tr>';
     }
 $table .= '</table>
-</div>
-<br/>
-<input type="submit" class="btn w280" value="'.lang("Save changes").'" />
+</div>';
+
+if($admin_access == 2){
+    $table .= '
+    <br/>
+    <input type="submit" class="btn w280" value="'.lang("Save changes").'" />';
+}
+
+        $table .= '
 </form><br/>';
     if($arr_count){
         $fout .= $table.'
@@ -181,7 +210,7 @@ $table .= '</table>
     }else{
         $fout = '<div class="clear_block">'.lang("Data not found").'</div>';
     }
-    if($_GET["l"]=="en"){
+    if($_GET["l"]=="en" && $admin_access == 2){
         $fout .= '<br/><input type="button" class="btn w280" '
                 . 'onClick=\'result = prompt("New value", ""); if(result != ""){document.getElementById("new_value").value=result;'
                 . 'document.getElementById("new_form").submit();}\' value="'.lang("Add new value").'" /><br/>';

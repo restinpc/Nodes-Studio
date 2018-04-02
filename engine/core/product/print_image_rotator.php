@@ -37,8 +37,11 @@ function print_image_rotator($site, $caption, $images){
             $size = getimagesize($_SERVER["PUBLIC_URL"].'/img/data/big/'.$images[0]);
         }
     }
+    if(count($images)==1){
+        $class = 'class="hidden"';
+    }
     $galery = '
-    <figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject" class="hidden">
+    <figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject" '.$class.'>
         <a target="_blank" href="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
             <img id="g0" src="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'" itemprop="thumbnail" alt="'.$caption.' 1" />
         </a>

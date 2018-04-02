@@ -27,7 +27,7 @@ function print_chat($user_id){
                     . '<table class="list">'
                     . '<td align=left width=100% valign=top>';
             if(!$data["system"]){
-                $fout .= '<span class="chat_left_text">'.lang("Sended").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></span><br/>'.engine::decrypt($data["text"], $_SERVER["HTTP_HOST"]);
+                $fout .= '<span class="chat_left_text">'.lang("Sended").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></span><br/>'.$data["text"];
             }else{
                 $fout .= '<span class="chat_left_text">'.lang("System message").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span><br/>'.'<i>'.lang($data["text"]).'</i>';
             }     
@@ -43,7 +43,7 @@ function print_chat($user_id){
             if(!$data["system"]){
                 $fout .= '<div class="chat_right_text">'
                         . lang("Received").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></div>'
-                    . '<div class="clear"></div>'.engine::decrypt($data["text"], $_SERVER["HTTP_HOST"]);
+                    . '<div class="clear"></div>'.$data["text"];
             }else{
                 $fout .= '<div class="chat_right_text">'
                         . lang("System message").' <span class="utc_date" alt="'.$data["date"].'">'.date("d.m.Y H:i", $data["date"]).'</span></div>'

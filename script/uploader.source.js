@@ -3,7 +3,7 @@
 * Do not edit directly.
 * @path /script/uploader.source.js
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -169,8 +169,9 @@ function UploadFile(file) {
     if (location.host.indexOf("sitepointstatic") >= 0) return;
     if( $id("fileselect").value != "") return;
     var xhr = new XMLHttpRequest();
-    if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/jpg" || file.type == "image/gif" || file.type == "image/png") && file.size <= $id("MAX_FILE_SIZE").value) {
+    if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/jpg" || file.type == "image/gif" || file.type == "image/png")) {
         var fname = file.name;
+        console.log(fname);
         xhr.onreadystatechange = function(e) {
             if (xhr.readyState == 4) {
                 if(xhr.responseText == "error"){
@@ -178,16 +179,18 @@ function UploadFile(file) {
                     document.getElementById("filedrag").style.display="none";
                     alert(no_drag_drop);
                 }else{
-                    document.getElementById("new_image").value=fname;
+                    document.getElementById("new_image").value=xhr.responseText;
                     document.getElementById("new_image_form").submit();
                 }
             }
         };
         xhr.open("POST", dir+"/uploader.php?dragndrop=1", true);
+        xhr.setRequestHeader("X-FILENAME", file.name);
         xhr.setRequestHeader("X_FILENAME", file.name);
         xhr.setRequestHeader("HTTP_X_FILENAME", file.name);
         xhr.send(file);
         document.getElementById("filedrag").innerHTML = uploading+".."; 
+        console.log("done");
     }
 }
 //------------------------------------------------------------------------------

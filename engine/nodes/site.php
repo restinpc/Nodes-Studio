@@ -3,7 +3,7 @@
 * Framework site primary class.
 * @path /engine/nodes/site.php
 *
-* @name    Nodes Studio    @version 2.0.4
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -45,11 +45,11 @@ function site($compact=0){
         $this->title = $this->configs["name"];
     }else $this->title = $config["name"];
     if(!empty($this->configs['image'])){
-        if(strpos($this->configs["image"], "http://")!==FALSE){
+        if(strpos($this->configs["image"], "http")!==FALSE){
             $this->img = $this->configs["image"];
         }else{
             if(strpos($this->configs["image"], $_SERVER["DIR"])!==FALSE){ 
-                $this->img = 'http://'.$_SERVER["HTTP_HOST"].$this->configs["image"];
+                $this->img = $_SERVER["PROTOCOL"].'://'.$_SERVER["HTTP_HOST"].$this->configs["image"];
             }else{ 
                 if($this->configs["image"][0]=="/"){
                     $this->img = $_SERVER["PUBLIC_URL"].$this->configs["image"];
@@ -166,24 +166,37 @@ function site($compact=0){
         require_once("template/meta.php");
         $fout .= '
 </head>
-<body style="opacity: 0;" class="nodes">
+<body style="opacity: 0;" class="nodes">';
+if(!isset($_POST["jQuery"])){
+    $fout .= '
+    <script> var loading_state = 0; '.
+    'function display(){ if(!window.jQuery) setTimeout(function(){ document.body.style.opacity = "1";}, 1000); else jQuery("html, body").animate({opacity: 1}, 1000); }'.
+    'var tm = setTimeout(display, 5000); function preload(){ '.$this->onload.';  return 0; } window.onload = loading_site; '.
+    'function loading_site(){ loading_state++; if(loading_state!=6){ return; } try{ preload(); }catch(e){}; clearTimeout(tm); display(); }; </script>
+    </script>';
+}
+$fout .= '
 <img src="'.$_SERVER["DIR"].'/img/load.gif" style="display:none;" alt="'.lang("Loading").'" />';
     }else{
         $fout .= '<title>'.$this->title.'</title>';
     }
     $fout .= $this->content.'
-<link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" />
-<link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript">
-    var root_dir = "'.$_SERVER["DIR"].'"; 
-    var submit_patterns = '.$this->configs["catch_patterns"].';';
-    if(!isset($_POST["jQuery"])) $fout .= '
-    var load_events = true; '; 
-    $fout .= '
-</script>
-<script src="'.$_SERVER["DIR"].'/script/jquery.js" type="text/javascript"></script>
-<script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript"></script>
-<script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript"></script>';
+<link href="'.$_SERVER["DIR"].'/template/nodes.css" rel="stylesheet" type="text/css" onLoad=\'loading_site();\' />
+<link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css" onLoad=\'loading_site();\' />
+<script type="text/javascript">var root_dir = "'.$_SERVER["DIR"].'"; var submit_patterns = '.$this->configs["catch_patterns"].';';
+if(!isset($_POST["jQuery"])) $fout .= ' var load_events = true;'; 
+    $fout .= 
+'</script>
+<script src="'.$_SERVER["DIR"].'/script/jquery.js" type="text/javascript" onLoad=\'loading_site();\'></script>
+<script src="'.$_SERVER["DIR"].'/script/script.js" type="text/javascript" onLoad=\'loading_site();\'></script>
+<script src="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.js" type="text/javascript" onLoad=\'loading_site();\'></script>';
+    if((!empty($_SESSION["user"]["id"]) || $this->configs["public_notifications"]) && $_SERVER["PROTOCOL"] == 'https' ){
+        if(!isset($_POST["jQuery"])){
+            $fout .= '
+<script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+<script src="'.$_SERVER["DIR"].'/notifications.php"></script>';
+        }
+    }
     if(!empty($_SESSION["user"]["id"])){
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = '.intval($_SESSION["user"]["id"]);
         $res = engine::mysql($query);
@@ -208,10 +221,6 @@ function site($compact=0){
     }
     if(!isset($_POST["jQuery"])){
         $fout .= '
-    <script type="text/javascript">
-        function display(){ if(!window.jQuery) setTimeout(function(){ document.body.style.opacity = "1";}, 1000); else jQuery("html, body").animate({opacity: 1}, 1000); }'.
-        'var tm = setTimeout(display, 5000); window.onload = function(){ try{ preload(); }catch(e){}; clearTimeout(tm); display(); }; function preload(){ '.$this->onload.';  return 0; }
-    </script>
 </body>
 </html>';
     }else{

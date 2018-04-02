@@ -3,7 +3,7 @@
 * Backend file.
 * @path /engine/code/images.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 */
@@ -18,7 +18,31 @@ $fout = '<!DOCTYPE html>
 <link href="'.$_SERVER["DIR"].'/template/'.$_SESSION["template"].'/template.css" rel="stylesheet" type="text/css">
 </head>
 <body class="body_images nodes">';
-if(!empty($_GET['id']) && !empty($_GET["pos"])){
+if(!empty($_GET["editor"]) && $_SESSION["user"]["admin"] == 1){
+    if(!empty($_FILES) && !empty($_POST["name"])){
+        $name = mysql_real_escape_string($_POST["name"]);
+        $file = file::upload('tiny_image', 'img/data', 1);
+        if($file == "error"){
+            $fout .= '<script>alert("'.lang("Error").'");parent.js_hide_wnd();</script>';
+        }else{
+            $image_size = getimagesize($_SERVER["DOCUMENT_ROOT"].'/img/data/'.$file);
+            $fout .= '
+            <script>
+                parent.tinymce.EditorManager.get("editable").execCommand(\'mceInsertContent\', false, "<p><img src=\"'.$_SERVER["PUBLIC_URL"].'/img/data/'.$file.'\" style=\"width: 100%; max-width: '.$image_size[0].'px; max-height: '.$image_size[1].'px; margin-left: auto; margin-right: auto; display: block;\" alt=\"'.$name.'\"  title=\"'.$name.'\"  /></p>");
+                parent.js_hide_wnd(); 
+            </script>';
+        }
+    }else{
+        $fout .= '<p>'.lang("Select an image to upload").'</p><br/>
+        <div class="w100p center">
+            <form method="POST" ENCTYPE="multipart/form-data" id="form" >
+                <input type="file" class="input w280" name="tiny_image" /><br/><br/>
+                <input type="text" name="name" class="input w280" required placeHolder="'.lang("Image description").'" /><br/><br/>
+                <input type="submit" class="btn w280" value="'.lang("Upload image").'" />
+            </form>
+        </div>';
+    }
+}else if(!empty($_GET['id']) && !empty($_GET["pos"])){
     if(!empty($_POST)){
         if(file_exists('img/data/thumb/'.$_POST["file1"])){
             $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.intval($_GET["id"]).'"';

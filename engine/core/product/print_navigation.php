@@ -29,7 +29,7 @@ function print_navigation($site, $title){
         $fout .= '
         <span class="profile_menu_item '.($title == lang("Products")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
         . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/product">'. lang("Products").'</a></span>';
-    $query = 'SELECT * FROM `nodes_product_data` WHERE `cat_id` = "1" AND `url` <> "" ORDER BY `value` ASC';
+    $query = 'SELECT * FROM `nodes_product_data` WHERE `cat_id` = "1" AND `url` <> "" ORDER BY `order` DESC';
     $res = engine::mysql($query);
     $i = 0;
     while($data = mysql_fetch_array($res)){

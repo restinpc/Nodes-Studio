@@ -3,7 +3,7 @@
 * Print admin outbox page.
 * @path /engine/core/admin/print_admin_outbox.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,12 +19,27 @@
 * @usage <code> engine::print_admin_outbox($cms); </code>
 */
 function print_admin_outbox($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "outbox" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if($_SESSION["order"]=="id") $_SESSION["order"] = "date";
     $arr_count = 0;    
     $from = ($_SESSION["page"]-1)*$_SESSION["count"]+1;
     $to = ($_SESSION["page"]-1)*$_SESSION["count"]+$_SESSION["count"];
     $fout = '<div class="document640">';
     if($_GET["act"]=="new"){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         if(!empty($_POST["caption"])){
             $caption = trim(mysql_real_escape_string($_POST["caption"]));
             $action = intval($_POST["action"]);
@@ -64,6 +79,7 @@ function print_admin_outbox($cms){
                     <select type="text" name="action" class="input w100p" >
                         <option value="0">'.lang("Send to email").'</option>
                         <option value="1">'.lang("Send in chat").'</option>
+                        <option value="2">'.lang("Send as notification").'</option>
                     </select>
                 </td>
             </tr>
@@ -77,6 +93,10 @@ function print_admin_outbox($cms){
         </div>';
     }else{
         if(!empty($_POST["id"])){
+            if($admin_access != 2){
+                engine::error(401);
+                return;
+            }
             $query = 'DELETE FROM `nodes_outbox` WHERE `id` = "'.intval($_POST["id"]).'"';
             engine::mysql($query);
         }
@@ -118,11 +138,15 @@ function print_admin_outbox($cms){
                 <td align=left valign=middle>'.$action.'</td>
                 <td align=left valign=middle>'.$data["sended"].' / '.$data["total"].'</td>
                 <td align=left valign=middle>'.date("d/m/Y H:i", $data["date"]).'</td>
-                <td width=20 align=left valign=middle>
+                <td width=20 align=left valign=middle>';
+            if($admin_access == 2){
+                $table .= '
                     <form method="POST">
                         <input type="hidden" name="id" value="'.$data["id"].'" />
                         <input type="submit" value="'.lang("Delete").'" onClick=\'if(!confirm("'.lang("Are you sure?").'")){event.preventDefault(); return 0;}\' class="btn small" />
-                    </form>
+                    </form>';
+            }
+            $table .= '
                 </td>
             </tr>';
         }$table .= '</table>
@@ -184,7 +208,9 @@ function print_admin_outbox($cms){
         }else{
             $fout .= '<div class="clear_block">'.lang("Messages not found").'</div>';
         }
-        $fout .= '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=outbox&act=new"><input type="button" class="btn w280" value="'.lang("New bulk message").'"></a>';
+        if($admin_access == 2){
+            $fout .= '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=outbox&act=new"><input type="button" class="btn w280" value="'.lang("New bulk message").'"></a>';
+        }
     }
     $fout .= '</div>';
     return $fout;

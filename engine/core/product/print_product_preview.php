@@ -44,6 +44,8 @@ function print_product_preview($site, $data, $right=0){
         if($data["user_id"]==$_SESSION["user"]["id"]){
             $fout .= ' onClick=\'alert("'.lang("Unable to purchase your own product").'")\' ';  
         }else{
+            //TODO selector propertis and count
+            
             $fout .= ' onClick=\'buy_now('.$data["id"].', '
                     . '"'.lang("A new item has been added to your Shopping Cart").'", '
                     . '"'.lang("Continue").'", '

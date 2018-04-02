@@ -27,11 +27,11 @@ function print_articles($site, $data=array()){
     $to = ($_SESSION["page"]-1)*$_SESSION["count"]+$_SESSION["count"];
     if(!empty($data)){
         $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` = "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'"'
-                        . ' ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"].' LIMIT '.($from-1).', '.$_SESSION["count"];
+                        . ' ORDER BY `order` DESC LIMIT '.($from-1).', '.$_SESSION["count"];
         $requery = 'SELECT COUNT(*) FROM `nodes_content` WHERE `cat_id` = "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
     }else{
         $query = 'SELECT * FROM `nodes_content` WHERE `lang` = "'.$_SESSION["Lang"].'"'
-                . ' ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"].' LIMIT '.($from-1).', '.$_SESSION["count"];
+                . ' ORDER BY `order` DESC LIMIT '.($from-1).', '.$_SESSION["count"];
         $requery = 'SELECT COUNT(*) FROM `nodes_content` WHERE `lang` = "'.$_SESSION["Lang"].'"'; 
     }
     $res = engine::mysql($requery);

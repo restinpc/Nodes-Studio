@@ -21,6 +21,17 @@
 * @usage <code> engine::print_order($site, 1); </code>
 */
 function print_order($site, $order_id){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+        . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "orders" '
+        . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+        . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     $query = 'SELECT * FROM `nodes_product_order` WHERE `id` = "'.$order_id.'"';
     $r = engine::mysql($query);
     while($d = mysql_fetch_array($r)){
@@ -73,8 +84,13 @@ function print_order($site, $order_id){
                 '.lang("Shipping address").': '.$addresstr.'
             </div>
             <div class="clear"></div>
-            <div class="print_order_buttons">
+            <div class="print_order_buttons">';
+                if($admin_access == 2){
+                   $fout .= '
                 <form method="POST">'.$buttons.' </form>
+                        ';
+                }
+            $fout .= '
             </div>
             <div class="clear"></div>
             </div>';

@@ -26,9 +26,6 @@ if(!isset($_POST["jQuery"])){
             str_replace("\n", "<br/>", $_POST["text"])
         );
          $this->onload .= '; alert("'.lang("Message sent successfully").'"); ';
-        $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-        . 'VALUES("7", "'.$_SESSION["user"]["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$_POST["text"].'")';
-        engine::mysql($query);
     }
     //  Header Start
     $header = '<header id="mainHead">
@@ -83,7 +80,7 @@ if(!isset($_POST["jQuery"])){
         <li><a href="'.$_SERVER["DIR"].'/register">'.lang("Sign Up").'</a></li>
         <li class="hidden"><a href="'.$_SERVER["DIR"].'/sitemap.php" target="_blank">'.lang("Sitemap").'</a></li>';
     }else{ 
-        if($_SESSION["user"]["id"]=="1"){
+        if($_SESSION["user"]["admin"]=="1"){
                 $header .= '
         <li><a href="'.$_SERVER["DIR"].'/admin">'.lang("Admin").'</a></li>';
         }$header .= '
@@ -129,7 +126,7 @@ $footer = '
             </a><div class="clear h7"></div>';  
         $footer .= '
         </div>
-        
+        <br/><br/>
     </div>
     <div class="footer_right left-center" id="contact_us">
     <span>'.lang("Contact Us").'</span>
@@ -144,12 +141,13 @@ $footer = '
     }$footer .= '
         </form>
         </div>
-        <div class="clear"><br/></div>
+        <br/><br/>
+        <div class="clear"></div>
     </div>
     <div id="copyright">
         <div class="line">
             <span class="text">
-                <nobr>'.lang("Copyright").' <a itemprop="url" href="'.$_SERVER["PUBLIC_URL"].'" title="'.$this->configs["description"].'">'.$_SERVER["HTTP_HOST"].'</a>, 2017.</nobr>
+                <nobr>'.lang("Copyright").' <a itemprop="url" href="'.$_SERVER["PUBLIC_URL"].'" title="'.$this->configs["description"].'">'.$_SERVER["HTTP_HOST"].'</a>, 2018.</nobr>
                 <nobr>'.lang("All rights reserved").'.</nobr>
             </span>
             <span><a href="'.$_SERVER["DIR"].'/">'.lang("Home").'</a></span>

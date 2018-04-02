@@ -37,7 +37,7 @@ function print_comment($id, $noreply = 0){
             }
         }
         $fout1 .= '<table align=center class="comment_table">';
-        $query = 'SELECT * FROM `nodes_comment` WHERE `reply` = "'.$c["id"].'"';
+        $query = 'SELECT * FROM `nodes_comment` WHERE `reply` = "'.$c["id"].'" ORDER BY `id` ASC';
         $rf = engine::mysql($query);
         $flag = 0;
         while($df = mysql_fetch_array($rf)){
@@ -65,9 +65,6 @@ function print_comments($url){
             $query = 'INSERT INTO `nodes_comment` (`url`, `reply`, `user_id`, `text`, `date`) '
             . 'VALUES("'.$url.'", "'.intval($_POST["reply"]).'", "'.$_SESSION["user"]["id"].'", "'.$text.'", "'.date("U").'")';
             engine::mysql($query); 
-            $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-            . 'VALUES("6", "'.$_SESSION["user"]["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "'.$text.'")';
-            engine::mysql($query);
             $query = 'SELECT * FROM `nodes_config` WHERE `name` = "send_comments_email"'; 
             $r_conf = engine::mysql($query);
             $d_conf = mysql_fetch_array($r_conf);
@@ -81,7 +78,7 @@ function print_comments($url){
     }
     $flag = 0;
     $fout1 .= '<table align=center class="w100p">';
-    $query = 'SELECT * FROM `nodes_comment` WHERE `url` LIKE "'.$url.'" AND `reply` = 0';
+    $query = 'SELECT * FROM `nodes_comment` WHERE `url` LIKE "'.$url.'" AND `reply` = 0 ORDER BY `id` ASC';
     $res = engine::mysql($query);
     while($data = mysql_fetch_array($res)){
         if(intval($data["id"])>0){

@@ -83,7 +83,7 @@ function print_products($site){
         }
     }
     $requery = str_replace('`product`.*', 'COUNT(`product`.`id`)', $query);
-    $query .= ' GROUP BY `product`.`id` ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"].' LIMIT '.($from-1).', '.$_SESSION["count"];
+    $query .= ' GROUP BY `product`.`id` ORDER BY `order` DESC LIMIT '.($from-1).', '.$_SESSION["count"];
     $res = engine::mysql($query);
     $r = engine::mysql($requery);
     $d = mysql_fetch_array($r);

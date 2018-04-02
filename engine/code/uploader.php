@@ -29,13 +29,15 @@ if(!empty($_GET["id"])) $result .= $_GET["id"];
 if(!empty($_GET["dragndrop"])||!empty($_FILES)){
     $fn = (isset($_SERVER['HTTP_X_FILENAME']) ? $_SERVER['HTTP_X_FILENAME'] : false);
     if ($fn) {
+        $ext = explode('.', $fn);
+        $fn = md5($fn).'.'.$ext[count($ext)-1];
         if(file_put_contents(
                 $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/big/' . $fn,
                 file_get_contents('php://input')
         )){
-            die(lang('Ok'));
+            die($fn);
         }else{
-            die(lang('Error'));
+            die('error');
         }
     }else if(isset($_FILES['fileselect'])) {
         $files = $_FILES['fileselect'];
@@ -50,9 +52,14 @@ if(!empty($_GET["dragndrop"])||!empty($_FILES)){
             <input type="hidden" name="new_image" value="'.$fn.'" id="new_image" />
             </form><script>document.getElementById("new_image_form").submit();</script>');
         }else{
-            die(lang('Error'));
+            die('error');
         }
-    }die();
+    }
+    print_r($_GET);
+    print_r($_POST);
+    print_r($_FILES);
+    print_r($_SERVER);
+    die();
 }
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
 $res = engine::mysql($query);
@@ -208,7 +215,6 @@ if(!empty($_POST["name"])){
 }else{
     echo '<body class="nodes dragndrop_body"> 
 <form id="upload" method="POST" enctype="multipart/form-data">
-    <input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="10485760" />
     <div style="height: 100%;">
         <input type="file" id="fileselect" name="fileselect" onChange=\'document.getElementById("upload").submit();\' />
         <div id="filedrag" onClick=\'document.getElementById("fileselect").click();\'>'.lang("Drop file here").'</div>

@@ -3,7 +3,7 @@
 * Print admin errors page.
 * @path /engine/core/admin/print_admin_errors.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,10 +19,29 @@
 * @usage <code> engine::print_admin_errors($cms); </code>
 */
 function print_admin_errors($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+            . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "errors" '
+            . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+            . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if($_GET["act"]=="reset"){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'DELETE FROM `nodes_error`';
         engine::mysql($query);
     }else if(!empty($_POST["id"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'DELETE FROM `nodes_error` WHERE `id` = "'.intval($_POST["id"]).'"';
         engine::mysql($query);
     }
@@ -62,15 +81,19 @@ function print_admin_errors($cms){
         $table .= '<tr>
             <td align=left valign=middle onClick=\'alert("<b>GET</b> '.(!empty($data["get"])?$data["get"]:lang("Empty")).'<hr/>'
                 . ' <b>POST</b> '.(!empty($data["post"])?$data["post"]:lang("Empty")).'<hr/>'
-                . ' <b>SESSION</b> '.(!empty($data["session"])?$data["session"]:lang("Empty")).'");\' class="pointer">'.mb_substr(str_replace("http://".$_SERVER["HTTP_HOST"], "", $data["url"]),0,60).'</td>
+                . ' <b>SESSION</b> '.(!empty($data["session"])?$data["session"]:lang("Empty")).'");\' class="pointer">'.mb_substr(str_replace($_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"], "", $data["url"]),0,60).'</td>
             <td align=left valign=middle>'.$data["ip"].'</td>
             <td align=left valign=middle>'.date("d/m/Y H:i", $data["date"]).'</td>
             <td align=left valign=middle>'.$data["lang"].'</td>
-            <td width=20 align=left valign=middle>
+            <td width=20 align=left valign=middle>';
+        if($admin_access == 2){
+            $table .= '
                 <form method="POST">
                     <input type="hidden" name="id" value="'.$data["id"].'" />
                     <input type="submit" value="'.lang("Delete").'" class="btn small" />
-                </form>
+                </form>';
+        }
+        $table .= '
             </td>
         </tr>';
     }$table .= '</table>
@@ -128,8 +151,12 @@ function print_admin_errors($cms){
            }$fout .= '
      </ul>
     </div>';
-         }$fout .= '<div class="clear"></div><br/><br/>
-    <a href="'.$_SERVER["DIR"].'/admin/?mode=errors&act=reset"><input type="button" class="btn w280" value="'.lang("Clear logs").'" /></a><br/>
+         }$fout .= '<div class="clear"></div><br/>';
+            if($admin_access == 2){
+                $fout .= '
+                <a href="'.$_SERVER["DIR"].'/admin/?mode=errors&act=reset"><input type="button" class="btn w280" value="'.lang("Clear logs").'" /></a><br/>';
+            }
+         $fout .= '
     </form>
     </div>';
     }else{

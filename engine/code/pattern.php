@@ -108,6 +108,7 @@ body{
                 ';
             if($d["action"] == "1"){
                 $script_x .= 'cursor_img.src="/img/cms/pointer.png";
+                    iframe.elementFromPoint('.$d["x"].', '.$d["y"].').click();
                     console.innerHTML = "'.lang("Click to").' '.$d["x"].'x'.$d["y"].' at "+iframe.src;
                     ';
             }else{

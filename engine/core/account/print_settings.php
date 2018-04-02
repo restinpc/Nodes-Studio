@@ -27,9 +27,6 @@ function print_settings($site){
         engine::mysql($query);
         $query = 'UPDATE `nodes_user` SET `pass` = "" WHERE `id` = "'.$_SESSION["user"]["id"].'"';
         engine::mysql($query);
-        $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-        . 'VALUES("5", "'.$_SESSION["user"]["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "")';
-        engine::mysql($query);
         unset($_SESSION["user"]);
         $fout = '<script language="JavaScript">window.location = "'.$_SERVER["DIR"].'/";</script>';
     }else{

@@ -42,7 +42,7 @@ function print_catalog($site, $data){
     if(!empty($images)){
         $text = engine::print_image_viewer($site, $data["text"], $data["caption"], $images);
     }
-    $fout .= '<div class="fr">'.engine::print_share($_SERVER["PUBLIC_URL"].'/content/'.$data["url"]).'</div>';
+    $fout .= '<div class="fr">'.engine::print_share($site, $_SERVER["PUBLIC_URL"].'/content/'.$data["url"], $data["caption"]).'</div>';
     $fout .= '
         <div class="cr"><br/></div>
         <div itemprop="articleBody" class="text">'.$text.'</div>

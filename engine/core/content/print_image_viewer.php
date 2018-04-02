@@ -3,7 +3,7 @@
 * Prints an image viewer and updates pictures inside article
 * @path /engine/core/function/print_image_viewer.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -24,25 +24,28 @@
 *   $text = 'Text of article. <img src="/img/1.jpg" /> <br/> <img src="/img/2.jpg" /> ';
 *   $caption = 'Article name';
 *   $images = array("/img/1.jpg", "/img/2.jpg"); 
-*   engine::print_image_viewer($site, $text, $caption, $images); 
+*   $captions = array("Image 1", "Image 2");
+*   engine::print_image_viewer($site, $text, $caption, $images, $captions); 
 * </code>
 */
-function print_image_viewer($site, $text, $caption, $images){
+function print_image_viewer($site, $text, $caption, $images, $captions){
     if(!empty($images)){
-        for($i = 0; $i<count($images[1]); $i++){
-            $image = $images[1][$i];
+        for($i = 0; $i<count($images); $i++){
+            $image = $images[$i];
             $image = str_replace('../img', '/img', $image);
             $size = getimagesize($image);
-            $text = str_replace($images[1][$i].'"', $image.'" alt="'.$image.'" onClick=\'nodes_galery("'.$image.'");\' class="img pointer"', $text);
+            $text = str_replace($images[$i].'"', $image.'" alt="'.$image.'" onClick=\'nodes_galery("'.$image.'");\' class="img pointer"', $text);
             if(!$size[0]){
                 $size = getimagesize($_SERVER["PUBLIC_URL"].$image);
             }  
             if($size[0]){
+                if(!empty($captions[$i])) $title = $captions[$i];
+                else $title = $caption;
                 $galery .= '<figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
                     <a target="_blank" href="'.$image.'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
-                        <img id="nodes_galery_'.$i.'" src="'.$image.'" alt="'.$image.'" itemprop="thumbnail" alt="Image'.$i.'" />
+                        <img id="nodes_galery_'.$i.'" src="'.$image.'" itemprop="thumbnail" alt="'.$image.'" title="'.$title.'" />
                     </a>
-                    <figcaption itemprop="caption description">'.$caption.'</figcaption>                                 
+                    <figcaption itemprop="caption description">'.$title.'</figcaption>                                 
                 </figure>';
             }
         }  

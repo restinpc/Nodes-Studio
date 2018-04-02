@@ -9,7 +9,7 @@
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-if(!empty($_GET["file"])&&$_SESSION["user"]["id"]=="1"){
+if(!empty($_GET["file"])&&$_SESSION["user"]["admin"]=="1"){
     echo '<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +17,7 @@ if(!empty($_GET["file"])&&$_SESSION["user"]["id"]=="1"){
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <style type="text/css" media="screen">
     body {overflow: hidden;}
-    #editor {margin: 0;position: absolute;top: 0;bottom: 0;left: 0;right: 0;}
+    #editor {margin: 0;position: absolute;top: 0;bottom: 0;left: 0;right: 0;overflow:scroll;}
   </style>
 </head>
 <body>
@@ -40,13 +40,6 @@ if(!empty($_GET["file"])&&$_SESSION["user"]["id"]=="1"){
     }
     echo $file.'
 </pre>
-<script src="'.$_SERVER["DIR"].'/script/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-<script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/twilight");
-    editor.session.setMode("ace/mode/'.$ace_mode.'");
-</script>
-
 </body>
 </html>';
 }else engine::error();

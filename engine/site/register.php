@@ -26,9 +26,6 @@ $this->title = lang("Sign Up").' - '.$this->title;
 if(!empty($_POST["email"])&&!empty($_POST["pass"])){
     if($_POST["captcha"] != $_SESSION["captcha"]){
         $this->onload .= ' alert("'.lang("Error").'. '.lang("Invalid conformation code").'."); ';      
-        $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-        . 'VALUES("2", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Invalid conformation code")';
-        engine::mysql($query);
     }else{
         $name = mysql_real_escape_string($_POST["name"]);
         $email = strtolower(mysql_real_escape_string($_POST["email"]));
@@ -39,9 +36,6 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
         $d = mysql_fetch_array($r);
         if(!empty($d)){
             $this->onload .= ' alert("'.lang("Error").'. '.lang("Email").' '.lang("allready exist").'."); '; 
-            $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-            . 'VALUES("2", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Email '.$_POST["email"].' allready exist")';
-            engine::mysql($query);
             unset($_POST["email"]);
         }else if(strpos($email, "@")){
             $query = 'INSERT INTO `nodes_user` (`name`, `photo`, `email`, `pass`, `lang`, `online`, `confirm`, `code`) 
@@ -55,9 +49,6 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             unset($data["token"]);
             unset($data[9]);
             $_SESSION["user"] = $data;
-            $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-            . 'VALUES("1", "'.$data["id"].'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Sucsessful registration")';
-            engine::mysql($query);
             if($this->configs["confirm_signup_email"]){
                 email::confirmation($email, $name, $code);  
             }else if($this->configs["send_registration_email"]){
@@ -70,9 +61,6 @@ if(!empty($_POST["email"])&&!empty($_POST["pass"])){
             }return;   
         }else{
             $this->onload .= ' alert("'.lang("Error").'. '.lang("Incorrect email").'."); '; 
-            $query = 'INSERT INTO `nodes_log`(action, user_id, ip, date, details) '
-            . 'VALUES("2", "0", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("U").'", "Incorrect email '.$_POST["email"].'")';
-            engine::mysql($query);
             unset($_POST["email"]);
         }
     }

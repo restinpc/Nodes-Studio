@@ -14,8 +14,6 @@ Disallow: /account$
 Disallow: /engine/
 Disallow: /font/
 Disallow: /res/
-Disallow: /script/
-Disallow: /template/
 Disallow: *.php
 Allow: /sitemap.php
 Sitemap: '.$_SERVER["PUBLIC_URL"].'/sitemap.xml';

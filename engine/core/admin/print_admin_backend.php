@@ -3,7 +3,7 @@
 * Print admin backend page.
 * @path /engine/core/admin/print_admin_backend.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
@@ -19,7 +19,22 @@
 * @usage <code> engine::print_admin_backend($cms); </code>
 */
 function print_admin_backend($cms){
+    $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
+        . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "backend" '
+        . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
+        . 'AND `access`.`admin_id` = `admin`.`id`';
+    $admin_res = engine::mysql($query);
+    $admin_data = mysql_fetch_array($admin_res);
+    $admin_access = intval($admin_data["access"]);
+    if(!$admin_access){
+        engine::error(401);
+        return;
+    }
     if(isset($_POST["id"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $id = intval($_POST["id"]);
         $mode = trim(htmlspecialchars($_POST["mode"]));
         $file = trim(htmlspecialchars($_POST["file"]));
@@ -28,6 +43,10 @@ function print_admin_backend($cms){
         $fout = '<script type="text/javascript">window.location = document.referrer;</script>';
         return $fout;
     }else if(!empty($_POST["mode"]) && !empty($_POST["file"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $mode = trim(htmlspecialchars($_POST["mode"]));
         $mode = str_replace('/', '', $mode);
         $file = trim(htmlspecialchars($_POST["file"]));
@@ -39,7 +58,7 @@ function print_admin_backend($cms){
 * Backend '.$mode.' page file.
 * @path /engine/site/'.$file.'
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 2.0.8
 * @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
 *
 * @var \$this->title - Page title.
@@ -62,12 +81,20 @@ if(!empty($_GET[1])){
         fwrite($fname, $code);
         fclose($fname);
     }else if($_GET["act"]=="edit" && !empty($_GET["id"]) && !empty($_GET["target"]) && !empty($_GET["value"])){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $id = intval($_GET["id"]);
         $value = urldecode($_GET["value"]);
         $target = trim(htmlspecialchars($_GET["target"]));
         $query = 'UPDATE `nodes_backend` SET `'.$target.'`="'.$value.'" WHERE `id` = "'.$id.'"';
         engine::mysql($query);
     }else if(intval($_GET["delete"])>0){
+        if($admin_access != 2){
+            engine::error(401);
+            return;
+        }
         $query = 'SELECT * FROM `nodes_backend` WHERE `id` = "'.intval($_GET["delete"]).'"';
         $res = engine::mysql($query);
         $data = mysql_fetch_array($res);
@@ -130,16 +157,20 @@ if(!empty($_GET[1])){
                         <td width=30% align=left >
                         <select class="input w100p" onChange=\'if(this.value==1){show_editor("engine/site/'.$data["file"].'");}else if(this.value==2 && confirm("'.lang("Are you sure?").'")){window.location="'.$_SERVER["DIR"].'/admin/?mode=backend&delete='.$data["id"].'";}\'>
                             <option>'.lang("Select an action").'</option>
-                            <option value="1">'.lang("View source").'</option>
-                            <option value="2">'.lang("Delete file").'</option>
-                        </select>
+                            <option value="1">'.lang("View source").'</option>';
+            if($admin_access == 2){
+                $table .= '<option value="2">'.lang("Delete file").'</option>';
+            }
+            $table .= '</select>
                         </td>
                     </tr>
                 ';
         }
     }
 $table .= '</tbody>
-    </table><br/>
+    </table><br/>';
+if($admin_access == 2){
+$table .= '
     <form method="POST" id="default">
         '.lang("Default file").': 
         <select name="default" class="input" onChange=\'document.getElementById("default").submit();\'>';
@@ -161,10 +192,14 @@ $table .= '</tbody>
                 $table .= '<option selected disabled value="'.$data["file"].'">'.$data["file"].'</option>';     
             }
         }
-    }        
+    }    
+}    
 $table .= '
         </select>
     </form>
+    <br/>';
+
+$table .= '
 </div>
 ';
         $fout .= '<div class="document640">'.$table.'
@@ -220,15 +255,19 @@ $table .= '
          }
          $fout .= '
     </form>
-    <div class="clear"><br/></div>
-    <input type="button" class="btn w280" value="'.lang("New file").'" onClick=\' this.style.display = "none"; document.getElementById("new_file").style.display = "block"; jQuery("#new_file").removeClass("hidden");\' />
-    <div id="new_file" class="hidden">
-        <form method="POST">
-        '.lang("Path").': <input required placeHolder="'.lang("Path").'" type="text" class="input" name="mode" /><br/><br/>
-        '.lang("File").': <input required placeHolder="'.lang("File").'" type="text" class="input" name="file" /><br/><br/>
-         <input type="submit" class="btn w280" value="'.lang("Submit").'" />
-        </form><br/>
-    </div>
+    <div class="clear"><br/></div>';
+    if($admin_access == 2){
+         $fout .= '
+        <input type="button" class="btn w280" value="'.lang("New file").'" onClick=\' this.style.display = "none"; document.getElementById("new_file").style.display = "block"; jQuery("#new_file").removeClass("hidden");\' />
+        <div id="new_file" class="hidden">
+            <form method="POST">
+            '.lang("Path").': <input required placeHolder="'.lang("Path").'" type="text" class="input" name="mode" /><br/><br/>
+            '.lang("File").': <input required placeHolder="'.lang("File").'" type="text" class="input" name="file" /><br/><br/>
+             <input type="submit" class="btn w280" value="'.lang("Submit").'" />
+            </form><br/>
+        </div>';
+    }
+         $fout .= '
     </div>';
     return $fout;
 }

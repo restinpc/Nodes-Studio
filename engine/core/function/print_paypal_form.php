@@ -21,7 +21,7 @@
 * @param bool $autopay Autosubmit form flag.
 * @return string Returns content of block on success, or die with error.
 * @usage <code> 
-*   $return = "http://".$_SERVER["HTTP_HOST"].$_SERVER["DIR]."/";
+*   $return = $_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"].$_SERVER["DIR]."/";
 *   engine::print_paypal_form(1, 100, $return); 
 * </code>
 */
@@ -33,7 +33,7 @@ function print_paypal_form($invoice_id, $sum, $return, $autopay=0){
     if($data["value"]) $domain = 'www.sandbox.paypal.com';
     else $domain = 'www.paypal.com';
     if(strpos("http", $return) != 0){
-        $return = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].$return;
+        $return = $_SERVER["PROTOCOL"].'://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].$return;
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_id"';
     $res = engine::mysql($query);
