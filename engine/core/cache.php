@@ -3,9 +3,9 @@
 * Cache library.
 * @path /engine/core/cache.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 * 
 * @example <code>
 *  $cache = new cache();
@@ -77,13 +77,13 @@ public static function update_cache($url, $jQuery = 0, $lang="en"){
 public function cache(){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "cache"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $is_cache = intval($data["value"]);
     $fout = ''; 
     if( empty($_POST) || !empty($_POST["cache"]) ){
         $query = 'SELECT * FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(!empty($data) && $data["interval"]>0){
             if($data["date"]<=intval(date("U")-$data["interval"])){
                 die(self::update_cache($_SERVER["SCRIPT_URI"], 0, $data["lang"]));
@@ -120,7 +120,7 @@ public function cache(){
     }else if(count($_POST)==1 && isset($_POST["jQuery"])){
         $query = 'SELECT * FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(!empty($data) && $data["interval"]>0){
             if($data["date"]<=intval(date("U")-$data["interval"])){
                 die(self::update_cache($_SERVER["SCRIPT_URI"], 1, $data["lang"]));
@@ -158,14 +158,14 @@ public function page_id(){
     if(empty($_POST["nocache"])){
         $query = 'SELECT `id` FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
         $res = engine::mysql($query);
-        $cache = mysql_fetch_array($res);
+        $cache = mysqli_fetch_array($res);
         if(!empty($cache)){
             $cache_id = $cache["id"];
         }else{
             $query = 'INSERT INTO `nodes_cache`(url, date, lang, `interval`, html, content) '
             . 'VALUES("'.$_SERVER["SCRIPT_URI"].'", "'.date("U").'", "'.$_SESSION["Lang"].'", -1, "", "")';
             engine::mysql($query);
-            $cache_id = mysql_insert_id();
+            $cache_id = mysqli_insert_id($_SERVER["sql_connection"]);
         }
     }else $cache_id = 0;
     return $cache_id;

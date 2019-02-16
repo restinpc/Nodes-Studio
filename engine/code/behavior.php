@@ -3,9 +3,9 @@
 * Behavioral information input script.
 * @path /engine/code/behavior.php
 *
-* @name    Nodes Studio    @version 2.0.6
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -17,7 +17,7 @@ if(!empty($_POST["patterns"])){
         if(!empty($_POST["patterns"][$i][5])){
             $query = 'SELECT `id` FROM `nodes_attendance` WHERE `token` = "'.session_id().'" ORDER BY `id` DESC LIMIT 0, 1';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             $query = 'INSERT INTO `nodes_pattern`(`attendance_id`, `action`, `x`, `y`, `top`, `width`, `height`, `date`) '
                 . 'VALUES("'.$data["id"].'", "'.$_POST["patterns"][$i][0].'", "'.$_POST["patterns"][$i][1].'", "'.$_POST["patterns"][$i][2].'", '
                 . '"'.$_POST["patterns"][$i][3].'", "'.$_POST["patterns"][$i][4].'", "'.$_POST["patterns"][$i][5].'", "'.(date("U")-(10-intval($_POST["patterns"][$i][6]))).'")';

@@ -3,9 +3,9 @@
 * Prints search result block.
 * @path /engine/core/function/print_search_result.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -23,7 +23,7 @@
 * @usage <code> engine::print_search_result($site, "Result 1", "Value 1", "/"); </code>
 */
 function print_search_result($site, $caption, $html, $url){
-    $request = mysql_real_escape_string(urldecode($_GET[1]));
+    $request = engine::escape_string(urldecode($_GET[1]));
     $html = preg_replace('#<[^>]+>#', " ", $html);
     $html = trim(preg_replace('#[\s]+#', ' ', $html));
     $pos = strpos($html, $request);
@@ -38,7 +38,7 @@ function print_search_result($site, $caption, $html, $url){
             }$html = $start.mb_substr($html, $from, 180).'..';
         }$html = str_replace($_GET[1], "<b>".$_GET[1]."</b>", $html);
         $fout = '<div class="search_result">'
-            . '<a href="'.$url.'" target="_blank" class="fs16">'.$caption.'</a>'
+            . '<a vr-control id="link-'.$url.'" href="'.$url.'" target="_blank" class="fs16">'.$caption.'</a>'
             . '<p>'.$html.'</p>'
             . '</div><br/>';
         return $fout;

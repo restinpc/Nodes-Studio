@@ -3,9 +3,9 @@
 * Print admin backend page.
 * @path /engine/core/admin/print_admin_backend.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_backend($cms){
         . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
         . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -58,8 +58,8 @@ function print_admin_backend($cms){
 * Backend '.$mode.' page file.
 * @path /engine/site/'.$file.'
 *
-* @name    Nodes Studio    @version 2.0.8
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @name    Nodes Studio    @version 3.0.0.1
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var \$this->title - Page title.
 * @var \$this->content - Page HTML data.
@@ -97,7 +97,7 @@ if(!empty($_GET[1])){
         }
         $query = 'SELECT * FROM `nodes_backend` WHERE `id` = "'.intval($_GET["delete"]).'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $query = 'DELETE FROM `nodes_backend` WHERE `id` = "'.intval($_GET["delete"]).'"';
         engine::mysql($query);
         unlink('engine/site/'.$data["file"]);
@@ -124,7 +124,7 @@ if(!empty($_GET[1])){
         </thead>
         <tbody>';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($data["file"] == "main.php" 
         || $data["file"] == "site.php"
         || $data["file"] == "register.php"
@@ -135,13 +135,13 @@ if(!empty($_GET[1])){
         || $data["file"] == "login.php"){
             $table .= '
                     <tr>
-                        <td width=35% align=left><a href="/'.$_SERVER["DIR"].$data["mode"].'" target="_blank">/'.$data["mode"].'</a></td>
+                        <td width=35% align=left><a vr-control id="backend-'.$data["id"].'" href="/'.$_SERVER["DIR"].$data["mode"].'" target="_blank">/'.$data["mode"].'</a></td>
                         <td width=35% align=left >'.$data["file"].'</td>';
             if($data["file"] != "site.php"){
                 $table .= '<td width=30% align=left>
-                    <select class="input w100p" onChange=\'if(this.value==1){show_editor("engine/site/'.$data["file"].'");}\'>
-                        <option>'.lang("Select an action").'</option>
-                        <option value="1">'.lang("View source").'</option>
+                    <select vr-control id="select-action-'.$data["id"].'" class="input w100p" onChange=\'if(this.value==1){show_editor("engine/site/'.$data["file"].'");}\'>
+                        <option vr-control id="option-action-0">'.lang("Select an action").'</option>
+                        <option vr-control id="option-action-1" value="1">'.lang("View source").'</option>
                     </select>
                     </td>';
             } 
@@ -152,14 +152,14 @@ if(!empty($_GET[1])){
             $table .= '
                     <tr>
                         <td width=35% align=left>
-                        <a title="'.lang("Edit").'" onClick=\'var s = prompt("'.lang("Edit").':", "'.$data["mode"].'"); if(s.length > 0 && s != "'.$data["mode"].'"){window.location="'.$_SERVER["DIR"].'/admin/?mode=backend&act=edit&id='.$data["id"].'&target=mode&value="+encodeURI(s);}\'>/'.$data["mode"].'</a></td>
+                        <a vr-control id="backend-'.$data["mode"].'" title="'.lang("Edit").'" onClick=\'var s = prompt("'.lang("Edit").':", "'.$data["mode"].'"); if(s.length > 0 && s != "'.$data["mode"].'"){window.location="'.$_SERVER["DIR"].'/admin/?mode=backend&act=edit&id='.$data["id"].'&target=mode&value="+encodeURI(s);}\'>/'.$data["mode"].'</a></td>
                         <td width=35%  align=left>'.$data["file"].'</td>
                         <td width=30% align=left >
-                        <select class="input w100p" onChange=\'if(this.value==1){show_editor("engine/site/'.$data["file"].'");}else if(this.value==2 && confirm("'.lang("Are you sure?").'")){window.location="'.$_SERVER["DIR"].'/admin/?mode=backend&delete='.$data["id"].'";}\'>
-                            <option>'.lang("Select an action").'</option>
-                            <option value="1">'.lang("View source").'</option>';
+                        <select vr-control id="select-action-'.$data["id"].'" class="input w100p" onChange=\'if(this.value==1){show_editor("engine/site/'.$data["file"].'");}else if(this.value==2 && confirm("'.lang("Are you sure?").'")){window.location="'.$_SERVER["DIR"].'/admin/?mode=backend&delete='.$data["id"].'";}\'>
+                            <option vr-control id="option-action-0">'.lang("Select an action").'</option>
+                            <option vr-control id="option-action-1" value="1">'.lang("View source").'</option>';
             if($admin_access == 2){
-                $table .= '<option value="2">'.lang("Delete file").'</option>';
+                $table .= '<option vr-control id="option-action-2" value="2">'.lang("Delete file").'</option>';
             }
             $table .= '</select>
                         </td>
@@ -173,23 +173,23 @@ if($admin_access == 2){
 $table .= '
     <form method="POST" id="default">
         '.lang("Default file").': 
-        <select name="default" class="input" onChange=\'document.getElementById("default").submit();\'>';
+        <select vr-control id="select-default-file" name="default" class="input" onChange=\'document.getElementById("default").submit();\'>';
     if(!empty($_POST["default"])){
         $query = 'UPDATE `nodes_config` SET `value` = "'.$_POST["default"].'" WHERE `name` = "default"';
         engine::mysql($query);
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "default"';   
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $default = $data["value"];
     $query = 'SELECT * FROM `nodes_backend` ORDER BY `id` ASC';   
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($data["file"] != "admin.php"){
             if($data["file"]!=$default){
-                $table .= '<option value="'.$data["file"].'">'.$data["file"].'</option>'; 
+                $table .= '<option vr-control id="option-file-'.$data["id"].'" value="'.$data["file"].'">'.$data["file"].'</option>'; 
             }else{
-                $table .= '<option selected disabled value="'.$data["file"].'">'.$data["file"].'</option>';     
+                $table .= '<option vr-control id="option-file-'.$data["id"].'" selected disabled value="'.$data["file"].'">'.$data["file"].'</option>';     
             }
         }
     }    
@@ -211,22 +211,22 @@ $table .= '
     <input type="hidden" name="reset" id="query_reset" value="0" />
     <div class="total-entry">';
     $res = engine::mysql($requery);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $count = $data[0];
     if($to > $count) $to = $count;
     if($data[0]>0){
-        $fout .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-            <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-             <option'; if($_SESSION["count"]=="20") $fout .= ' selected'; $fout .= '>20</option>
-             <option'; if($_SESSION["count"]=="50") $fout .= ' selected'; $fout .= '>50</option>
-             <option'; if($_SESSION["count"]=="100") $fout .= ' selected'; $fout .= '>100</option>
+        $fout.= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+            <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+             <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $fout.= ' selected'; $fout.= '>20</option>
+             <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $fout.= ' selected'; $fout.= '>50</option>
+             <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $fout.= ' selected'; $fout.= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$fout .= '</div><div class="cr"></div>';
     if($count>$_SESSION["count"]){
        $fout .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
            if($_SESSION["page"]>1){
-                $fout .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                $fout .= '<span vr-control id="page-prev" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$fout .= '<ul>';
            $a = $b = $c = $d = $e = $f = 0;
            for($i = 1; $i <= $pages; $i++){
@@ -239,7 +239,7 @@ $table .= '
                        $b = 1; $e = 0;
                       $fout .= '<li class="active-page">'.$i.'</li>';
                    }else{
-                       $fout .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                       $fout .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                    }
                }else if((!$c||!$b) && !$f && $i<$pages){
                    $f = 1; $e = 0;
@@ -248,7 +248,7 @@ $table .= '
                    $fout .= '<li class="dots">. . .</li>';
                }
            }if($_SESSION["page"]<$pages){
-               $fout .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+               $fout .= '<li vr-control id="page-next" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
            }$fout .= '
      </ul>
     </div>';
@@ -258,12 +258,12 @@ $table .= '
     <div class="clear"><br/></div>';
     if($admin_access == 2){
          $fout .= '
-        <input type="button" class="btn w280" value="'.lang("New file").'" onClick=\' this.style.display = "none"; document.getElementById("new_file").style.display = "block"; jQuery("#new_file").removeClass("hidden");\' />
+        <input vr-control id="new-file" type="button" class="btn w280" value="'.lang("New file").'" onClick=\' this.style.display = "none"; document.getElementById("new_file").style.display = "block"; jQuery("#new_file").removeClass("hidden");\' />
         <div id="new_file" class="hidden">
             <form method="POST">
-            '.lang("Path").': <input required placeHolder="'.lang("Path").'" type="text" class="input" name="mode" /><br/><br/>
-            '.lang("File").': <input required placeHolder="'.lang("File").'" type="text" class="input" name="file" /><br/><br/>
-             <input type="submit" class="btn w280" value="'.lang("Submit").'" />
+            '.lang("Path").': <input vr-control id="input-path" required placeHolder="'.lang("Path").'" type="text" class="input" name="mode" /><br/><br/>
+            '.lang("File").': <input vr-control id="input-file" required placeHolder="'.lang("File").'" type="text" class="input" name="file" /><br/><br/>
+             <input vr-control id="input-submit" type="submit" class="btn w280" value="'.lang("Submit").'" />
             </form><br/>
         </div>';
     }

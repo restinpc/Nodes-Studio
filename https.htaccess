@@ -5,6 +5,10 @@ RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteCond %{HTTP_HOST} ^www\.(.*)
 RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+php_value upload_max_filesize 128M
+php_value post_max_size 128M
+php_value max_file_uploads 10
+php_value client_max_body_size 128M;
 <IfModule mod_deflate.c>
     SetOutputFilter DEFLATE
 </IfModule>
@@ -23,11 +27,15 @@ RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
         Header unset Expires
         Header set Cache-Control "max-age=604800"
     </FilesMatch>
+    <FilesMatch "\.(obj|mtl|ply|dae|jpg|jpeg|gif|png|avi|mp4|webm|mss|json|OBJ|MTL|PLY|DAE|JPG|JPEG|GIF|PNG|AVI|MP4|WEBM|MSS|JSON)$">
+        Header set Access-Control-Allow-Origin *
+    </FilesMatch>
 </ifModule>
 RewriteRule ^favicon/(.*)$ favicon/$1 [L]
 RewriteRule ^file/(.*)$ file/$1 [L]
 RewriteRule ^font/(.*)$ font/$1 [L]
 RewriteRule ^img/(.*)$ img/$1 [L] 
+RewriteRule ^node/(.*)$ node/index.php?$1 [L] 
 RewriteRule ^res/(.*)$ res/$1 [L]
 RewriteRule ^script/(.*)$ script/$1 [L]
 RewriteRule ^template/(.*)$ template/$1 [L]

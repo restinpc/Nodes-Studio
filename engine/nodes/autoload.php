@@ -3,9 +3,9 @@
 * Framework autoloader.
 * @path /engine/nodes/autoload.php
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 error_reporting(0); 
 date_default_timezone_set('UTC');
@@ -18,8 +18,9 @@ if( $_SERVER["HTTP_HTTPS"] == "on" ||
     $_SERVER["PROTOCOL"] = "https";
 }
 $_SERVER["CONSOLE"] = array();
-$_SERVER["DIR"] = str_replace("/cron.php", "", str_replace("/index.php", "", 
-    str_replace($_SERVER["DOCUMENT_ROOT"], "", $_SERVER["SCRIPT_FILENAME"])));
+$_SERVER["DIR"] = str_replace("/cron.php", "", 
+    str_replace("index.php", "", str_replace("/index.php", "",
+    str_replace($_SERVER["DOCUMENT_ROOT"], "", $_SERVER["SCRIPT_FILENAME"]))));
 $_SERVER["PUBLIC_URL"] = $_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"].$_SERVER["DIR"];
 ini_set('include_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]);
 require_once('engine/core/engine.php');

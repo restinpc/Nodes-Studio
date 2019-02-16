@@ -3,9 +3,9 @@
 * Print admin access page.
 * @path /engine/core/admin/print_admin_access.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_access($cms){
             . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
             . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -34,7 +34,7 @@ function print_admin_access($cms){
         $user_id = intval($_GET["user_id"]);
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
         $res = engine::mysql($query);
-        $user = mysql_fetch_array($res);
+        $user = mysqli_fetch_array($res);
         if($user["id"] == $_SESSION["user"]["id"]){
             engine::error(401);
             return;
@@ -50,13 +50,13 @@ function print_admin_access($cms){
             }
             $query = 'SELECT * FROM `nodes_admin`';
             $res = engine::mysql($query);
-            while($data = mysql_fetch_array($res)){ 
+            while($data = mysqli_fetch_array($res)){ 
                 if(isset($_POST["permission_".$data["id"]])){
                     $access = $_POST["permission_".$data["id"]];
                     $id = $data["id"];
                     $query = 'SELECT * FROM `nodes_access` WHERE `user_id` = "'.$user["id"].'" AND `admin_id` = "'.$id.'"';
                     $r = engine::mysql($query);
-                    $d = mysql_fetch_array($r);
+                    $d = mysqli_fetch_array($r);
                     if(!empty($d)){
                         $query = 'UPDATE `nodes_access` SET `access` = "'.$access.'" WHERE `id` = "'.$d["id"].'"';
                         engine::mysql($query);
@@ -68,7 +68,7 @@ function print_admin_access($cms){
             }
             $query = 'SELECT * FROM `nodes_access` WHERE `user_id` = "'.$user["id"].'" AND `access` > 0';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             if(!empty($data)) $flag = 1;
             else $flag = 0;
             $query = 'UPDATE `nodes_user` SET `admin` = "'.$flag.'" WHERE `id` = "'.$user["id"].'"';
@@ -84,27 +84,27 @@ function print_admin_access($cms){
         
         $query = 'SELECT * FROM `nodes_admin`';
         $res = engine::mysql($query);
-        while($data = mysql_fetch_array($res)){
+        while($data = mysqli_fetch_array($res)){
             $query = 'SELECT `access`.`access` FROM `nodes_access` AS `access` '
                     . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`url` = "'.$data["url"].'" '
                     . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
                     . 'AND `access`.`admin_id` = `admin`.`id`';
             $section_res = engine::mysql($query);
-            $section_data = mysql_fetch_array($section_res);
+            $section_data = mysqli_fetch_array($section_res);
             $section_access = intval($section_data["access"]);
             $query = 'SELECT * FROM `nodes_access` WHERE `user_id` = "'.$user["id"].'" AND `admin_id` = "'.$data["id"].'"';
             $r = engine::mysql($query);
-            $d = mysql_fetch_array($r);
+            $d = mysqli_fetch_array($r);
             $access = intval($d["access"]);
             if($section_access >= $access && $section_access != 0){
                 $fout .= '<tr>
                         <td align=left>'.lang($data["name"]).'</td>
                         <td>
-                            <select name="permission_'.$data["id"].'" class="input w280">
-                                <option value="0" '.($access==0?'selected':'').'>'.lang("No access").'</option>
-                                <option value="1" '.($access==1?'selected':'').'>'.lang("Read-only").'</option>';
+                            <select vr-control id="select-permission" name="permission_'.$data["id"].'" class="input w280">
+                                <option vr-control id="option-no-access" value="0" '.($access==0?'selected':'').'>'.lang("No access").'</option>
+                                <option vr-control id="option-read-only" value="1" '.($access==1?'selected':'').'>'.lang("Read-only").'</option>';
                 if($section_access == 2){
-                    $fout .= '<option value="2" '.($access==2?'selected':'').'>'.lang("Full access").'</option>';
+                    $fout .= '<option vr-control id="option-full-access" value="2" '.($access==2?'selected':'').'>'.lang("Full access").'</option>';
                 }
                 $fout .= '
                             </select>
@@ -114,8 +114,8 @@ function print_admin_access($cms){
         }
             
         $fout .= '</table></div><br/>
-            <input type="submit" value="'.lang("Save changes").'" class="btn w280" /><br/>
-            <a href="'.$_SERVER["DIR"].'/admin/?mode=access"><input type="button" class="btn w280" value="'.lang("Back to access").'" /></a>
+            <input vr-control id="input-save-changes" type="submit" value="'.lang("Save changes").'" class="btn w280" /><br/>
+            <a vr-control id="back-to-access" href="'.$_SERVER["DIR"].'/admin/?mode=access"><input type="button" class="btn w280" value="'.lang("Back to access").'" /></a>
             </form>
             </div>
             ';
@@ -127,7 +127,7 @@ function print_admin_access($cms){
             }
             $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.intval($_POST["delete"]).'"';
             $res = engine::mysql($query);
-            $user = mysql_fetch_array($res);
+            $user = mysqli_fetch_array($res);
             if($user["id"] == $_SESSION["user"]["id"]){
                 engine::error(401);
                 return;
@@ -165,9 +165,9 @@ function print_admin_access($cms){
                 ); foreach($array as $order=>$value){
                     $table .= '<th>';
                     if($_SESSION["order"]==$order){
-                        if($_SESSION["method"]=="ASC") $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "DESC"; submit_search_form();\'>'.lang($value).'&nbsp;&uarr;</a>';
-                        else $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'&nbsp;&darr;</a>';
-                    }else $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'</a>';
+                        if($_SESSION["method"]=="ASC") $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "DESC"; submit_search_form();\'>'.lang($value).'&nbsp;&uarr;</a>';
+                        else $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'&nbsp;&darr;</a>';
+                    }else $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'</a>';
                     $table .= '</th>';
                 }
                 $table .= '
@@ -175,13 +175,13 @@ function print_admin_access($cms){
             </tr>
             </thead>';      
         $res = engine::mysql($query);
-        while($data = mysql_fetch_array($res)){
+        while($data = mysqli_fetch_array($res)){
             $arr_count++;
             if($data["online"] > date("U")-300) $online = '<center>'.lang("Online").'</center>';
             else $online = date("d/m/Y", $data["online"]);
             if($data["id"] != 1 && $admin_access == 2){
                 if($data["id"] != $_SESSION["user"]["id"]){
-                    $select = '<select class="input" onChange=\'if(confirm("'.lang("Are you sure?").'")){
+                    $select = '<select vr-control id="select-action-'.$arr_count.'" class="input" onChange=\'if(confirm("'.lang("Are you sure?").'")){
 if(this.value=="1"){
     window.location="'.$_SERVER["DIR"].'/admin/?mode=access&user_id='.$data["id"].'";
 }else if(this.value=="2"){
@@ -189,9 +189,9 @@ if(this.value=="1"){
     $id("query_form").submit();
 }else{this.selectedIndex=0;} 
                     }\'>'
-                    . '<option value="0">'.lang("Select an action").'</option>'
-                    . '<option value="1">'.lang("Edit permission").'</option>'
-                    . '<option value="2">'.lang("Delete from admin").'</option>'
+                    . '<option vr-control id="option-action-0" value="0">'.lang("Select an action").'</option>'
+                    . '<option vr-control id="option-action-1" value="1">'.lang("Edit permission").'</option>'
+                    . '<option vr-control id="option-action-2" value="2">'.lang("Delete from admin").'</option>'
                     . '</select>';
                 }else{
                     $select = "";
@@ -204,10 +204,10 @@ if(this.value=="1"){
                 }
             }
             if($data["confirm"]) $flag = '<input type="checkbox" checked disabled />';
-            else $flag = '<input type="checkbox" title="'.lang("Code").': '.$data["code"].'" '
+            else $flag = '<input vr-control id="input-checkbox-'.$data["id"].'" type="checkbox" title="'.lang("Code").': '.$data["code"].'" '
                     . 'onClick=\'document.getElementById("confirm_value").value="'.$data["id"].'"; '
                     . 'document.getElementById("confirm_form").submit();\' />';
-            $table .= '<tr><td align=left class="nowrap">'.$flag.'&nbsp;<a href="'.$_SERVER["DIR"].'/account/inbox/'.$data["id"].'">'.$data["name"].'</a></td>'
+            $table .= '<tr><td align=left class="nowrap">'.$flag.'&nbsp;<a vr-control id="link-user-'.$data["id"].'" href="'.$_SERVER["DIR"].'/account/inbox/'.$data["id"].'">'.$data["name"].'</a></td>'
                     . '<td align=left><a href="mailto:'.$data["email"].'">'.$data["email"].'</a></td>'
                     . '<td align=left>'.$online.'</td>'
                     . '<td width=45 align=left>'.$select.'</td></tr>';
@@ -225,15 +225,15 @@ if(this.value=="1"){
         <input type="hidden" name="delete" id="delete_id" value="0" />
         <div class="total-entry">';
         $res = engine::mysql($requery);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $count = $data[0];
         if($to > $count) $to = $count;
         if($data[0]>0){
-            $fout .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-                <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-                 <option'; if($_SESSION["count"]=="20") $fout .= ' selected'; $fout .= '>20</option>
-                 <option'; if($_SESSION["count"]=="50") $fout .= ' selected'; $fout .= '>50</option>
-                 <option'; if($_SESSION["count"]=="100") $fout .= ' selected'; $fout .= '>100</option>
+            $fout.= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+                <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+                 <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $fout.= ' selected'; $fout.= '>20</option>
+                 <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $fout.= ' selected'; $fout.= '>50</option>
+                 <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $fout.= ' selected'; $fout.= '>100</option>
                 </select> '.lang("per page").'.</nobr></p>';
         }$fout .= '
         </div><div class="cr"></div>';
@@ -241,7 +241,7 @@ if(this.value=="1"){
            $fout .= '<div class="pagination" >';
                 $pages = ceil($count/$_SESSION["count"]);
                if($_SESSION["page"]>1){
-                    $fout .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                    $fout .= '<span vr-control id="previous_page" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
                 }$fout .= '<ul>';
                $a = $b = $c = $d = $e = $f = 0;
                for($i = 1; $i <= $pages; $i++){
@@ -254,7 +254,7 @@ if(this.value=="1"){
                            $b = 1; $e = 0;
                           $fout .= '<li class="active-page">'.$i.'</li>';
                        }else{
-                           $fout .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                           $fout .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                        }
                    }else if((!$c||!$b) && !$f && $i<$pages){
                        $f = 1; $e = 0;
@@ -263,7 +263,7 @@ if(this.value=="1"){
                        $fout .= '<li class="dots">. . .</li>';
                    }
                }if($_SESSION["page"]<$pages){
-                   $fout .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+                   $fout .= '<li vr-control id="next-page" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
                }$fout .= '
          </ul>
         </div>';
@@ -275,17 +275,17 @@ if(this.value=="1"){
         }
         if($admin_access == 2){
             $fout .= '
-                <input type="button" class="btn w280" value="'.lang("Add new admin").'" onClick=\'this.style.display="none"; jQuery("#new_admin").removeClass("hidden");\' />
+                <input vr-control id="input-add-admin" type="button" class="btn w280" value="'.lang("Add new admin").'" onClick=\'this.style.display="none"; jQuery("#new_admin").removeClass("hidden");\' />
                 <div class="document320 hidden" id="new_admin">
-                <select class="input w280" id="admin_id">';
+                <select vr-control class="input w280" id="admin_id">';
             $query = 'SELECT * FROM `nodes_user` WHERE `ban` = 0 AND `admin` = 0';
             $res = engine::mysql($query);
-            while($user = mysql_fetch_array($res)){
+            while($user = mysqli_fetch_array($res)){
                 $fout .= '<option value="'.$user["id"].'">'.$user["name"].' ['.$user["email"].']</option>';
             }
             $fout .= '
                 </select><br/>
-                <input type="button" class="btn w280" value="'.lang("Submit").'" onClick=\'window.location = "'.$_SERVER["DIR"].'/admin/?mode=access&user_id="+$id("admin_id").value\' />
+                <input vr-control id="input-submit" type="button" class="btn w280" value="'.lang("Submit").'" onClick=\'window.location = "'.$_SERVER["DIR"].'/admin/?mode=access&user_id="+$id("admin_id").value\' />
                 </div>
                 ';
         }

@@ -3,9 +3,9 @@
 * Image resize library.
 * @path /engine/core/image.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 * 
 * @example <code>
 *  $img = new image("/img/1.jpg"); 
@@ -233,5 +233,56 @@ static function base64_to_jpg($base64_string, $output_file) {
     fwrite( $ifp, base64_decode( $data[ 1 ] ) );
     fclose( $ifp ); 
     return $output_file; 
+}
+//------------------------------------------------------------------------------
+static function upload_plan($src, $dest, $ext, $width=600, $height=600, $rgb=0xffffff, $quality=100, $proportions=1){
+    if (!file_exists($src)) return false;
+    $size = getimagesize($src);
+    if ($size === false) return false;
+    if($ext == 'jpg'){
+        $icfunc = "imagecreatefromjpeg";
+    }else{
+        $icfunc = "imagecreatefrom" . $ext;
+    }
+    //echo $icfunc;
+    if (!function_exists($icfunc)) return false;
+    $isrc = $icfunc($src);
+    
+    $idest = imagecreatetruecolor($width, $height);
+    imagesavealpha($idest, true);
+    if($ext == 'jpg'){
+         $color =  imagecolorallocate($idest, 255, 255, 255);
+    }else{
+         $color =  imagecolorallocatealpha($idest, 0, 0, 0, 127);
+    }
+    imagefill($idest, 0, 0, $color);
+
+    if($proportions){
+        $x_ratio = $width / $size[0];
+        $y_ratio = $height / $size[1];
+        $ratio       = min($x_ratio, $y_ratio);
+        $use_x_ratio = ($x_ratio == $ratio);
+        $new_width   = $use_x_ratio  ? $width  : round($size[0] * $ratio);
+        $new_height  = !$use_x_ratio ? $height : round($size[1] * $ratio);
+        $new_left    = $use_x_ratio  ? 0 : round(($width - $new_width) / 2);
+        $new_top     = !$use_x_ratio ? 0 : round(($height - $new_height) / 2);
+        imagecopyresampled($idest,$isrc,$new_left,$new_top,0,0,$new_width,$new_height,$size[0],$size[1]);  
+    }else{
+        imagecopyresampled($idest, $isrc, 0, 0, 0, 0, $width, $height, $size[0], $size[1]);
+    }
+    if( $ext == "jpg" || 
+        $ext == "jpeg" || 
+        $ext == "JPG" || 
+        $ext == "JPEG"){
+        imagejpeg($idest, $dest, $quality);
+    }else if($ext == "gif" || $ext == "GIF"){
+        imagegif($idest, $dest);
+    }else if($ext == "png" || $ext == "PNG"){
+        var_dump($idest);
+        echo imagepng($idest, $dest);
+    }
+    imagedestroy($isrc);
+    imagedestroy($idest);
+    return true;
 }
 }

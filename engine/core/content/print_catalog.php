@@ -3,9 +3,9 @@
 * Prints content catalog page.
 * @path /engine/core/content/print_catalog.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -37,7 +37,7 @@ function print_catalog($site, $data){
     }else{
         $fout .= '<img class="hidden" itemprop="image" src="'.$site->img.'" />';    
     }
-    $fout .= '<h1 itemprop="headline" '.($data["visible"]?'class="hidden"':'').'>'.$data["caption"].'</h1><br/>';
+    $fout .= '<h1 itemprop="headline" class="pt20'.($data["visible"]?' hidden':'').'">'.$data["caption"].'</h1><br/>';
     preg_match_all('#<img[^>]+src="(.*?)"#',$data["text"],$images);
     if(!empty($images)){
         $text = engine::print_image_viewer($site, $data["text"], $data["caption"], $images);
@@ -54,8 +54,8 @@ function print_catalog($site, $data){
     $fout .= '</div>
     <div class="clear"><br/></div>';
     if($_SESSION["user"]["id"]=="1"){
-        $fout .= '<br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn w280" value="'.lang("Add article").'" /></a>'
-            . '<br/><br/><a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit directory").'" /></a><br/><br/>';
+        $fout .= '<br/><a vr-control id="add_article" href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'"><input type="button" class="btn w280" value="'.lang("Add article").'" /></a>'
+            . '<br/><br/><a vr-control id="edit_directory" href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit directory").'" /></a><br/><br/>';
     }
     return $fout;
 }

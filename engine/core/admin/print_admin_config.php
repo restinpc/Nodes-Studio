@@ -3,9 +3,9 @@
 * Print admin config page.
 * @path /engine/core/admin/print_admin_config.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_config($cms){
         . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
         . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -36,7 +36,7 @@ function print_admin_config($cms){
             return;
         }
         foreach($_POST as $arr=>$value){
-            $query = 'UPDATE `nodes_config` SET `value` = "'.mysql_real_escape_string($value).'" WHERE `name` = "'.$arr.'"';
+            $query = 'UPDATE `nodes_config` SET `value` = "'.engine::escape_string($value).'" WHERE `name` = "'.$arr.'"';
             engine::mysql($query);
         }
     }
@@ -45,19 +45,21 @@ function print_admin_config($cms){
     $fout = '<div class="document640">
             <form method="POST"><div class="table">
         <table width=100% id="table">';
-    while($data = mysql_fetch_array($res)){
+    $i = 0;
+    while($data = mysqli_fetch_array($res)){
+        $i++;
         if($data["type"]=="bool"){
             $fout .= '
                 <tr>
                     <td width=100 align=left class="p5">'.$data["text"].'</td>
                     <td class="p5" align=left >
-                    <select '.($admin_access != 2?'disabled':'').' class="input w100p" name="'.$data["name"].'">';
+                    <select vr-control id="select-config-'.$i.'" '.($admin_access != 2?'disabled':'').' class="input w100p" name="'.$data["name"].'">';
             if($data["value"]){
-                $fout .= '<option value="0">'.lang("No").'</option>'
-                        . '<option value="1" selected>'.lang("Yes").'</option>';
+                $fout .= '<option vr-control id="option-no-'.$i.'" value="0">'.lang("No").'</option>'
+                        . '<option vr-control id="option-yes-'.$i.'" value="1" selected>'.lang("Yes").'</option>';
             }else{
-                $fout .= '<option value="0" selected>'.lang("No").'</option>'
-                        . '<option value="1">'.lang("Yes").'</option>';
+                $fout .= '<option vr-control id="option-no-'.$i.'" value="0" selected>'.lang("No").'</option>'
+                        . '<option vr-control id="option-yes-'.$i.'" value="1">'.lang("Yes").'</option>';
             }
             $fout .= '        
                     </select>
@@ -68,7 +70,7 @@ function print_admin_config($cms){
                 <tr>
                     <td width=100 align=left class="p5">'.$data["text"].'</td>
                     <td class="p5" align=left >
-                    <input '.($admin_access != 2?'disabled':'').' class="input w100p" type="text" name="'.$data["name"].'" value="'.$data["value"].'" />
+                    <input vr-control id="input-config-'.$i.'" '.($admin_access != 2?'disabled':'').' class="input w100p" type="text" name="'.$data["name"].'" value="'.$data["value"].'" />
                     </td>
                 </tr>';
         }
@@ -77,7 +79,7 @@ function print_admin_config($cms){
             . '</div>';
     if($admin_access == 2){
         $fout .= '<br/>'
-            . '<input type="submit" class="btn w280" value="'.lang("Save settings").'" />';
+            . '<input vr-control id="input-save-settings" type="submit" class="btn w280" value="'.lang("Save settings").'" />';
     }
     $fout .= '</form>'
             . '</div>';

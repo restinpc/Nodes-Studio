@@ -3,19 +3,19 @@
 * Twitter OAuth script.
 * @path /engine/api/oauth/twitter_auth.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "tw_key"';
 $res = engine::mysql($query);
-$key = mysql_fetch_array($res);
+$key = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "tw_secret"';
 $res = engine::mysql($query);
-$secret = mysql_fetch_array($res);
+$secret = mysqli_fetch_array($res);
 define ('TWITTER_CONSUMER_KEY', $key["value"]);
 define ('TWITTER_CONSUMER_SECRET', $secret["value"]);
 define ('TWITTER_URL_CALLBACK', $_SERVER["PROTOCOL"].'://'.$_SERVER["HTTP_HOST"].''.$_SERVER["DIR"].'/account.php?mode=social&method=tw&auth=1');
@@ -115,11 +115,11 @@ if(!$_GET["auth"]){
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
         }else{
             $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$link.'"'; 
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             if(empty($data)){
                 $path = '';
                 $ext = explode('.', $user_data->profile_image_url);
@@ -131,7 +131,7 @@ if(!$_GET["auth"]){
                 $res = engine::mysql($query);
                 $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$link.'"';
                 $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
+                $data = mysqli_fetch_array($res);
             }
         }
         unset($data["pass"]);

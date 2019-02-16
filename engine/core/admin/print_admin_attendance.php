@@ -3,9 +3,9 @@
 * Print admin attendance page.
 * @path /engine/core/admin/print_admin_attendance.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_attendance($cms){
         . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
         . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -32,31 +32,31 @@ function print_admin_attendance($cms){
     }
     if($_GET["action"]=="stat" || empty($_GET["action"])){
         $stat = '<b>'.lang("Statistic").'</b>';
-        $pages = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
-        $users = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=users&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Users").'</a>';
+        $pages = '<a vr-control id="attendance-pages" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
+        $users = '<a vr-control id="attendance-users" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=users&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Users").'</a>';
     }else if($_GET["action"]=="pages"){
-        $stat = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
+        $stat = '<a vr-control id="attendance-statistic" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
         $pages = '<b>'.lang("Pages").'</b>';
-        $users = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=users&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Users").'</a>';
+        $users = '<a vr-control id="attendance-users" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=users&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Users").'</a>';
     }else if($_GET["action"]=="users"){
-        $stat = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
-        $pages = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
-        $referrers = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=ref&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Referrers").'</a>';
+        $stat = '<a vr-control id="attendance-statistic" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
+        $pages = '<a vr-control id="attendance-pages" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
+        $referrers = '<a vr-control id="attendance-referrers" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action=ref&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Referrers").'</a>';
         $users = '<b>'.lang("Users").'</b>';
     }
     $from = '';
     $to = '';
     if($_GET["interval"]=="day" || empty($_GET["interval"])){
         $by_day = '<b>'.lang("By days").'</b>';
-        $by_week = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
-        $by_month = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
+        $by_week = '<a vr-control id="by-weeks" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
+        $by_month = '<a vr-control id="by-months" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
         if(empty($_GET["date"])){
             $from = strtotime(date('Y-m-d')." 00:00:00");
             $to = date("U");
             $timeStamp = strtotime(date('Y-m-d')." 00:00:00 - 1 days");
             $date1 = date('d/m/Y', $timeStamp);
             $url_date1 = date("Y-m-d", $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
+            $prev = '<a vr-control id="link-prev" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
             $now = '<b>'.date("d/m/Y").'</b>';
             $next = '&nbsp;';
         }else{
@@ -68,18 +68,18 @@ function print_admin_attendance($cms){
             $timeStamp = strtotime($_GET["date"]." 00:00:00 + 1 days");
             $date2 = date('d/m/Y', $timeStamp);
             $url_date2 = date("Y-m-d", $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$url_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
             $now = '<b>'.date("d/m/Y", strtotime($_GET["date"])).'</b>';
             if(strtotime($url_date2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$url_date2.'">'.$date2.' &raquo;</a>'; 
+                $next = '<a vr-control id="date-'.$url_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$url_date2.'">'.$date2.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             } 
         }
     }else if($_GET["interval"]=="week"){
-        $by_day = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
+        $by_day = '<a vr-control id="by-days" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
         $by_week = '<b>'.lang("By weeks").'</b>';
-        $by_month = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
+        $by_month = '<a vr-control id="by-months" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
         $prev = ' - 7 days';
         $prev2 = ' - 14 days';
         $next = ' + 0 days';
@@ -92,7 +92,7 @@ function print_admin_attendance($cms){
             $link_date1 = date('Y-m-d', $timeStamp); 
             $timeStamp = strtotime(date('Y-m-d')." 00:00:00".$prev2);
             $date11 = date('d.m', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.date("d.m").'</b>';
             $next = '&nbsp;';
         }else{
@@ -109,17 +109,17 @@ function print_admin_attendance($cms){
             $timeStamp = strtotime($_GET["date"]."00:00:00".$next2);
             $date22 = date('d.m', $timeStamp);
             $link_date2 = date('Y-m-d', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.$date.'</b>';
             if(strtotime($_GET["date"]."00:00:00".$next2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
+                $next = '<a vr-control id="date-'.$link_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             }
         }   
     }else if($_GET["interval"]=="month"){
-        $by_day = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
-        $by_week = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
+        $by_day = '<a vr-control id="by-days" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
+        $by_week = '<a vr-control id="by-weeks" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
         $by_month = '<b>'.lang("By months").'</b>';
         $prev = ' - 1 month';
         $prev2 = ' - 2 month';
@@ -133,7 +133,7 @@ function print_admin_attendance($cms){
             $link_date1 = date('Y-m-d', $timeStamp); 
             $timeStamp = strtotime(date('Y-m-d')."00:00:00".$prev2);
             $date11 = date('m.Y', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.date("m.Y").'</b>';
             $next = '&nbsp;';
         }else{
@@ -150,10 +150,10 @@ function print_admin_attendance($cms){
             $timeStamp = strtotime($_GET["date"]."00:00:00".$next2);
             $date22 = date('m.Y', $timeStamp);
             $link_date2 = date('Y-m-d', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.$date.'</b>';
             if(strtotime($_GET["date"]."00:00:00".$next2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
+                $next = '<a vr-control id="date-'.$link_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=attendance&action='.$_GET["action"].'&interval=month&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             }
@@ -189,14 +189,14 @@ function print_admin_attendance($cms){
     if($_GET["action"]=="stat" || empty($_GET["action"])){
         $query = 'SELECT COUNT(DISTINCT `token`, `ip`) as `a`, COUNT(`id`) as `b` FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $views = $data['b'];
         $visit = $data['a'];
         $query = 'SELECT COUNT(DISTINCT `att`.`token`, `att`.`ip`) as `a` FROM `nodes_attendance` AS `att` '
                 . 'LEFT JOIN `nodes_agent` AS `agent` ON `agent`.`id` = `att`.`agent_id` '
                 . 'WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `agent`.`bot` = 1';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $bots_visit = $data['a'];
         $fout .= '<center class="lh2"><span class="statistic_span">'.lang("Visitors").": ".$visit.'</span> ';
         $fout .= '<span class="statistic_span"  style="color: rgb(20,180,180);">'.lang("Views").": ".$views.'</span> ';
@@ -211,11 +211,11 @@ function print_admin_attendance($cms){
         $visitors = array();
         $actions = array();
         $sessions = array();
-        while($data = mysql_fetch_array($res)){
+        while($data = mysqli_fetch_array($res)){
             $pages[$data["url"]]++;
             $query = 'SELECT COUNT(*) FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["act_id"].'"';
             $r = engine::mysql($query);
-            $d = mysql_fetch_array($r);
+            $d = mysqli_fetch_array($r);
             $actions[$data["url"]]+=$d[0];
         }
         array_multisort($pages);
@@ -231,13 +231,13 @@ function print_admin_attendance($cms){
         $table = '';
         foreach($pages as $page=>$count){
             if($count > $max_val){
-                $table = '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
+                $table = '<tr><td align=left><a vr-control id="p-'.$page.'" href="'.$page.'" target="_blank">'.$page.'</a></td>'
                         . '<td>'.$count.'</td>
                             <td>'.$actions[$page].'</td>
                             </tr>'.$table;
                 $max_val=$count;
             }else if($count < $min_val){
-                $table .= '<tr><td align=left><a href="'.$page.'" target="_blank">'.$page.'</a></td>'
+                $table .= '<tr><td align=left><a vr-control id="p-'.$page.'" href="'.$page.'" target="_blank">'.$page.'</a></td>'
                         . '<td>'.$count.'</td>
                            <td>'.$actions[$page].'</td></tr>';  
                 $min_val = $count;
@@ -258,43 +258,43 @@ function print_admin_attendance($cms){
             <th>'.lang("Actions").'</th>
             <th width=80>&nbsp;</th>
         </tr>';
-        while($data = mysql_fetch_array($res)){
+        while($data = mysqli_fetch_array($res)){
             if(!in_array($data["token"], $tokens)){
                 $query = 'SELECT COUNT(*) FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["id"].'" ORDER BY `id` ASC';
                 $r = engine::mysql($query);
-                $d = mysql_fetch_array($r);
+                $d = mysqli_fetch_array($r);
                 $query = 'SELECT COUNT(*) FROM `nodes_attendance` WHERE `token` = "'.$data["token"].'"';
                 $rr = engine::mysql($query);
-                $dd = mysql_fetch_array($rr);
+                $dd = mysqli_fetch_array($rr);
                 array_push($tokens, $data["token"]);
                 $query = 'SELECT * FROM `nodes_attendance` WHERE `token` = "'.$data["token"].'" AND `user_id` <> 0';
                 $kr = engine::mysql($query);
-                $kd = mysql_fetch_array($kr);
+                $kd = mysqli_fetch_array($kr);
                 if(empty($kd)){ 
                     $user_name = "Anonim";
                 }else{
                     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$kd["user_id"].'"';
                     $dr = engine::mysql($query);
-                    $user = mysql_fetch_array($dr);
+                    $user = mysqli_fetch_array($dr);
                     $user_name = $user["name"];
                 }
                 $query = 'SELECT `width`, `height` FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["id"].'" ORDER BY `id` ASC';
                 $wr = engine::mysql($query);
-                $window = mysql_fetch_array($wr);
+                $window = mysqli_fetch_array($wr);
                 $query = 'SELECT `ref_id` FROM `nodes_attendance` WHERE `token` = "'.$data["token"].'" AND `ref_id` != 0';
                 $ref = engine::mysql($query);
-                $dref = mysql_fetch_array($ref);
+                $dref = mysqli_fetch_array($ref);
                 if($dref){
                     $query = 'SELECT * FROM `nodes_referrer` WHERE `id` = "'.$dref["ref_id"].'"';
                     $ddref = engine::mysql($query);
-                    $ref_data = mysql_fetch_array($ddref);
+                    $ref_data = mysqli_fetch_array($ddref);
                     $url = parse_url($ref_data["name"]);
-                    $link = '<a href="'.$ref_data["name"].'" target="_blank">'.$url["host"].'</a>';
+                    $link = '<a vr-control id="ref-'.$dref["id"].'" href="'.$ref_data["name"].'" target="_blank">'.$url["host"].'</a>';
                 }else{
                     $link = "Blank";
                 }
                 if($d[0]>0){
-                    $button = '<a onClick=\'window.open("/pattern.php?token='.$data["token"].'", "'.lang("View session").'", "width='.($window["width"]).',height='.($window["height"]+25).'");\' class="btn small">'.lang("View session").'</a>';
+                    $button = '<a vr-control id="session-'.$data.'" onClick=\'window.open("/pattern.php?token='.$data["token"].'", "'.lang("View session").'", "width='.($window["width"]).',height='.($window["height"]+25).'");\' class="btn small">'.lang("View session").'</a>';
                 }else{
                     $button = '&nbsp;';
                 }

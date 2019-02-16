@@ -3,13 +3,13 @@
 * Image croper & uploader.
 * @path /engine/code/uploader.php
 *
-* @name    Nodes Studio    @version 2.0.3
-* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @name    Nodes Studio    @version 3.0.0.1
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
-if(empty($_SESSION["user"]["id"])) die(engine::error(401));
+if(empty($_SESSION["user"]["email"])) die(engine::error(401));
 define("MAX_IMG_WIDTH", 1000);
 define("MAX_IMG_HEIGHT", 1000);
 $THUWIDTH = 400;
@@ -55,18 +55,13 @@ if(!empty($_GET["dragndrop"])||!empty($_FILES)){
             die('error');
         }
     }
-    print_r($_GET);
-    print_r($_POST);
-    print_r($_FILES);
-    print_r($_SERVER);
-    die();
 }
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
 $res = engine::mysql($query);
-$data = mysql_fetch_array($res);
+$data = mysqli_fetch_array($res);
 $template = $data["value"];
 echo '<!DOCTYPE html>
-<html>
+<html style="background-color:#fff;">
 <head>
 <meta charset="UTF-8" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -82,6 +77,7 @@ echo '<!DOCTYPE html>
     var dir = "'.$_SERVER["DIR"].'";
     var posx = posy = 30;
     var fx = fy = drag_mode = 0;
+    var scale = 1;
 </script>
 <script src="'.$_SERVER["DIR"].'/script/uploader.js" type="text/javascript"></script>
 </head>';
@@ -93,7 +89,12 @@ if(!empty($_POST["name"])){
         $img = new image($_POST["url"]); 
         $img->save($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/big/', $name, $ext, true, 100);
         unlink($_POST["url"]);
-        $img->crop($_POST["l"], $_POST["t"], $_POST["w"], $_POST["h"]); 
+        $img->crop(
+                intval($_POST["l"]*$_POST["scale"]), 
+                intval($_POST["t"]*$_POST["scale"]),
+                intval($_POST["w"]),
+                intval($_POST["h"])
+            ); 
         $img->resize($THUWIDTH, $THUHEIGHT); 
         $path = $img->save($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/thumb/', $name, $ext, true, 100); 
         $fout .= '<body class="nodes result_body">
@@ -125,6 +126,7 @@ if(!empty($_POST["name"])){
                             var el = top.document.getElementById("new_photo_"+i);
                             if(el.title == "none"){
                                 el.style.background = "url('.$_SERVER["DIR"].'/img/data/thumb/'. $name.'.'.$ext.') center no-repeat";
+                                el.style.backgroundSize = "cover";
                                 el.style.display = "block";
                                 el.title = "";
                                 top.document.getElementById("file"+i).value = "'. $name.'.'.$ext.'";
@@ -150,7 +152,7 @@ if(!empty($_POST["name"])){
         $file = $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/img/data/big/'.$_POST["new_image"];
         $size = getimagesize($file);
         if($size[0]<$THUWIDTH||$size[1]<$THUHEIGHT) 
-            die('<script type="text/javascript">alert("'.lang("Image too small. Minimal size is 400x400").'."); window.location="'.$_SERVER["DIR"].'/uploader.php?id='.$_GET["id"].'";</script></html>');
+            die('<script type="text/javascript">alert("'.lang("Image too small. Minimal size is ".$THUWIDTH.'x'.$THUHEIGHT).'."); window.location="'.$_SERVER["DIR"].'/uploader.php?id='.$_GET["id"].'";</script></html>');
         $f_name = "";
         $a = md5(date('U').$file);
         $ext = strtolower(array_pop(explode(".", $file)));
@@ -175,14 +177,15 @@ if(!empty($_POST["name"])){
             $size = getimagesize($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/".$f_name);
             $width = intval($size[0]);
             $height = intval($size[1]);
+            $scale = 1;
             $fout = '<body class="nodes uploader_body" draggable="false" title="'.lang("For uploading selected area use double click").'">
-                <div id="image" draggable="false" style="background: url('.$_SERVER["DIR"].'/'.$f_name.') top left no-repeat;" >
-                    <img id="img" draggable="false" src="'.$_SERVER["DIR"].'/'.$f_name.'" />
+                <div id="image" draggable="false" onDragStart="return false;" style="background: url('.$_SERVER["DIR"].'/'.$f_name.') top left no-repeat; width: '.($width/$scale).'px; height: '.($height/$scale).'px; background-size: cover;" >
+                    <img id="img" draggable="false" onDragStart="return false;" src="'.$_SERVER["DIR"].'/'.$f_name.'" style="width: '.($width/$scale).'px; height: '.($height/$scale).'px;" />
                 </div>
-                <div id="frame" draggable="false" style="width:'.$THUWIDTH.'px; height:'.$THUHEIGHT.'px;position: absolute;top: 28px;left: 28px;display:block;">
-                    <table draggable="false" cellpadding=0 cellspacing=0 onMouseDown=\'if(drag_mode!=3)drag_mode=1;\'>
+                <div id="frame" draggable="false" onDragStart="return false;" style="width:'.($THUWIDTH/$scale).'px; height:'.($THUHEIGHT/$scale).'px;position: absolute;top: 28px;left: 28px;display:block;">
+                    <table draggable="false" cellpadding=0 cellspacing=0  onDragStart="return false;" onMouseDown=\'if(drag_mode!=3)drag_mode=1;\'>
                     <tr><td align=left valign=top></td></tr></table>
-                    <div id="bottom_dot" onMouseDown=\'drag_mode=2;\' draggable="false">
+                    <div id="bottom_dot" onMouseDown=\'drag_mode=2;\' draggable="false" onDragStart="return false;">
                         <div class="dot" draggable="false"> </div>
                     </div>
                 </div><br/>
@@ -195,16 +198,31 @@ if(!empty($_POST["name"])){
                     <input type="hidden" id="l" name="l" value="0"/>
                     <input type="hidden" id="w" name="w" value="'.$THUWIDTH.'"/>
                     <input type="hidden" id="h" name="h" value="'.$THUHEIGHT.'"/>
+                    <input type="hidden" id="scale" name="scale" value="'.$scale.'"/>
                     <input type="submit" class="btn w280" value="'.lang("Crop image").'" />
                 </form>
                 <script type="text/javascript">
+                    var s1 = '.$height.'/(parent.parent.document.getElementById("img_editor").offsetHeight-120);
+                    var s2 = '.$width.'/(parent.parent.document.getElementById("img_editor").offsetWidth-100);
+                    if(s1 > s2){
+                        if(s1 > 1) scale = s1;
+                    }else{
+                        if(s2 > 1) scale = s2;
+                    }
+                    document.getElementById("image").style.width = (('.($width).'/scale))+"px";
+                    document.getElementById("image").style.height = (('.($height).'/scale))+"px";
+                    document.getElementById("img").style.width = ('.($width).'/scale)+"px";
+                    document.getElementById("img").style.height = ('.($height).'/scale)+"px";
+                    document.getElementById("frame").style.width = ('.($THUWIDTH).'/scale)+"px";
+                    document.getElementById("frame").style.height = ('.($THUHEIGHT).'/scale)+"px";
+                    document.getElementById("scale").value = scale;
                     addHandler(document.getElementById("frame"), "touchstart", function(){ drag_mode=1; });
                     addHandler(document.getElementById("frame"), "touchend", function(){ drag_mode=0; });
                     addHandler(document.getElementById("bottom_dot"), "touchend", function(){ drag_mode=0; });
                     addHandler(document.getElementById("bottom_dot"), "touchstart", function(){ drag_mode=2; });
                     try{
-                        window.parent.document.getElementById("'.$f1.'").style.width="'.($width+60).'px";
-                        window.parent.document.getElementById("'.$f1.'").style.height="'.($height+120).'px";
+                        window.parent.document.getElementById("'.$f1.'").style.width=('.($width).'/scale+60)+"px";
+                        window.parent.document.getElementById("'.$f1.'").style.height=('.($height).'/scale+80)+"px";
                     }catch(e){}
                 </script>
             </body>
@@ -217,7 +235,7 @@ if(!empty($_POST["name"])){
 <form id="upload" method="POST" enctype="multipart/form-data">
     <div style="height: 100%;">
         <input type="file" id="fileselect" name="fileselect" onChange=\'document.getElementById("upload").submit();\' />
-        <div id="filedrag" onClick=\'document.getElementById("fileselect").click();\'>'.lang("Drop file here").'</div>
+        <div vr-control id="filedrag" onClick=\'document.getElementById("fileselect").click();\'>'.lang("Drop file here").'</div>
     </div>
     <div id="submitbutton">
         <button class="btn" type="submit">'.lang("Upload Files").'</button>

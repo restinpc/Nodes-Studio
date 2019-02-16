@@ -3,9 +3,9 @@
 * Print admin language page.
 * @path /engine/core/admin/print_admin_language.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_language($cms){
         . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
         . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -40,7 +40,7 @@ function print_admin_language($cms){
             }
             $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$name.'"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             if(empty($data)){
                 $query = 'INSERT INTO `nodes_language`(name, lang, value) VALUES("'.$name.'", "en", "'.$name.'")';
                 engine::mysql($query);
@@ -70,7 +70,7 @@ function print_admin_language($cms){
                         $id!=""){
                     $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE  "'.$id.'" AND `lang` = "'.$_GET["l"].'"';
                     $res = engine::mysql($query);
-                    $data = mysql_fetch_array($res);
+                    $data = mysqli_fetch_array($res);
                     if(!empty($data)){
                         $query = 'UPDATE `nodes_language` SET `value` = "'.$value.'" WHERE `name` LIKE  "'.$id.'" AND `lang` = "'.$_GET["l"].'"';
                         engine::mysql($query);
@@ -83,17 +83,17 @@ function print_admin_language($cms){
         }
     }
     $fout = '<div class="document980">'.
-            lang("Select your language").': <select class="input" onChange="window.location = \''.$_SERVER["DIR"].'/admin/?mode=language&l=\'+this.value;">';
+            lang("Select your language").': <select vr-control id="select-lang" class="input" onChange="window.location = \''.$_SERVER["DIR"].'/admin/?mode=language&l=\'+this.value;">';
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "languages"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $arr = explode(";", $data["value"]);
     foreach($arr as $value){
         if(!empty($value)){
             if(!empty($_GET["l"])&&$_GET["l"]==$value){
-                $fout .= '<option value="'.$value.'" selected>'.$value.'</option>';
+                $fout .= '<option vr-control id="option-lang-'.$value.'" value="'.$value.'" selected>'.$value.'</option>';
             }else{
-                $fout .= '<option value="'.$value.'">'.$value.'</option>';
+                $fout .= '<option vr-control id="option-lang-'.$value.'" value="'.$value.'">'.$value.'</option>';
             }
         }
     }$fout .= '</select><br/><br/>';
@@ -123,21 +123,21 @@ function print_admin_language($cms){
         </thead>
         <tbody>';
     $res = engine::mysql($query);
-    while($data=  mysql_fetch_array($res)){
+    while($data=  mysqli_fetch_array($res)){
         $arr_count++;
         $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$data["name"].'" AND `lang` = "'.$_GET["l"].'"';
         $r = engine::mysql($query);
-        $d = mysql_fetch_array($r);
+        $d = mysqli_fetch_array($r);
 
         $table .= '<tr><td width=50% align=left>'.$data["name"].'</td>';
         if($_GET["l"]=="en" && $admin_access == 2){
-            $table .= '<td width=50% align=left><input name="'.  base64_encode($data["name"]).'" type="text" value="'.$data["value"].'" class="input w100p" />'
-                . '</td><td width=20><div class="close_image"'
+            $table .= '<td width=50% align=left><input vr-control id="input-lang-'.$arr_count.'" name="'.  base64_encode($data["name"]).'" type="text" value="'.$data["value"].'" class="input w100p" />'
+                . '</td><td width=20><div vr-control id="div-delete-'.$arr_count.'" class="close_image"'
                 . 'onClick=\'if(confirm("'.lang("Delete").' \"'.$data["name"].'\"?")){document.getElementById("delete_value").value="'.base64_encode($data["name"]).'";'
                 . 'document.getElementById("delete_form").submit();}\''
                 . '> </div></td>';
         }else{
-            $table .= '<td width=50% align=left colspan=2><input name="'.base64_encode($data["name"]).'" '.($admin_access!=2?'disabled':'').' type="text" value="'.$d["value"].'" class="input w270" /></td>'; 
+            $table .= '<td width=50% align=left colspan=2><input vr-control id="input-lang-'.$arr_count.'" name="'.base64_encode($data["name"]).'" '.($admin_access!=2?'disabled':'').' type="text" value="'.$d["value"].'" class="input w270" /></td>'; 
         }
         $table .= '</tr>';
     }
@@ -147,7 +147,7 @@ $table .= '</table>
 if($admin_access == 2){
     $table .= '
     <br/>
-    <input type="submit" class="btn w280" value="'.lang("Save changes").'" />';
+    <input vr-control id="input-save-changes" type="submit" class="btn w280" value="'.lang("Save changes").'" />';
 }
 
         $table .= '
@@ -162,15 +162,15 @@ if($admin_access == 2){
     <input type="hidden" name="reset" id="query_reset" value="0" />
     <div class="total-entry">';
     $res = engine::mysql($requery);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $count = $data[0];
     if($to > $count) $to = $count;
     if($data[0]>0){
-        $fout .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-            <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-             <option'; if($_SESSION["count"]=="20") $fout .= ' selected'; $fout .= '>20</option>
-             <option'; if($_SESSION["count"]=="50") $fout .= ' selected'; $fout .= '>50</option>
-             <option'; if($_SESSION["count"]=="100") $fout .= ' selected'; $fout .= '>100</option>
+        $fout.= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+            <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+             <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $fout.= ' selected'; $fout.= '>20</option>
+             <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $fout.= ' selected'; $fout.= '>50</option>
+             <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $fout.= ' selected'; $fout.= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$fout .= '
     </div><div class="cr"></div>';
@@ -178,7 +178,7 @@ if($admin_access == 2){
        $fout .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
            if($_SESSION["page"]>1){
-                $fout .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                $fout .= '<span vr-control id="page-prev" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$fout .= '<ul>';
            $a = $b = $c = $d = $e = $f = 0;
            for($i = 1; $i <= $pages; $i++){
@@ -191,7 +191,7 @@ if($admin_access == 2){
                        $b = 1; $e = 0;
                       $fout .= '<li class="active-page">'.$i.'</li>';
                    }else{
-                       $fout .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                       $fout .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                    }
                }else if((!$c||!$b) && !$f && $i<$pages){
                    $f = 1; $e = 0;
@@ -200,7 +200,7 @@ if($admin_access == 2){
                    $fout .= '<li class="dots">. . .</li>';
                }
            }if($_SESSION["page"]<$pages){
-               $fout .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+               $fout .= '<li vr-control id="page-next" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
            }$fout .= '
      </ul>
     </div>';
@@ -211,7 +211,7 @@ if($admin_access == 2){
         $fout = '<div class="clear_block">'.lang("Data not found").'</div>';
     }
     if($_GET["l"]=="en" && $admin_access == 2){
-        $fout .= '<br/><input type="button" class="btn w280" '
+        $fout .= '<br/><input vr-control id="input-new-value" type="button" class="btn w280" '
                 . 'onClick=\'result = prompt("New value", ""); if(result != ""){document.getElementById("new_value").value=result;'
                 . 'document.getElementById("new_form").submit();}\' value="'.lang("Add new value").'" /><br/>';
     }

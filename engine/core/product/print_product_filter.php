@@ -3,9 +3,9 @@
 * Print product filter page.
 * @path /engine/core/product/print_product_filter.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -28,17 +28,17 @@ function print_product_filter($site){
     $query = 'SELECT * FROM `nodes_product_property` WHERE `id` > 1 ORDER BY `id` ASC';
     $res = engine::mysql($query);
     $flag = 0;
-    while($data = mysql_fetch_array($res)){
-        $filter .= '<select class="input" name="'.$data["id"].'" onChange=\'document.getElementById("filer_form").submit();\'>
+    while($data = mysqli_fetch_array($res)){
+        $filter .= '<select vr-control id="select-product-filter" class="input" name="'.$data["id"].'" onChange=\'document.getElementById("filer_form").submit();\'>
         <option value="0">'.lang("Any").' '.lang($data["value"]).'</option>';
         $query = 'SELECT * FROM `nodes_product_data` WHERE `cat_id` = "'.$data["id"].'"';
         $r = engine::mysql($query);
-        while($cat = mysql_fetch_array($r)){
+        while($cat = mysqli_fetch_array($r)){
             $flag=1;
             if($_SESSION["details"][$data["id"]]==$cat["id"]){
-                $filter .= '<option value="'.$cat["id"].'" selected>'.lang($cat["value"]).'</option>';
+                $filter .= '<option vr-control id="option-filter-'.$cat["id"].'" value="'.$cat["id"].'" selected>'.lang($cat["value"]).'</option>';
             }else{
-                $filter .= '<option value="'.$cat["id"].'">'.lang($cat["value"]).'</option>';
+                $filter .= '<option vr-control id="option-filter-'.$cat["id"].'" value="'.$cat["id"].'">'.lang($cat["value"]).'</option>';
             }
         }$filter .= '
             </select> &nbsp; ';

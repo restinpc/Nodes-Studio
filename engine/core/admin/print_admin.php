@@ -3,9 +3,9 @@
 * Print admin main page.
 * @path /engine/core/admin/print_admin.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site class object.
 * @var $cms->title - Page title.
@@ -42,9 +42,9 @@ function print_admin($cms){
     <section class="left_column b0">';
     $query = 'SELECT `admin`.*, `access`.`access` FROM `nodes_access` AS `access` LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`id` = `access`.`admin_id` WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `admin`.`id` ASC';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($data["access"]){
-            $fout .= '<div class="admin_menu_icon"><a href="'.$_SERVER["DIR"].'/admin/?mode='.$data["url"].'"><img src="'.$_SERVER["DIR"].'/img/'.$data["img"].'" /><br/>'.lang($data["name"]).'</a></div>';
+            $fout .= '<div class="admin_menu_icon"><a vr-control id="admin-link-'.$data["id"].'" href="'.$_SERVER["DIR"].'/admin/?mode='.$data["url"].'"><img src="'.$_SERVER["DIR"].'/img/'.$data["img"].'" /><br/>'.lang($data["name"]).'</a></div>';
         }
     }
     $fout .= '</section>

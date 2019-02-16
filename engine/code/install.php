@@ -3,9 +3,9 @@
 * Framework Installer.
 * @path /engine/code/install.php
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 function output(){
 array_push($_SERVER["CONSOLE"], "output()");
@@ -17,46 +17,67 @@ if(!empty($_POST["mysql_server"])){
     . '</center>';
     $flag = 0;
     $output .= 'Checking MySQL connection.. ';
-    if(mysql_connect($_POST["mysql_server"], 
+    $link = mysqli_connect($_POST["mysql_server"], 
         $_POST["mysql_login"],
-        $_POST["mysql_pass"])){
-        if(mysql_select_db($_POST["mysql_db"]))
+        $_POST["mysql_pass"]);
+    if($link){
+        if(mysqli_select_db($link, $_POST["mysql_db"]))
             $flag = 1;
     }if($flag){
+        $crypt_salt = str_replace("+", ".", substr(md5(date("U").$_SERVER["HTTP_HOST"]), 0, 6));
+        $salt = substr(md5(date("U").$_SERVER["REMOTE_ADDR"]),0,22);
+        $salt = '$'.implode('$',array( "2y", str_pad(11, 2, "0", STR_PAD_LEFT), str_replace("+",".",$salt)));
+        $salt = substr($salt, 0, (strlen($salt) - strlen($_SERVER["config"]["crypt_salt"]))-1);
+        $key = $salt.$crypt_salt.'.';
+        $hashed_password = crypt($password, $key);
+        $pass = str_replace($key, '', $hashed_password);
         $output .= "Ok.<br/>";
+        
         $query = "DROP TABLE IF EXISTS 
-        `nodes_access`,
-        `nodes_admin`,
-        `nodes_agent`,
-        `nodes_attendance`,
-        `nodes_backend`,
-        `nodes_cache`,
-        `nodes_catalog`,
-        `nodes_comment`,
-        `nodes_config`,
-        `nodes_content`,
-        `nodes_error`,
-        `nodes_firebase`, 
-        `nodes_image`,
-        `nodes_inbox`,
-        `nodes_invoice`, 
-        `nodes_language`,
-        `nodes_meta`,
-        `nodes_order`,
-        `nodes_outbox`,
-        `nodes_pattern`,
-        `nodes_perfomance`,
-        `nodes_product`,
-        `nodes_product_data`,
-        `nodes_product_order`,
-        `nodes_product_property`,
-        `nodes_property_data`,
-        `nodes_referrer`,
-        `nodes_shipping`,
-        `nodes_transaction`,
-        `nodes_user`,
-        `nodes_user_outbox`;
-
+            `nodes_access`,
+            `nodes_admin`,
+            `nodes_aframe`,
+            `nodes_agent`,
+            `nodes_anonim`,
+            `nodes_attendance`,
+            `nodes_backend`,
+            `nodes_cache`,
+            `nodes_catalog`,
+            `nodes_comment`,
+            `nodes_config`,
+            `nodes_content`,
+            `nodes_error`,
+            `nodes_firebase`,
+            `nodes_image`,
+            `nodes_inbox`,
+            `nodes_invoice`,
+            `nodes_language`,
+            `nodes_meta`,
+            `nodes_order`,
+            `nodes_outbox`,
+            `nodes_pattern`,
+            `nodes_perfomance`,
+            `nodes_product`,
+            `nodes_product_data`,
+            `nodes_product_order`,
+            `nodes_product_property`,
+            `nodes_property_data`,
+            `nodes_referrer`,
+            `nodes_server_client`,
+            `nodes_server_data`,
+            `nodes_server_lobby`,
+            `nodes_server_object`,
+            `nodes_server_scene`,
+            `nodes_shipping`,
+            `nodes_transaction`,
+            `nodes_user`,
+            `nodes_user_outbox`,
+            `nodes_vr_level`,
+            `nodes_vr_link`,
+            `nodes_vr_navigation`,
+            `nodes_vr_object`,
+            `nodes_vr_project`,
+            `nodes_vr_scene`;
 
 CREATE TABLE IF NOT EXISTS `nodes_access` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -84,7 +105,8 @@ CREATE TABLE IF NOT EXISTS `nodes_user` (
   `photo` varchar(400) NOT NULL,
   `url` varchar(400) NOT NULL,
   `email` varchar(400) NOT NULL,
-  `pass` varchar(32) NOT NULL,
+  `pass` varchar(64) NOT NULL,
+  `salt` varchar(32) NOT NULL,
   `lang` varchar(3) NOT NULL,
   `balance` double NOT NULL,
   `ip` varchar(20) NOT NULL,
@@ -112,18 +134,18 @@ CREATE TABLE IF NOT EXISTS `nodes_config` (
 
 
 INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
-('name', '".mysql_real_escape_string($_POST["name"])."', 'Site name', 'string'),
-('description', '".mysql_real_escape_string($_POST["description"])."', 'Description', 'string'),
-('email', '".mysql_real_escape_string($_POST["admin_email"])."', 'Site email', 'string'),
-('language', '".mysql_real_escape_string($_POST["language"])."', 'Site language', 'string'),
-('languages', '".mysql_real_escape_string(str_replace("'", "\'", $_POST["languages"]))."', 'Available languages', 'string'),
+('name', '".mysqli_real_escape_string($link,$_POST["name"])."', 'Site name', 'string'),
+('description', '".mysqli_real_escape_string($link,$_POST["description"])."', 'Description', 'string'),
+('email', '".mysqli_real_escape_string($link,$_POST["admin_email"])."', 'Site email', 'string'),
+('language', '".mysqli_real_escape_string($link,$_POST["language"])."', 'Site language', 'string'),
+('languages', '".mysqli_real_escape_string($link,str_replace("'", "\'", $_POST["languages"]))."', 'Available languages', 'string'),
 ('image', '".$_SERVER["PUBLIC_URL"]."/img/cms/nodes_studio.png', 'Site image', 'string'),
 ('email_image', '".$_SERVER["PUBLIC_URL"]."/img/logo.png', 'Email header image', 'string'),
 ('invoice_image', '".$_SERVER["PUBLIC_URL"]."/img/logo.png', 'Invoice logo image', 'string');
 
 
-INSERT INTO `nodes_user` (`admin`, `name`, `photo`, `url`, `email`, `pass`, `lang`, `balance`, `ip`, `ban`, `online`, `token`, `confirm`, `code`, `bulk_ignore`) VALUES
-('1', '".mysql_real_escape_string(str_replace("'", "\'", $_POST["admin_name"]))."', 'admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".md5(trim(strtolower($_POST["admin_pass"])))."', '".$_POST["language"]."', 0, '', -1, 0, '', 1, 0, 0);
+INSERT INTO `nodes_user` (`admin`, `name`, `photo`, `url`, `email`, `pass`, `salt`, `lang`, `balance`, `ip`, `ban`, `online`, `token`, `confirm`, `code`, `bulk_ignore`) VALUES
+('1', '".mysqli_real_escape_string($link,str_replace("'", "\'", $_POST["admin_name"]))."', 'admin.jpg', '', '".htmlspecialchars($_POST["admin_email"])."', '".$pass."', '".$salt."', '".$_POST["language"]."', 0, '', -1, 0, '', 1, 0, 0);
      
 
 INSERT INTO `nodes_admin` (`id`, `name`, `url`, `img`) VALUES
@@ -131,12 +153,12 @@ INSERT INTO `nodes_admin` (`id`, `name`, `url`, `img`) VALUES
 (2, 'Pages', 'pages', 'cms/pages.jpg'),
 (3, 'Content', 'content', 'cms/content.jpg'),
 (4, 'Products', 'products', 'cms/products.jpg'),
-(5, 'Users', 'users', 'cms/users.jpg'),
-(6, 'Orders', 'orders', 'cms/orders.jpg'),
-(7, 'Finance', 'finance', 'cms/finance.jpg'),
-(8, 'Language', 'language', 'cms/language.jpg'),
-(9, 'Attendance', 'attendance', 'cms/attendance.jpg'),
-(10, 'Files', 'files', 'cms/files.jpg'),
+(5, 'Panoramas', 'panoramas', 'cms/pano.jpg'),
+(6, 'Users', 'users', 'cms/users.jpg'),
+(7, 'Orders', 'orders', 'cms/orders.jpg'),
+(8, 'Finance', 'finance', 'cms/finance.jpg'),
+(9, 'Language', 'language', 'cms/language.jpg'),
+(10, 'Attendance', 'attendance', 'cms/attendance.jpg'),
 (11, 'Config', 'config', 'cms/config.jpg'),
 (12, 'Backend', 'backend', 'cms/backend.jpg'),
 (13, 'Templates', 'templates', 'cms/templates.jpg'),
@@ -171,6 +193,7 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('cron', '1', 'jQuery cron', 'bool'),
 ('cache', '1', 'Allow cache', 'bool'),
 ('compress', '1', 'Compress HTML', 'bool'),
+('cardboard', '1', 'Cardboard mode (beta)', 'bool'),
 ('sandbox', '1', 'Sandbox payment mode', 'bool'),
 ('autoupdate', '1', 'Engine auto-update', 'bool'),
 ('autobackup', '1', 'Auto backup', 'bool'),
@@ -190,14 +213,16 @@ INSERT INTO `nodes_config` (`name`, `value`, `text`, `type`) VALUES
 ('paypal_test', '1', 'PayPal test mode', 'bool'),
 ('paypal_id', '', '<a href=\"https://www.paypal.com/\" target=\"_blank\">PayPal user ID</a>', 'string'),
 ('payment_description', '', 'Payment description', 'string'),
+('coinpayment_private', '', '<a href=\"https://www.coinpayments.net/\" target=\"_blank\">Coinpayments Private Key</a>', 'string'),
+('coinpayment_public', '', '<a href=\"https://www.coinpayments.net/\" target=\"_blank\">Coinpayments Public Key</a>', 'string'),
 ('vk_id', '', 'VK client ID', 'string'),
-('fb_link', '', '<a href=\"https://facebook.com/\" target=\"_blank\">Facebook page URL</a>', 'string'),
+('fb_link', 'https://facebook.com/', '<a href=\"https://facebook.com/\" target=\"_blank\">Facebook page URL</a>', 'string'),
 ('fb_id', '', 'Facebook client ID', 'string'),
 ('fb_secret', '', 'Facebook client secret', 'string'),
-('tw_link', '', '<a href=\"https://twitter.com/\" target=\"_blank\">Twitter page URL</a>', 'string'),
+('tw_link', 'https://twitter.com', '<a href=\"https://twitter.com/\" target=\"_blank\">Twitter page URL</a>', 'string'),
 ('tw_key', '', 'Twitter consumer key', 'string'),
 ('tw_secret', '', 'Twitter consumer secret', 'string'),
-('gp_link', '', '<a href=\"https://plus.google.com/\" target=\"_blank\">Google+ page URL</a>', 'string'),
+('gp_link', 'https://plus.google.com/', '<a href=\"https://plus.google.com/\" target=\"_blank\">Google+ page URL</a>', 'string'),
 ('gp_id', '0', 'Google+ user ID', 'string'),
 ('gp_secret', '', 'Google+ client secret', 'string'),
 ('gp_dev', '', 'Google+ developer key', 'string'),
@@ -232,6 +257,72 @@ KEY `token` (`token`),
 KEY `display` (`display`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+CREATE TABLE IF NOT EXISTS `nodes_aframe` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `caption` varchar(100) NOT NULL,
+  `text` text NOT NULL,
+  `url` varchar(40) NOT NULL,
+  `image` varchar(100) NOT NULL,
+  `file` varchar(40) NOT NULL,
+  `lang` varchar(4) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+CREATE TABLE IF NOT EXISTS `nodes_server_client` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lobby_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `object_id` int(11) NOT NULL,
+  `online` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+CREATE TABLE IF NOT EXISTS `nodes_server_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lobby_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `position` varchar(60) NOT NULL,
+  `rotation` varchar(60) NOT NULL,
+  `timestamp` double NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+CREATE TABLE IF NOT EXISTS `nodes_server_lobby` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `scene_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `date` int(11) NOT NULL,
+  `last` int(11) NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+CREATE TABLE IF NOT EXISTS `nodes_server_object` (
+  `object_id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` varchar(40) NOT NULL,
+  `scene_id` int(11) NOT NULL,
+  `type` tinyint(1) NOT NULL,
+  `collada-model` varchar(40) NOT NULL,
+  `position` varchar(60) NOT NULL,
+  `rotation` varchar(60) NOT NULL,
+  `scale` varchar(20) NOT NULL,
+  `nodes-click` text NOT NULL,
+  PRIMARY KEY (`object_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+CREATE TABLE IF NOT EXISTS `nodes_server_scene` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `max_radius` double NOT NULL,
+  `radius` double NOT NULL,
+  `terrain` longtext NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
 
 CREATE TABLE IF NOT EXISTS `nodes_backend` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -250,12 +341,14 @@ CREATE TABLE IF NOT EXISTS `nodes_invoice` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+
 CREATE TABLE IF NOT EXISTS `nodes_firebase` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `token` varchar(400) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
 
 INSERT INTO `nodes_backend` (`mode`, `file`) VALUES
 ('', 'main.php'),
@@ -266,7 +359,8 @@ INSERT INTO `nodes_backend` (`mode`, `file`) VALUES
 ('content', 'content.php'),
 ('product', 'product.php'),
 ('search', 'search.php'),
-('profile', 'profile.php');
+('profile', 'profile.php'),
+('aframe', 'aframe.php');
 
 
 CREATE TABLE IF NOT EXISTS `nodes_cache` (
@@ -302,7 +396,7 @@ CREATE TABLE IF NOT EXISTS `nodes_catalog` (
   PRIMARY KEY (`id`),
   KEY `visible` (`visible`),
   KEY `lang` (`lang`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
 CREATE TABLE IF NOT EXISTS `nodes_comment` (
@@ -574,135 +668,259 @@ CREATE TABLE IF NOT EXISTS `nodes_agent` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+CREATE TABLE `nodes_vr_level` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `text` text NOT NULL,
+  `image` varchar(100) NOT NULL,
+  `rotation` int(11) NOT NULL,
+  `scale` double NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-INSERT INTO `nodes_agent` (`id`, `name`, `bot`) VALUES
-(1, 'a.pr-cy.ru', 1),
-(2, 'AdsBot-Google (+http://www.google.com/adsbot.html)', 1),
-(3, 'AdsBot-Google-Mobile (+http://www.google.com/mobile/adsbot.html) Mozilla (iPhone; U; CPU iPhone OS 3 0 like Mac OS X) AppleWebKit (KHTML, like Gecko) Mobile Safari', 1),
-(4, 'Apache-HttpClient/4.5 (Java/1.8.0_60)', 1),
-(5, 'eSyndiCat Bot', 1),
-(6, 'facebookexternalhit/1.1', 1),
-(7, 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 1),
-(8, 'Google favicon', 1),
-(9, 'Googlebot-Image/1.0', 1),
-(10, 'GuzzleHttp/6.1.0 curl/7.26.0 PHP/5.5.29-1~dotdeb+7.1', 1),
-(11, 'GuzzleHttp/6.1.0 curl/7.35.0 PHP/5.6.14-1+deb.sury.org~trusty+1', 1),
-(12, 'Java/1.4.1_04', 1),
-(13, 'Java/1.8.0_60', 1),
-(14, 'LinksMasterRoBot/0.01 (http://www.linksmaster.ru)', 1),
-(15, 'LinkStats Bot', 1),
-(16, 'ltx71 - (http://ltx71.com/)', 1),
-(17, 'Mozilla/5.0 (compatible; AhrefsBot/5.0; +http://ahrefs.com/robot/)', 1),
-(18, 'Mozilla/5.0 (compatible; archive.org_bot; Wayback Machine Live Record; +http://archive.org/details/archive.org_bot)', 1),
-(19, 'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)', 1),
-(20, 'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)', 1),
-(21, 'Mozilla/5.0 (compatible; CNCat/4.2; +http://www.cn-software.com/en/cncat/robot/)', 1),
-(22, 'Mozilla/5.0 (compatible; CNCat/4.2; +http://www.vipwords.com/en/cncat/robot/)', 1),
-(23, 'Mozilla/5.0 (compatible; DeuSu/5.0.2; +https://deusu.de/robot.html)', 1),
-(24, 'Mozilla/5.0 (compatible; DotBot/1.1; http://www.opensiteexplorer.org/dotbot, help@moz.com)', 1),
-(25, 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 1),
-(26, 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)/1.8 (InfoSeek crawler; http://www.infoseek.com; crawler@infoseek.com)', 1),
-(27, 'Mozilla/5.0 (compatible; Google-Site-Verification/1.0)', 1),
-(28, 'Mozilla/5.0 (compatible; GrapeshotCrawler/2.0; +http://www.grapeshot.co.uk/crawler.php)', 1),
-(29, 'Mozilla/5.0 (compatible; linkdexbot/2.2; +http://www.linkdex.com/bots/)', 1),
-(30, 'Mozilla/5.0 (compatible; LinkpadBot/1.06; +http://www.linkpad.ru)', 1),
-(31, 'Mozilla/5.0 (compatible; Linux x86_64; Mail.RU_Bot/2.0; +http://go.mail.ru/help/robots)', 1),
-(32, 'Mozilla/5.0 (compatible; Linux x86_64; Mail.RU_Bot/Fast/2.0; +http://go.mail.ru/help/robots)', 1),
-(33, 'Mozilla/5.0 (compatible; meanpathbot/1.0; +http://www.meanpath.com/meanpathbot.html)', 1),
-(34, 'Mozilla/5.0 (compatible; MegaIndex.ru/2.0; +http://megaindex.com/crawler)', 1),
-(35, 'Mozilla/5.0 (compatible; MJ12bot/v1.4.5; http://www.majestic12.co.uk/bot.php?+)', 1),
-(36, 'Mozilla/5.0 (compatible; NetSeer crawler/2.0; +http://www.netseer.com/crawler.html; crawler@netseer.com)', 1),
-(37, 'Mozilla/5.0 (compatible; openstat.ru/Bot)', 1),
-(38, 'Mozilla/5.0 (compatible; SemrushBot/0.99~bl; +http://www.semrush.com/bot.html)', 1),
-(39, 'Mozilla/5.0 (compatible; SputnikFaviconBot/1.2; +http://corp.sputnik.ru/webmaster)', 1),
-(40, 'Mozilla/5.0 (compatible; statdom.ru/Bot; +http://statdom.ru/bot.html)', 1),
-(41, 'Mozilla/5.0 (compatible; StatOnlineRuBot/1.0)', 1),
-(42, 'Mozilla/5.0 (compatible; vkShare; +http://vk.com/dev/Share)', 1),
-(43, 'Mozilla/5.0 (compatible; WebArtexBot; +http://webartex.ru/)', 1),
-(44, 'Mozilla/5.0 (compatible; Web-Monitoring/1.0; +http://monoid.nic.ru/)', 1),
-(45, 'Mozilla/5.0 (compatible; YaDirectFetcher/1.0; +http://yandex.com/bots)', 1),
-(46, 'Mozilla/5.0 (compatible; YaDirectFetcher/1.0; Dyatel; +http://yandex.com/bots)', 1),
-(47, 'Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)', 1),
-(48, 'Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)', 1),
-(49, 'Mozilla/5.0 (compatible; YandexDirect/3.0; +http://yandex.com/bots)', 1),
-(50, 'Mozilla/5.0 (compatible; YandexImages/3.0; +http://yandex.com/bots)', 1),
-(51, 'Mozilla/5.0 (compatible; YandexMetrika/2.0; +http://yandex.com/bots DEV)', 1),
-(52, 'Mozilla/5.0 (compatible; YandexMetrika/2.0; +http://yandex.com/bots mtmon01e.yandex.ru)', 1),
-(53, 'Mozilla/5.0 (compatible; YandexMetrika/2.0; +http://yandex.com/bots mtmon01g.yandex.ru)', 1),
-(54, 'Mozilla/5.0 (compatible; YandexMetrika/2.0; +http://yandex.com/bots mtmon01i.yandex.ru)', 1),
-(55, 'Mozilla/5.0 (compatible; YandexMetrika/2.0; +http://yandex.com/bots mtweb01t.yandex.ru)', 1),
-(56, 'Mozilla/5.0 (compatible; YandexMetrika/2.0; +http://yandex.com/bots)', 1),
-(57, 'Mozilla/5.0 (compatible; YandexMetrika/3.0; +http://yandex.com/bots)', 1),
-(58, 'Mozilla/5.0 (compatible; YandexWebmaster/2.0; +http://yandex.com/bots)', 1),
-(59, 'Mozilla/5.0 (compatible; YandexWebmaster/2.0; +http://yandex.com/bots)', 1),
-(60, 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B411 Safari/600.1.4 (compatible; YandexMobileBot/3.0; +http://yandex.com/bots)', 1),
-(61, 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12F70 Safari/600.1.4 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 1),
-(62, 'Mozilla/5.0 (Windows NT 6.2; WOW64) Runet-Research-Crawler (itrack.ru/research/cmsrate; rating@itrack.ru)', 1),
-(63, 'Mozilla/5.0 (Windows NT 6.2; WOW64) Runet-Research-Crawler (itrack.ru/research/cmsrate; rating@itrack.ru)', 1),
-(64, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en; rv:1.9.0.13) Gecko/2009073022 Firefox/3.5.2 (.NET CLR 3.5.30729) SurveyBot/2.3 (DomainTools)', 1),
-(65, 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.0; trendictionbot0.5.0; trendiction search; http://www.trendiction.de/bot; please let us know of any problems; web at trendiction.com) Gecko/20071127 Firefox/3.0.0.11', 1),
-(66, 'Netcat Bot', 1),
-(67, 'netEstate NE Crawler (+http://www.website-datenbank.de/)', 1),
-(68, 'OdklBot/1.0 (klass@odnoklassniki.ru)', 1),
-(69, 'parser3', 1),
-(70, 'PEAR HTTP_Request class ( http://pear.php.net/ )', 1),
-(71, 'pr-cy.ru Screenshot Bot', 1),
-(72, 'python-requests/2.8.1', 1),
-(73, 'Riddler (http://riddler.io/about)', 1),
-(74, 'rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)', 1),
-(75, 'RookeeBot', 1),
-(76, 'SafeDNS search bot/Nutch-1.9 (https://www.safedns.com/searchbot; support [at] safedns [dot] com)', 1),
-(77, 'SeopultContentAnalyzer/1.0', 1),
-(78, 'Validator.nu/LV http://validator.w3.org/services', 1),
-(79, 'W3C_Validator/1.3 http://validator.w3.org/services', 1),
-(80, 'W3C_Validator/1.3 libwww-perl/6.05', 1),
-(81, 'Websquash.com (Add url robot)', 1),
-(82, 'Who.is Bot', 1),
-(83, 'Y!J-ASR/0.1 crawler (http://www.yahoo-help.jp/app/answers/detail/p/595/a_id/42716/)', 1),
-(84, 'Yandex/1.01.001 (compatible; Win16; I)', 1),
-(85, 'Nodes Studio 2.0', 1),
-(86, 'Mozilla/5.0 (compatible; AhrefsBot/5.2; +http://ahrefs.com/robot/)', 1),
-(87, 'Googlebot/2.1 (+http://www.google.com/bot.html)', 1),
-(88, 'CRAZYWEBCRAWLER 0.9.10, http://www.crazywebcrawler.com', 1),
-(89, 'C-T bot', 1),
-(90, 'Mozilla/5.0 (compatible; Uptimebot/1.0; +http://www.uptime.com/uptimebot)', 1),
-(91, 'Virusdie crawler/2.1', 1),
-(92, 'Mozilla/5.0 (compatible; Google-Structured-Data-Testing-Tool +https://search.google.com/structured-data/testing-tool)', 1),
-(93, 'Mozilla/5.0 (compatible; YandexPagechecker/2.0; +http://yandex.com/bots)', 1),
-(94, 'GuzzleHttp/6.1.0 curl/7.38.0 PHP/7.0.13-1~dotdeb+8.1', 1),
-(95, 'Mozilla/5.0 (compatible; YandexOntoDB/1.0; +http://yandex.com/bots)', 0),
-(96, 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 0),
-(97, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/600.2.5 (KHTML, like Gecko) Version/8.0.2 Safari/600.2.5 (Applebot/0.1; +http://www.apple.com/go/applebot)', 0),
-(98, 'Mozilla/5.0 (compatible; SemrushBot/1.2~bl; +http://www.semrush.com/bot.html)', 0),
-(99, 'Mozilla/5.0 (compatible; spbot/5.0.3; +http://OpenLinkProfiler.org/bot )', 0),
-(100, 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12F70 Safari/600.1.4 (compatible; Laserlikebot/0.1)', 0),
-(101, 'Google-Adwords-Instant (+http://www.google.com/adsbot.html)', 0),
-(102, 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1 (compatible; AdsBot-Google-Mobile; +http://www.google.com/mobile/adsbot.html)', 0),
-(103, 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)', 0),
-(104, 'Mozilla/5.0 (compatible; SEOkicks-Robot; +http://www.seokicks.de/robot.html)', 0),
-(105, 'Mozilla/5.0 (compatible; Plukkie/1.6; http://www.botje.com/plukkie.htm)', 0),
-(106, 'Mozilla/5.0 (compatible; YandexDirectDyn/1.0; +http://yandex.com/bots)', 0),
-(107, 'CCBot/2.0 (http://commoncrawl.org/faq/)', 0),
-(108, 'msnbot-media/1.1 (+http://search.msn.com/msnbot.htm)', 0),
-(109, 'Wotbox/2.01 (+http://www.wotbox.com/bot/)', 0),
-(110, 'Mozilla/5.0 (compatible; WebHistoryBot/1.2.1 IS NOT SE bot like Googlebot/2.1; +http://www.google.com/bot.html,Yahoo! Slurp or Bingbot)', 0),
-(111, 'AportCatalogRobot/2.0', 0),
-(112, 'Mozilla/5.0 (compatible; WBSearchBot/1.1; +http://www.warebay.com/bot.html)', 0),
-(113, 'Mozilla/5.0 (compatible; special_archiver/3.1.1 +http://www.archive.org/details/archive.org_bot)', 0),
-(114, 'SEMrushBot', 0),
-(115, 'BOT/0.1 (BOT for JCE)', 0),
-(116, 'Mozilla/5.0 (compatible; LinkpadBot/1.12; +http://www.linkpad.ru)', 0),
-(117, 'Mozilla/5.0 (TweetmemeBot/4.0; +http://datasift.com/bot.html) Gecko/20100101 Firefox/31.0', 0),
-(118, 'Mediatoolkitbot (complaints@mediatoolkit.com)', 0),
-(119, 'Mozilla/5.0 (compatible; Yeti/1.1; +http://naver.me/bot)', 0),
-(120, 'Mozilla/5.0 (compatible; IDBot/1.1; +http://www.id-search.xyz/bot.html)', 0),
-(121, 'Mozilla/5.0 (compatible; SemrushBot-BA; +http://www.semrush.com/bot.html)', 0),
-(122, 'TurnitinBot (https://turnitin.com/robot/crawlerinfo.html)', 0),
-(123, 'Mozilla/5.0 (compatible; archive.org_bot +http://www.archive.org/details/archive.org_bot)', 0),
-(124, 'Digincore crawler bot. See https://www.digincore.com/crawler.html for rules and instructions.', 0),
-(125, 'Linguee Bot (http://www.linguee.com/bot; bot@linguee.com)', 0),
-(126, 'RankingBot2 -- https://varocarbas.com/bot_ranking2/', 0),
-(127, 'Mozilla/5.0 (compatible; SEOkicks-Robot +http://www.seokicks.de/robot.html)', 0);
+CREATE TABLE `nodes_vr_link` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  `scene_id` int(11) NOT NULL,
+  `url` varchar(200) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `scale` varchar(100) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `nodes_vr_navigation` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  `scene_id` int(11) NOT NULL,
+  `target` int(11) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `scale` varchar(100) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `nodes_vr_object` (
+  `id` int(11) NOT NULL,
+  `scene_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `text` text NOT NULL,
+  `width` double NOT NULL,
+  `height` double NOT NULL,
+  `color` varchar(40) NOT NULL,
+  `base64` text NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `rotation` varchar(100) NOT NULL,
+  `scale` varchar(100) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `nodes_vr_project` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `url` varchar(100) NOT NULL,
+  `text` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `nodes_vr_scene` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `position` varchar(400) NOT NULL,
+  `rotation` varchar(400) NOT NULL,
+  `lat` double NOT NULL,
+  `lng` double NOT NULL,
+  `top` int(11) NOT NULL DEFAULT '0',
+  `left` int(11) NOT NULL DEFAULT '0',
+  `height` double NOT NULL,
+  `floor_position` varchar(400) NOT NULL,
+  `floor_radius` double NOT NULL,
+  `logo_size` double NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+ALTER TABLE `nodes_vr_level`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `nodes_vr_link`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `nodes_vr_navigation`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `nodes_vr_object`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `nodes_vr_project`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `nodes_vr_scene`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `nodes_vr_level`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `nodes_vr_link`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `nodes_vr_navigation`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `nodes_vr_object`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `nodes_vr_project`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `nodes_vr_scene`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+
+INSERT INTO `nodes_agent` (`name`, `bot`) VALUES
+('a.pr-cy.ru', 1),
+('Apache-HttpClient/4.5 (Java/1.8.0_60)', 1),
+('facebookexternalhit/1.1', 1),
+('facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 1),
+('Google favicon', 1),
+('GuzzleHttp/6.1.0 curl/7.26.0 PHP/5.5.29-1~dotdeb+7.1', 1),
+('GuzzleHttp/6.1.0 curl/7.35.0 PHP/5.6.14-1+deb.sury.org~trusty+1', 1),
+('Java/1.4.1_04', 1),
+('Java/1.8.0_60', 1),
+('ltx71 - (http://ltx71.com/)', 1),
+('Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)', 1),
+('Mozilla/5.0 (compatible; Google-Site-Verification/1.0)', 1),
+('Mozilla/5.0 (compatible; vkShare; +http://vk.com/dev/Share)', 1),
+('Mozilla/5.0 (compatible; Web-Monitoring/1.0; +http://monoid.nic.ru/)', 1),
+('Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)', 1),
+('parser3', 1),
+('PEAR HTTP_Request class ( http://pear.php.net/ )', 1),
+('python-requests/2.8.1', 1),
+('Riddler (http://riddler.io/about)', 1),
+('SeopultContentAnalyzer/1.0', 1),
+('Validator.nu/LV http://validator.w3.org/services', 1),
+('W3C_Validator/1.3 http://validator.w3.org/services', 1),
+('W3C_Validator/1.3 libwww-perl/6.05', 1),
+('Yandex/1.01.001 (compatible; Win16; I)', 1),
+('Nodes Studio 3.0', 1),
+('Mozilla/5.0 (compatible; YandexOntoDB/1.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; AhrefsBot/5.2; +http://ahrefs.com/robot/)', 1),
+('Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 1),
+('Googlebot/2.1 (+http://www.google.com/bot.html)', 1),
+('CRAZYWEBCRAWLER 0.9.10, http://www.crazywebcrawler.com', 1),
+('C-T bot', 1),
+('Mozilla/5.0 (compatible; Uptimebot/1.0; +http://www.uptime.com/uptimebot)', 1),
+('Virusdie crawler/2.1', 1),
+('Mozilla/5.0 (compatible; Google-Structured-Data-Testing-Tool +https://search.google.com/structured-data/testing-tool)', 1),
+('Mozilla/5.0 (compatible; YandexPagechecker/2.0; +http://yandex.com/bots)', 1),
+('GuzzleHttp/6.1.0 curl/7.38.0 PHP/7.0.13-1~dotdeb+8.1', 1),
+('GoogleProducer; (+http://goo.gl/7y4SX)', 1),
+('Mozilla/5.0 (compatible; SeznamBot/3.2; +http://napoveda.seznam.cz/en/seznambot-intro/)', 1),
+('SafeDNSBot (https://www.safedns.com/searchbot)', 1),
+('Mozilla/5.0 (compatible; WOT VerifyBot/1.1; +https://www.mywot.com/)', 1),
+('Mozilla/5.0 (compatible; Exabot/3.0; +http://www.exabot.com/go/robot)', 1),
+('LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)', 1),
+('Twitterbot/1.0', 1),
+('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/600.2.5 (KHTML, like Gecko) Version/8.0.2 Safari/600.2.5 (Applebot/0.1; +http://www.apple.com/go/applebot)', 1),
+('python-requests/2.12.4', 1),
+('Mozilla/5.0 (compatible; DuckDuckGo-Favicons-Bot/1.0; +http://duckduckgo.com)', 1),
+('Jigsaw/2.3.0 W3C_CSS_Validator_JFouffa/2.0 (See <http://validator.w3.org/services>)', 1),
+('W3C-checklink/4.81 libwww-perl/6.08', 1),
+('Mozilla/4.0 (compatible;HostTracker/2.0;+http://www.host-tracker.com/)', 1),
+('Mozilla/5.0 (en-us) AppleWebKit/537.36 (KHTML, like Gecko; Google PP Default) Chrome/27.0.1453 Safari/537.36', 1),
+('Mozilla/5.0 (compatible; SemrushBot/1.2~bl; +http://www.semrush.com/bot.html)', 1),
+('Mozilla/5.0 (compatible; spbot/5.0.3; +http://OpenLinkProfiler.org/bot )', 1),
+('Mozilla/5.0 (iPhone; CPU iPhone OS 8_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12F70 Safari/600.1.4 (compatible; Laserlikebot/0.1)', 1),
+('Google-Adwords-Instant (+http://www.google.com/adsbot.html)', 1),
+('Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1 (compatible; AdsBot-Google-Mobile; +http://www.google.com/mobile/adsbot.html)', 1),
+('Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)', 1),
+('Mozilla/5.0 (compatible; SEOkicks-Robot; +http://www.seokicks.de/robot.html)', 1),
+('Mozilla/5.0 (compatible; Plukkie/1.6; http://www.botje.com/plukkie.htm)', 1),
+('Mozilla/5.0 (compatible; YandexDirectDyn/1.0; +http://yandex.com/bots)', 1),
+('CCBot/2.0 (http://commoncrawl.org/faq/)', 1),
+('msnbot-media/1.1 (+http://search.msn.com/msnbot.htm)', 1),
+('Wotbox/2.01 (+http://www.wotbox.com/bot/)', 1),
+('Mozilla/5.0 (compatible; WebHistoryBot/1.2.1 IS NOT SE bot like Googlebot/2.1; +http://www.google.com/bot.html,Yahoo! Slurp or Bingbot)', 1),
+('AportCatalogRobot/2.0', 1),
+('Mozilla/5.0 (compatible; WBSearchBot/1.1; +http://www.warebay.com/bot.html)', 1),
+('Mozilla/5.0 (compatible; special_archiver/3.1.1 +http://www.archive.org/details/archive.org_bot)', 1),
+('SEMrushBot', 1),
+('BOT/0.1 (BOT for JCE)', 1),
+('Mozilla/5.0 (compatible; LinkpadBot/1.12; +http://www.linkpad.ru)', 1),
+('Mozilla/5.0 (TweetmemeBot/4.0; +http://datasift.com/bot.html) Gecko/20100101 Firefox/31.0', 1),
+('Mediatoolkitbot (complaints@mediatoolkit.com)', 1),
+('Mozilla/5.0 (compatible; Yeti/1.1; +http://naver.me/bot)', 1),
+('Mozilla/5.0 (compatible; IDBot/1.1; +http://www.id-search.xyz/bot.html)', 1),
+('Mozilla/5.0 (compatible; SemrushBot-BA; +http://www.semrush.com/bot.html)', 1),
+('TurnitinBot (https://turnitin.com/robot/crawlerinfo.html)', 1),
+('Mozilla/5.0 (compatible; archive.org_bot +http://www.archive.org/details/archive.org_bot)', 1),
+('Digincore crawler bot. See https://www.digincore.com/crawler.html for rules and instructions.', 1),
+('Linguee Bot (http://www.linguee.com/bot; bot@linguee.com)', 1),
+('RankingBot2 -- https://varocarbas.com/bot_ranking2/', 1),
+('Mozilla/5.0 (compatible; SEOkicks-Robot +http://www.seokicks.de/robot.html)', 1),
+('rogerbot/1.1 (http://moz.com/help/guides/search-overview/crawl-diagnostics#more-help, rogerbot-crawler+pr4-crawler-15@moz.com)', 1),
+('Mozilla/5.0 (compatible; Linux x86_64; Mail.RU_Bot/Robots/2.0; +http://go.mail.ru/help/robots)', 1),
+('Mozilla/5.0 (compatible; oBot/2.3.1; http://filterdb.iss.net/crawler/)', 1),
+('Mozilla/5.0 (compatible; MixrankBot; crawler@mixrank.com)', 1),
+('Mozilla/5.0 (compatible; TOBBOT; +http://tobbot.com/)', 1),
+('Googlebot-Video/1.0', 1),
+('Googlebot-News', 1),
+('woobot/2.0', 1),
+('Mozilla/5.0 (compatible; ExtLinksBot/1.5 +https://extlinks.com/Bot.html)', 1),
+('Links Guru Bot v.2.0; http://links.guru/', 1),
+('Mozilla/5.0 (Nekstbot; http://nekst.ipipan.waw.pl/nekstbot/)', 1),
+('TelegramBot (like TwitterBot)', 1),
+('Mozilla/5.0 (compatible; DnyzBot/1.0)', 1),
+('Mozilla/5.0 (compatible; InbyBot/2.1; +http://inbyapp.com)', 1),
+('C-T bot /ru/', 1),
+('Mozilla/5.0 (compatible; PiStato/v0.0.1; http://carsopict.com/pages/bot.html+)', 1),
+('Mozilla/5.0 (compatible; SeoUtilsBot/1.0; +https://seo-utils.ru/; support@seo-utils.ru)', 1),
+('Mozilla/5.0 (compatible; DnyzBot/1.0) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/64.0.3264.0 Safari/537.36', 1),
+('Mozilla/5.0 (compatible; Konqueror/3.5; Linux) KHTML/3.5.5 (like Gecko) (Exabot-Thumbnails)', 1),
+('Mozilla/5.0 (compatible; YandexVideo/3.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; ExtLinksBot/1.5; +https://extlinks.com/Bot.html)', 1),
+('Mozilla/5.0 (compatible; YandexAntivirus/2.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; YandexSitelinks; Dyatel; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; redditbot/1.0; +http://www.reddit.com/feedback)', 1),
+('Mozilla/5.0 (compatible; YandexImageResizer/2.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; YandexAccessibilityBot/3.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; DnyzBot/1.0) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/64.0.3282.167 Safari/537.36', 1),
+('Mozilla/5.0 (compatible; YandexMedia/3.0; +http://yandex.com/bots)', 1),
+('MauiBot (crawler.feedback+wc@gmail.com)', 1),
+('Mozilla/5.0 (compatible; YandexBot/3.0; MirrorDetector; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; AhrefsBot/2.0; +http://ahrefs.com/robot/)', 1),
+('Mozilla/5.0 (compatible; Linux x86_64; Meta_Bot/1.1)', 1),
+('Mozilla/5.0 (compatible; Linux x86_64; Mail.RU_Bot/2.0;)', 1),
+('Mozilla/5.0 (compatible; Linux x86_64; Yapl.RU_Bot/1.0;)', 1),
+('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html', 1),
+('Mozilla/5.0 (compatible; sukibot_heritrix/3.3.0-SNAPSHOT-20180329-1050 +http://suki.ling.helsinki.fi/eng/webmasters.html)', 1),
+('Mozilla/5.0 (compatible; YandexBlogs/0.99; robot; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; YandexFavicons/1.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; YandexVertis/3.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B411 Safari/600.1.4 (compatible; YandexBot/3.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; YandexPagechecker/1.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; YandexDirectDyn/1.0; +http://yandex.com/bots', 1),
+('Mozilla/5.0 (compatible; YandexCalendar/1.0; +http://yandex.com/bots)', 1),
+('Mozilla/5.0 (compatible; SemrushBot/2~bl; +http://www.semrush.com/bot.html)', 1),
+('Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36', 1),
+('Mozilla/5.0 (compatible; Cliqzbot/2.0; +http://cliqz.com/company/cliqzbot)', 1),
+('Mozilla/5.0 (compatible; LetsearchBot/1.0; +http://letsearch.ru)', 1),
+('Mozilla/5.0 (compatible; linkdexbot/2.0; +http://www.linkdex.com/bots/)', 1),
+('Mozilla/5.0 (compatible; Googlebot/2.1 +http://www.googlebot.com/bot.html)', 1),
+('Mozilla/5.0 (compatible; nsrbot/1.0; &#43;http://netsystemsresearch.com)', 1),
+('Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0 (IndeedBot 1.1)', 1),
+('Mozilla/5.0 (compatible; nsrbot/1.0; http://netsystemsresearch.com)', 1),
+('CCBot/2.0 (https://commoncrawl.org/faq/)', 1),
+('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36 (compatible; YandexScreenshotBot/3.0; +http://yandex.com/bots)', 1),
+('DF Bot 1.0', 1),
+('Mozilla/5.0 (compatible; Nimbostratus-Bot/v1.3.2; http://cloudsystemnetworks.com)', 1),
+('Mozilla/5.0 (compatible; YandexCatalog/3.0; +http://yandex.com/bots)', 1),
+('Mozilla/6.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 1),
+('Mozilla/5.0 (compatible; woobot/2.0; +https://www.woorank.com/bot)', 1),
+('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html )', 1),
+('Mozilla/5.0 (compatible; SemrushBot/3~bl; +http://www.semrush.com/bot.html)', 1),
+('B2B Bot', 1),
+('Mozilla/5.0 (compatible; AhrefsBot/6.1; +http://ahrefs.com/robot/)', 1),
+('Mozilla/5.0 (compatible; LetsearchBot/1.0; +https://letsearch.ru)', 1),
+('Mozilla/5.0 (compatible; oBot/2.3.1; +http://filterdb.iss.net/crawler/)', 1),
+('PleskBot', 1);
 
 
 CREATE TABLE IF NOT EXISTS `nodes_language` (
@@ -1813,7 +2031,203 @@ INSERT INTO `nodes_language` (`id`, `name`, `lang`, `value`) VALUES
 (1113, 'Send as notification', 'ru', 'Отправить уведомление'),
 (1114, 'Bulk message is sending now', 'ru', 'Массовое сообщение отправляется'),
 (1115, 'Complete item description', 'ru', 'Полное описание товара'),
-(1116, 'Add new admin', 'ru', 'Добавить администратора');
+(1116, 'Add new admin', 'ru', 'Добавить администратора'),
+(1117, 'Do not have an account?', 'en', 'Do not have an account?'),
+(1118, 'Forgot password', 'en', 'Forgot password'),
+(1119, 'Reset password', 'en', 'Reset password'),
+(1120, 'To confirm this password, use', 'en', 'To confirm this password, use'),
+(1121, 'this link', 'en', 'this link'),
+(1122, 'To process restore, please check your email', 'en', 'To process restore, please check your email'),
+(1123, 'Setup new password', 'en', 'Setup new password'),
+(1124, 'New password activated!', 'en', 'New password activated!'),
+(1125, 'Request for withdrawal of funds', 'en', 'Request for withdrawal of funds'),
+(1126, 'Your withdrawal request will be processed within a few days of submitting', 'en', 'Your withdrawal request will be processed within a few days of submitting'),
+(1127, 'Wallet', 'en', 'Wallet'),
+(1128, 'Wallet ID', 'en', 'Wallet ID'),
+(1129, 'Confirm request', 'en', 'Confirm request'),
+(1130, 'Back to finances', 'en', 'Back to finances'),
+(1131, 'Withdrawal confirmation', 'en', 'Withdrawal confirmation'),
+(1132, 'Withdrawal request processed', 'en', 'Withdrawal request processed'),
+(1133, 'Do not have an account?', 'ru', 'Еще не зарегистрированы?'),
+(1134, 'Forgot password', 'ru', 'Забыли пароль'),
+(1135, 'Reset password', 'ru', 'Сбросить пароль'),
+(1136, 'To process restore, please check your email', 'ru', 'Чтобы восстановить пароль, пожалуйста, проверьте Ваш email'),
+(1137, 'Setup new password', 'ru', 'Установить новый пароль'),
+(1138, 'Request for withdrawal of funds', 'ru', 'Запрос на вывод средств'),
+(1139, 'Your withdrawal request will be processed within a few days of submitting', 'ru', 'Ваш запрос на снятие средств будет обработан в течение нескольких дней после отправки'),
+(1140, 'Wallet', 'ru', 'Кошелек'),
+(1141, 'Wallet ID', 'ru', 'ID кошелька'),
+(1142, 'Confirm request', 'ru', 'Подтвердить запрос'),
+(1143, 'Back to finances', 'ru', 'Назад к финансам'),
+(1144, 'Withdrawal confirmation', 'ru', 'Подтверждение вывода средств'),
+(1145, 'Withdrawal request processed', 'ru', 'Запрос на снятие средств обработан'),
+(1146, 'Place insert your phone into cardboard', 'en', 'Place insert your phone into cardboard'),
+(1147, 'Virtual Reality', 'en', 'Virtual Reality'),
+(1148, 'Latest Articles', 'en', 'Latest Articles'),
+(1149, 'Popular goods', 'en', 'Popular goods'),
+(1150, 'Place insert your phone into cardboard', 'ru', 'Вставьте Ваеш телефон в Cardboard'),
+(1151, 'Virtual Reality', 'ru', 'Виртуальная реальность'),
+(1152, 'Latest Articles', 'ru', 'Последние статьи'),
+(1153, 'Popular goods', 'ru', 'Популярные товары'),
+(1154, 'To confirm your email, please enter or click on the following code', 'en', 'To confirm your email, please enter or click on the following code'),
+(1155, 'Account confirmation', 'en', 'Account confirmation'),
+(1156, 'Anonim', 'en', 'Anonim'),
+(1157, 'Panoramas', 'en', 'Panoramas'),
+(1158, 'Project Name', 'en', 'Project Name'),
+(1159, 'Levels', 'en', 'Levels'),
+(1160, 'Scenes', 'en', 'Scenes'),
+(1161, 'Objects', 'en', 'Objects'),
+(1162, 'Portals', 'en', 'Portals'),
+(1163, 'Links', 'en', 'Links'),
+(1164, 'Projects not found', 'en', 'Projects not found'),
+(1165, 'Add new project', 'en', 'Add new project'),
+(1166, 'Level Name', 'en', 'Level Name'),
+(1167, 'Levels not found', 'en', 'Levels not found'),
+(1168, 'Show project scheme', 'en', 'Show project scheme'),
+(1169, 'Add new level', 'en', 'Add new level'),
+(1170, 'Project properties', 'en', 'Project properties'),
+(1171, 'Scene Name', 'en', 'Scene Name'),
+(1172, 'Scenes not found', 'en', 'Scenes not found'),
+(1173, 'Show level plan', 'en', 'Show level plan'),
+(1174, 'Add new scene', 'en', 'Add new scene'),
+(1175, 'Position', 'en', 'Position'),
+(1176, 'Rotation', 'en', 'Rotation'),
+(1177, 'Latitude', 'en', 'Latitude'),
+(1178, 'Longitude', 'en', 'Longitude'),
+(1179, 'Floor position', 'en', 'Floor position'),
+(1180, 'Floor radius', 'en', 'Floor radius'),
+(1181, 'Logo size', 'en', 'Logo size'),
+(1182, 'level properties', 'en', 'level properties'),
+(1183, 'VR Projects', 'en', 'VR Projects'),
+(1184, 'Project details', 'en', 'Project details'),
+(1185, 'Delete project', 'en', 'Delete project'),
+(1186, 'Are you sure you want to delete a project with all levels, scenes and custom objects?', 'en', 'Are you sure you want to delete a project with all levels, scenes and custom objects?'),
+(1187, 'Level details', 'en', 'Level details'),
+(1188, 'Delete level', 'en', 'Delete level'),
+(1189, 'Are you sure you want to delete a level with all scenes and custom objects?', 'en', 'Are you sure you want to delete a level with all scenes and custom objects?'),
+(1190, 'Upload a panoramic image', 'en', 'Upload a panoramic image'),
+(1191, 'Or upload 6 images of cubemap', 'en', 'Or upload 6 images of cubemap'),
+(1192, 'Cube Rotation', 'en', 'Cube Rotation'),
+(1193, 'The resampling algorithm to use when generating the cubemap.', 'en', 'The resampling algorithm to use when generating the cubemap.'),
+(1194, 'Lanczos (best but slower)', 'en', 'Lanczos (best but slower)'),
+(1195, 'Cubic (sharper details)', 'en', 'Cubic (sharper details)'),
+(1196, 'Linear (softer details)', 'en', 'Linear (softer details)'),
+(1197, 'Output format', 'en', 'Output format'),
+(1198, 'Generating', 'en', 'Generating'),
+(1199, 'Scene position', 'en', 'Scene position'),
+(1200, 'Scene rotation', 'en', 'Scene rotation'),
+(1201, 'Scene latitude', 'en', 'Scene latitude'),
+(1202, 'Scene longitude', 'en', 'Scene longitude'),
+(1203, 'Drag-n-drop points to locate scenes on level.', 'en', 'Drag-n-drop points to locate scenes on level.'),
+(1204, 'Double click to open scene preview', 'en', 'Double click to open scene preview'),
+(1205, 'Image rotation', 'en', 'Image rotation'),
+(1206, 'Image scale', 'en', 'Image scale'),
+(1207, 'Apply chages', 'en', 'Apply chages'),
+(1208, 'Save chages', 'en', 'Save chages'),
+(1209, 'View scene', 'en', 'View scene'),
+(1210, 'Delete scene', 'en', 'Delete scene'),
+(1211, 'Are you sure you want to delete a scene with all custom objects?', 'en', 'Are you sure you want to delete a scene with all custom objects?'),
+(1212, 'Build navigation', 'en', 'Build navigation'),
+(1213, 'Are you sure you want to build navigation to neightbors scenes?', 'en', 'Are you sure you want to build navigation to neightbors scenes?'),
+(1214, 'Show editor', 'en', 'Show editor'),
+(1215, 'Default camera position', 'en', 'Default camera position'),
+(1216, 'Default camera rotation', 'en', 'Default camera rotation'),
+(1217, 'Height', 'en', 'Height'),
+(1218, 'Apply changes', 'en', 'Apply changes'),
+(1219, 'Load default setting', 'en', 'Load default setting'),
+(1220, 'Save scene settings', 'en', 'Save scene settings'),
+(1221, 'Add new object', 'en', 'Add new object'),
+(1222, 'Add new navigation', 'en', 'Add new navigation'),
+(1223, 'Add new link', 'en', 'Add new link'),
+(1224, 'Reset scene objects', 'en', 'Reset scene objects'),
+(1225, 'Panoramas not found', 'en', 'Panoramas not found'),
+(1226, 'Show map', 'en', 'Show map'),
+(1227, 'Object properties', 'en', 'Object properties'),
+(1228, 'Scale', 'en', 'Scale'),
+(1229, 'Point properties', 'en', 'Point properties'),
+(1230, 'Target', 'en', 'Target'),
+(1231, 'Link properties', 'en', 'Link properties'),
+(1232, 'Delete point', 'en', 'Delete point'),
+(1233, 'Delete object', 'en', 'Delete object'),
+(1234, 'To confirm your email, please enter or click on the following code', 'ru', 'Для подтверждения Email, пожалуйтса, используйте код'),
+(1235, 'Anonim', 'ru', 'Аноним'),
+(1236, 'Panoramas', 'ru', 'Панорамы'),
+(1237, 'Project Name', 'ru', 'Название проекта'),
+(1238, 'Levels', 'ru', 'Уровни'),
+(1239, 'Scenes', 'ru', 'Сцены'),
+(1240, 'Objects', 'ru', 'Обьекты'),
+(1241, 'Portals', 'ru', 'Порталы'),
+(1242, 'Links', 'ru', 'Ссылки'),
+(1243, 'Projects not found', 'ru', 'Проекты не найдены'),
+(1244, 'Add new project', 'ru', 'Добавить новый проект'),
+(1245, 'Level Name', 'ru', 'Название уровня'),
+(1246, 'Levels not found', 'ru', 'Уровни не найдены'),
+(1247, 'Show project scheme', 'ru', 'Показать схему проекта'),
+(1248, 'Add new level', 'ru', 'Добавить новый уровень'),
+(1249, 'Project properties', 'ru', 'Свойства проекта'),
+(1250, 'Scene Name', 'ru', 'Название сцены'),
+(1251, 'Scenes not found', 'ru', 'Сцены не найдены'),
+(1252, 'Show level plan', 'ru', 'Показать карту уровня'),
+(1253, 'Add new scene', 'ru', 'Добавить новую сцену'),
+(1254, 'Position', 'ru', 'Позиция'),
+(1255, 'Rotation', 'ru', 'Вращение'),
+(1256, 'Latitude', 'ru', 'Широта'),
+(1257, 'Longitude', 'ru', 'Долгота'),
+(1258, 'Floor position', 'ru', 'Позиция пола'),
+(1259, 'Floor radius', 'ru', 'Радиус пола'),
+(1260, 'Logo size', 'ru', 'Размер лого'),
+(1261, 'level properties', 'ru', 'Свойста уровня'),
+(1262, 'VR Projects', 'ru', 'VR Проекты'),
+(1263, 'Project details', 'ru', 'Детали уровня'),
+(1264, 'Delete project', 'ru', 'Удалить проект'),
+(1265, 'Are you sure you want to delete a project with all levels, scenes and custom objects?', 'ru', 'Вы уверены, что хотите удалить проект со всеми уровнями, сценами и объектами?'),
+(1266, 'Level details', 'ru', 'Детали уровня'),
+(1267, 'Delete level', 'ru', 'Удалить уровень'),
+(1268, 'Are you sure you want to delete a level with all scenes and custom objects?', 'ru', 'Вы уверены, что хотите удалить уровень со всеми сценами и объектами?'),
+(1269, 'Upload a panoramic image', 'ru', 'Загрузить панорамное изображение'),
+(1270, 'Or upload 6 images of cubemap', 'ru', 'Или загрузите 6 изображений кубической карты'),
+(1271, 'Cube Rotation', 'ru', 'Вращение куба'),
+(1272, 'The resampling algorithm to use when generating the cubemap.', 'ru', 'Алгоритм передискретизации, используемый при создании кубической карты.'),
+(1273, 'Lanczos (best but slower)', 'ru', 'Lanczos (лучше, но медленно)'),
+(1274, 'Cubic (sharper details)', 'ru', 'Cubic (жестче)'),
+(1275, 'Linear (softer details)', 'ru', 'Linear (мягче)'),
+(1276, 'Output format', 'ru', 'Выходной формат'),
+(1277, 'Generating', 'ru', 'Генерирование'),
+(1278, 'Scene position', 'ru', 'Позиция сцены'),
+(1279, 'Scene rotation', 'ru', 'Вращение сцены'),
+(1280, 'Scene latitude', 'ru', 'Широта сцены'),
+(1281, 'Scene longitude', 'ru', 'Долгота сцены'),
+(1282, 'Drag-n-drop points to locate scenes on level.', 'ru', 'Перетаскивайте точки, чтобы расположить сцены на уровне.'),
+(1283, 'Double click to open scene preview', 'ru', 'Двойной клик для открытия превью сцены'),
+(1284, 'Image rotation', 'ru', 'Вращение изображения'),
+(1285, 'Image scale', 'ru', 'Масштаб изображения'),
+(1286, 'Apply chages', 'ru', 'Применить изменения'),
+(1287, 'Save chages', 'ru', 'Сохранить изменения'),
+(1288, 'View scene', 'ru', 'Смотреть сцену'),
+(1289, 'Delete scene', 'ru', 'Удалить сцену'),
+(1290, 'Are you sure you want to delete a scene with all custom objects?', 'ru', 'Вы уверены, что хотите удалить сцену со всеми объектами?'),
+(1291, 'Build navigation', 'ru', 'Создать навигацию'),
+(1292, 'Are you sure you want to build navigation to neightbors scenes?', 'ru', 'Вы уверены, что хотите построить навигацию к соседним сценам?'),
+(1293, 'Show editor', 'ru', 'Показать редактор'),
+(1294, 'Default camera position', 'ru', 'Позиция камеры по-умолчанию'),
+(1295, 'Default camera rotation', 'ru', 'Вращение камеры по-умолчанию'),
+(1296, 'Height', 'ru', 'Высота'),
+(1297, 'Apply changes', 'ru', 'Применить изменения'),
+(1298, 'Load default setting', 'ru', 'Стандартные настройки'),
+(1299, 'Save scene settings', 'ru', 'Сохранить настройки'),
+(1300, 'Add new object', 'ru', 'Добавить обьект'),
+(1301, 'Add new navigation', 'ru', 'Добавить навигацию'),
+(1302, 'Add new link', 'ru', 'Добавить ссылку'),
+(1303, 'Reset scene objects', 'ru', 'Сбросить обьекты'),
+(1304, 'Panoramas not found', 'ru', 'Панорамы не найдены'),
+(1305, 'Show map', 'ru', 'Показать карту'),
+(1306, 'Object properties', 'ru', 'Свойста обьекта'),
+(1307, 'Scale', 'ru', 'Масштаб'),
+(1308, 'Point properties', 'ru', 'Свойста  точки'),
+(1309, 'Target', 'ru', 'Цель'),
+(1310, 'Link properties', 'ru', 'Свойства ссылки'),
+(1311, 'Delete point', 'ru', 'Удалить точку'),
+(1312, 'Delete object', 'ru', 'Удалить обьект');
 
 
 INSERT INTO `nodes_catalog` (`caption`, `description`, `text`, `url`, `img`, `visible`, `lang`, `order`, `date`, `public_date`) VALUES
@@ -1828,8 +2242,8 @@ INSERT INTO `nodes_catalog` (`caption`, `description`, `text`, `url`, `img`, `vi
         foreach($arr as $a){
             $a = trim($a);
             if(!empty($a)){
-                @mysql_query("SET NAMES utf8");
-                mysql_query($a) or die(mysql_error());
+                @mysqli_query($link, "SET NAMES utf8");
+                mysqli_query($link, $a) or die(mysqli_error($link));
             }
         }
         $output .= 'Generation config.php.. ';
@@ -1839,11 +2253,12 @@ INSERT INTO `nodes_catalog` (`caption`, `description`, `text`, `url`, `img`, `vi
 * Framework config file'."\n".'
 */'."\n".'
 $_SERVER["config"] = array('."\n".'
-    "name" => "'. mysql_real_escape_string($_POST["name"]).'",'."\n".'
-    "sql_server" => "'. mysql_real_escape_string($_POST["mysql_server"]).'",'."\n".'
-    "sql_login" => "'. mysql_real_escape_string($_POST["mysql_login"]).'",'."\n".'
-    "sql_pass" => "'. mysql_real_escape_string($_POST["mysql_pass"]).'",'."\n".'
-    "sql_db" => "'. mysql_real_escape_string($_POST["mysql_db"]).'"'."\n".'
+    "name" => "'. mysqli_real_escape_string($link,$_POST["name"]).'",'."\n".'
+    "sql_server" => "'. mysqli_real_escape_string($link,$_POST["mysql_server"]).'",'."\n".'
+    "sql_login" => "'. mysqli_real_escape_string($link,$_POST["mysql_login"]).'",'."\n".'
+    "sql_pass" => "'. mysqli_real_escape_string($link,$_POST["mysql_pass"]).'",'."\n".'
+    "sql_db" => "'. mysqli_real_escape_string($link,$_POST["mysql_db"]).'",'."\n".'
+    "crypt_salt" => "'.$crypt_salt.'"'."\n".'
 );';    
         if(intval($_POST["encoding"])){
             $encode = base64_encode($source);
@@ -1862,9 +2277,9 @@ $_SERVER["config"] = array('."\n".'
 '* Executable crontab file.'."\n".
 '* Should be configured on autoexec every 1 minute.'."\n".
 '*'."\n".
-'* @name    Nodes Studio    @version 2.0.3'."\n".
+'* @name    Nodes Studio    @version 3.0.0.1'."\n".
 '* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>'."\n".
-'* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License'."\n".
+'* @license http://www.apache.org/licenses/LICENSE-2.0'."\n".
 '*/'."\n".
 'if(isset($argv[1])) $_SERVER["HTTP_HOST"] = $argv[1];'."\n".
 'else $_SERVER["HTTP_HOST"] = "'.$_SERVER["HTTP_HOST"].'";'."\n".
@@ -1994,6 +2409,47 @@ INSERT INTO `nodes_property_data` (`id`, `product_id`, `property_id`, `data_id`)
 (39, 4, 3, 10),
 (42, 5, 3, 11),
 (45, 6, 3, 11);
+
+
+INSERT INTO `nodes_aframe` (`id`, `caption`, `text`, `url`, `image`, `file`, `lang`) VALUES
+(1, 'Panoramas', 'Multiresolution interactive 360 panorama viewer.', 'panorama', '/img/vr/pano-preview.jpg', 'panorama.php', 'en'),
+(2, 'Audio Visualizer', 'Virtual Reality\'s visualizer of audio! Experience music in new ways.', 'visualizer', '/img/vr/visualizer-preview.jpg', 'visualizer.php', 'en'),
+(3, 'Multiplayer', 'Nodes Studio & A-Frame Frameworks multiplayer demonstration scene.', 'multiplayer ', '/img/vr/multiplayer-preview.jpg', 'multiplayer.php', 'en'),
+(4, 'Панорамы', 'Интерактивный просмотрщик 360 панорам с мультиразрешением.', 'panorama', '/img/vr/pano-preview.jpg', 'panorama.php', 'ru'),
+(5, 'Аудио Визуализатор', 'Визуализатор аудио в формате виртуальной реальности!', 'visualizer', '/img/vr/visualizer-preview.jpg', 'visualizer.php', 'ru'),
+(6, 'Мультиплеер', 'Nodes Studio & A-Frame многопользовательская сцена', 'multiplayer ', '/img/vr/multiplayer-preview.jpg', 'multiplayer.php', 'ru');
+
+INSERT INTO `nodes_server_object` (`object_id`, `id`, `scene_id`, `type`, `collada-model`, `position`, `rotation`, `scale`, `nodes-click`) VALUES
+(1, 'green-dummy-object', 1, 1, '#green-dummy-model', '0 1.5 -10', '0 180 0', '1 1 1', 'event:custom_function'),
+(2, 'red-dummy-object', 1, 1, '#red-dummy-model', '0 1.5 10', '0 0 0', '1 1 1', 'event:custom_function'),
+(3, 'blue-dummy-object', 1, 1, '#blue-dummy-model', '10 1.5 0', '0 90 0', '1 1 1', 'event:custom_function'),
+(4, 'purple-dummy-object', 1, 1, '#purple-dummy-model', '-10 1.5 0', '0 270 0', '1 1 1', 'event:custom_function');
+
+INSERT INTO `nodes_server_scene` (`id`, `max_radius`, `radius`, `terrain`) VALUES (1, 600, 50, '{\"1\": [ [0, 0, 3], [0, 50, -1], [50, 0, 2], [50, 0, 2], [50, 50, -9.6666666666667], [0, 50, -1] ] , \"2\": [ [0, 50, -1], [0, 100, 5], [50, 50, -9.6666666666667], [50, 50, -9.6666666666667], [50, 100, 71.611111111111], [0, 100, 5] ] , \"3\": [ [0, 100, 5], [0, 150, 9], [50, 100, 71.611111111111], [50, 100, 71.611111111111], [50, 150, 8.537037037037], [0, 150, 9] ] , \"4\": [ [0, 150, 9], [0, 200, 6], [50, 150, 8.537037037037], [50, 150, 8.537037037037], [50, 200, 17.345679012346], [0, 200, 6] ] , \"5\": [ [0, 200, 6], [0, 250, 10], [50, 200, 17.345679012346], [50, 200, 17.345679012346], [50, 250, 26.115226337449], [0, 250, 10] ] , \"6\": [ [0, 250, 10], [0, 300, 9], [50, 250, 26.115226337449], [50, 250, 26.115226337449], [50, 300, 32.03840877915], [0, 300, 9] ] , \"7\": [ [0, 300, 9], [0, 350, 10], [50, 300, 32.03840877915], [50, 300, 32.03840877915], [50, 350, 81.012802926383], [0, 350, 10] ] , \"8\": [ [0, 350, 10], [0, 400, 8], [50, 350, 81.012802926383], [50, 350, 81.012802926383], [50, 400, 75.504267642128], [0, 400, 8] ] , \"9\": [ [0, 400, 8], [0, 450, 5], [50, 400, 75.504267642128], [50, 400, 75.504267642128], [50, 450, 48.168089214043], [0, 450, 5] ] , \"10\": [ [0, 450, 5], [0, 500, -3], [50, 450, 48.168089214043], [50, 450, 48.168089214043], [50, 500, 36.222696404681], [0, 500, -3] ] , \"11\": [ [0, 500, -3], [0, 550, -2], [50, 500, 36.222696404681], [50, 500, 36.222696404681], [50, 550, -5.592434531773], [0, 550, -2] ] , \"12\": [ [0, 550, -2], [0, 600, -1], [50, 550, -5.592434531773], [50, 550, -5.592434531773], [50, 600, -8.3641448439243], [0, 600, -1] ] , \"13\": [ [0, 600, -1], [0, 650, 6], [50, 600, -8.3641448439243], [50, 600, -8.3641448439243], [50, 650, -12.788048281308], [0, 650, 6] ] , \"14\": [ [0, 650, 6], [0, 700, 1], [50, 650, -12.788048281308], [50, 650, -12.788048281308], [50, 700, -13.929349427103], [0, 700, 1] ] , \"15\": [ [0, 700, 1], [0, 750, 9], [50, 700, -13.929349427103], [50, 700, -13.929349427103], [50, 750, -3.9764498090342], [0, 750, 9] ] , \"16\": [ [0, 750, 9], [0, 800, 10], [50, 750, -3.9764498090342], [50, 750, -3.9764498090342], [50, 800, 5.0078500636553], [0, 800, 10] ] , \"17\": [ [0, 800, 10], [0, 850, -4], [50, 800, 5.0078500636553], [50, 800, 5.0078500636553], [50, 850, 8.6692833545518], [0, 850, -4] ] , \"18\": [ [0, 850, -4], [0, 900, 1], [50, 850, 8.6692833545518], [50, 850, 8.6692833545518], [50, 900, 17.723094451517], [0, 900, 1] ] , \"19\": [ [0, 900, 1], [0, 950, 7], [50, 900, 17.723094451517], [50, 900, 17.723094451517], [50, 950, 21.907698150506], [0, 950, 7] ] , \"20\": [ [0, 950, 7], [0, 1000, -4], [50, 950, 21.907698150506], [50, 950, 21.907698150506], [50, 1000, 6.8025660501686], [0, 1000, -4] ] , \"21\": [ [0, 1000, -4], [0, 1050, 1], [50, 1000, 6.8025660501686], [50, 1000, 6.8025660501686], [50, 1050, 1.9341886833895], [0, 1050, 1] ] , \"22\": [ [0, 1050, 1], [0, 1100, -4], [50, 1050, 1.9341886833895], [50, 1050, 1.9341886833895], [50, 1100, -0.52193710553682], [0, 1100, -4] ] , \"23\": [ [0, 1100, -4], [0, 1150, -4], [50, 1100, -0.52193710553682], [50, 1100, -0.52193710553682], [50, 1150, -2.8406457018456], [0, 1150, -4] ] , \"24\": [ [0, 1150, -4], [0, 1200, 5], [50, 1150, -2.8406457018456], [50, 1150, -2.8406457018456], [50, 1200, -0.4468819006152], [0, 1200, 5] ] , \"25\": [ [50, 0, 2], [50, 50, -9.6666666666667], [100, 0, 8], [100, 0, 8], [100, 50, 28.111111111111], [50, 50, -9.6666666666667] ] , \"26\": [ [50, 50, -9.6666666666667], [50, 100, 71.611111111111], [100, 50, 28.111111111111], [100, 50, 28.111111111111], [100, 100, 30.018518518519], [50, 100, 71.611111111111] ] , \"27\": [ [50, 100, 71.611111111111], [50, 150, 8.537037037037], [100, 100, 30.018518518519], [100, 100, 30.018518518519], [100, 150, 52.555555555556], [50, 150, 8.537037037037] ] , \"28\": [ [50, 150, 8.537037037037], [50, 200, 17.345679012346], [100, 150, 52.555555555556], [100, 150, 52.555555555556], [100, 200, 8.1460905349794], [50, 200, 17.345679012346] ] , \"29\": [ [50, 200, 17.345679012346], [50, 250, 26.115226337449], [100, 200, 8.1460905349794], [100, 200, 8.1460905349794], [100, 250, 5.8689986282579], [50, 250, 26.115226337449] ] , \"30\": [ [50, 250, 26.115226337449], [50, 300, 32.03840877915], [100, 250, 5.8689986282579], [100, 250, 5.8689986282579], [100, 300, 64.007544581619], [50, 300, 32.03840877915] ] , \"31\": [ [50, 300, 32.03840877915], [50, 350, 81.012802926383], [100, 300, 64.007544581619], [100, 300, 64.007544581619], [100, 350, 64.01958542905], [50, 350, 81.012802926383] ] , \"32\": [ [50, 350, 81.012802926383], [50, 400, 75.504267642128], [100, 350, 64.01958542905], [100, 350, 64.01958542905], [100, 400, 61.845551999187], [50, 400, 75.504267642128] ] , \"33\": [ [50, 400, 75.504267642128], [50, 450, 48.168089214043], [100, 400, 61.845551999187], [100, 400, 61.845551999187], [100, 450, 83.505969618452], [50, 450, 48.168089214043] ] , \"34\": [ [50, 450, 48.168089214043], [50, 500, 36.222696404681], [100, 450, 83.505969618452], [100, 450, 83.505969618452], [100, 500, 47.965585079059], [50, 500, 36.222696404681] ] , \"35\": [ [50, 500, 36.222696404681], [50, 550, -5.592434531773], [100, 500, 47.965585079059], [100, 500, 47.965585079059], [100, 550, 9.6986156506555], [50, 550, -5.592434531773] ] , \"36\": [ [50, 550, -5.592434531773], [50, 600, -8.3641448439243], [100, 550, 9.6986156506555], [100, 550, 9.6986156506555], [100, 600, -1.4193212416806], [50, 600, -8.3641448439243] ] , \"37\": [ [50, 600, -8.3641448439243], [50, 650, -12.788048281308], [100, 600, -1.4193212416806], [100, 600, -1.4193212416806], [100, 650, 11.976161877696], [50, 650, -12.788048281308] ] , \"38\": [ [50, 650, -12.788048281308], [50, 700, -13.929349427103], [100, 650, 11.976161877696], [100, 650, 11.976161877696], [100, 700, -18.247078610238], [50, 700, -13.929349427103] ] , \"39\": [ [50, 700, -13.929349427103], [50, 750, -3.9764498090342], [100, 700, -18.247078610238], [100, 700, -18.247078610238], [100, 750, 1.9490407178749], [50, 750, -3.9764498090342] ] , \"40\": [ [50, 750, -3.9764498090342], [50, 800, 5.0078500636553], [100, 750, 1.9490407178749], [100, 750, 1.9490407178749], [100, 800, 12.993480324165], [50, 800, 5.0078500636553] ] , \"41\": [ [50, 800, 5.0078500636553], [50, 850, 8.6692833545518], [100, 800, 12.993480324165], [100, 800, 12.993480324165], [100, 850, 17.223537914124], [50, 850, 8.6692833545518] ] , \"42\": [ [50, 850, 8.6692833545518], [50, 900, 17.723094451517], [100, 850, 17.223537914124], [100, 850, 17.223537914124], [100, 900, 29.871971906731], [50, 900, 17.723094451517] ] , \"43\": [ [50, 900, 17.723094451517], [50, 950, 21.907698150506], [100, 900, 29.871971906731], [100, 900, 29.871971906731], [100, 950, 21.667588169585], [50, 950, 21.907698150506] ] , \"44\": [ [50, 950, 21.907698150506], [50, 1000, 6.8025660501686], [100, 950, 21.667588169585], [100, 950, 21.667588169585], [100, 1000, 16.125950790086], [50, 1000, 6.8025660501686] ] , \"45\": [ [50, 1000, 6.8025660501686], [50, 1050, 1.9341886833895], [100, 1000, 16.125950790086], [100, 1000, 16.125950790086], [100, 1050, 8.4542351745481], [50, 1050, 1.9341886833895] ] , \"46\": [ [50, 1050, 1.9341886833895], [50, 1100, -0.52193710553682], [100, 1050, 8.4542351745481], [100, 1050, 8.4542351745481], [100, 1100, 3.288828917467], [50, 1100, -0.52193710553682] ] , \"47\": [ [50, 1100, -0.52193710553682], [50, 1150, -2.8406457018456], [100, 1100, 3.288828917467], [100, 1100, 3.288828917467], [100, 1150, 3.4754153700282], [50, 1150, -2.8406457018456] ] , \"48\": [ [50, 1150, -2.8406457018456], [50, 1200, -0.4468819006152], [100, 1150, 3.4754153700282], [100, 1150, 3.4754153700282], [100, 1200, -1.2707040774775], [50, 1200, -0.4468819006152] ] , \"49\": [ [100, 0, 8], [100, 50, 28.111111111111], [150, 0, 2], [150, 0, 2], [150, 50, 29.37037037037], [100, 50, 28.111111111111] ] , \"50\": [ [100, 50, 28.111111111111], [100, 100, 30.018518518519], [150, 50, 29.37037037037], [150, 50, 29.37037037037], [150, 100, 57.666666666667], [100, 100, 30.018518518519] ] , \"51\": [ [100, 100, 30.018518518519], [100, 150, 52.555555555556], [150, 100, 57.666666666667], [150, 100, 57.666666666667], [150, 150, 22.746913580247], [100, 150, 52.555555555556] ] , \"52\": [ [100, 150, 52.555555555556], [100, 200, 8.1460905349794], [150, 150, 22.746913580247], [150, 150, 22.746913580247], [150, 200, 2.3161865569273], [100, 200, 8.1460905349794] ] , \"53\": [ [100, 200, 8.1460905349794], [100, 250, 5.8689986282579], [150, 200, 2.3161865569273], [150, 200, 2.3161865569273], [150, 250, 0.11042524005487], [100, 250, 5.8689986282579] ] , \"54\": [ [100, 250, 5.8689986282579], [100, 300, 64.007544581619], [150, 250, 0.11042524005487], [150, 250, 0.11042524005487], [150, 300, -1.6710105166895], [100, 300, 64.007544581619] ] , \"55\": [ [100, 300, 64.007544581619], [100, 350, 64.01958542905], [150, 300, -1.6710105166895], [150, 300, -1.6710105166895], [150, 350, 25.78537316466], [100, 350, 64.01958542905] ] , \"56\": [ [100, 350, 64.01958542905], [100, 400, 61.845551999187], [150, 350, 25.78537316466], [150, 350, 25.78537316466], [150, 400, 35.383503530966], [100, 400, 61.845551999187] ] , \"57\": [ [100, 400, 61.845551999187], [100, 450, 83.505969618452], [150, 400, 35.383503530966], [150, 400, 35.383503530966], [150, 450, 94.245008382868], [100, 450, 83.505969618452] ] , \"58\": [ [100, 450, 83.505969618452], [100, 500, 47.965585079059], [150, 450, 94.245008382868], [150, 450, 94.245008382868], [150, 500, 75.238854360127], [100, 500, 47.965585079059] ] , \"59\": [ [100, 500, 47.965585079059], [100, 550, 9.6986156506555], [150, 500, 75.238854360127], [150, 500, 75.238854360127], [150, 550, 59.30101836328], [100, 550, 9.6986156506555] ] , \"60\": [ [100, 550, 9.6986156506555], [100, 600, -1.4193212416806], [150, 550, 59.30101836328], [150, 550, 59.30101836328], [150, 600, 42.026770924085], [100, 600, -1.4193212416806] ] , \"61\": [ [100, 600, -1.4193212416806], [100, 650, 11.976161877696], [150, 600, 42.026770924085], [150, 600, 42.026770924085], [150, 650, 24.1945371867], [100, 650, 11.976161877696] ] , \"62\": [ [100, 650, 11.976161877696], [100, 700, -18.247078610238], [150, 650, 24.1945371867], [150, 650, 24.1945371867], [150, 700, 8.3078734847191], [100, 700, -18.247078610238] ] , \"63\": [ [100, 700, -18.247078610238], [100, 750, 1.9490407178749], [150, 700, 8.3078734847191], [150, 700, 8.3078734847191], [150, 750, 13.336611864119], [100, 750, 1.9490407178749] ] , \"64\": [ [100, 750, 1.9490407178749], [100, 800, 12.993480324165], [150, 750, 13.336611864119], [150, 750, 13.336611864119], [150, 800, 8.5930443020529], [100, 800, 12.993480324165] ] , \"65\": [ [100, 800, 12.993480324165], [100, 850, 17.223537914124], [150, 800, 8.5930443020529], [150, 800, 8.5930443020529], [150, 850, 10.936687513447], [100, 850, 17.223537914124] ] , \"66\": [ [100, 850, 17.223537914124], [100, 900, 29.871971906731], [150, 850, 10.936687513447], [150, 850, 10.936687513447], [150, 900, 18.844065778101], [100, 900, 29.871971906731] ] , \"67\": [ [100, 900, 29.871971906731], [100, 950, 21.667588169585], [150, 900, 18.844065778101], [150, 900, 18.844065778101], [150, 950, 22.794541951472], [100, 950, 21.667588169585] ] , \"68\": [ [100, 950, 21.667588169585], [100, 1000, 16.125950790086], [150, 950, 22.794541951472], [150, 950, 22.794541951472], [150, 1000, 20.362693637048], [100, 1000, 16.125950790086] ] , \"69\": [ [100, 1000, 16.125950790086], [100, 1050, 8.4542351745481], [150, 1000, 20.362693637048], [150, 1000, 20.362693637048], [150, 1050, 14.980959867227], [100, 1050, 8.4542351745481] ] , \"70\": [ [100, 1050, 8.4542351745481], [100, 1100, 3.288828917467], [150, 1050, 14.980959867227], [150, 1050, 14.980959867227], [150, 1100, 9.7413413197475], [100, 1100, 3.288828917467] ] , \"71\": [ [100, 1100, 3.288828917467], [100, 1150, 3.4754153700282], [150, 1100, 9.7413413197475], [150, 1100, 9.7413413197475], [150, 1150, 10.501861869081], [100, 1150, 3.4754153700282] ] , \"72\": [ [100, 1150, 3.4754153700282], [100, 1200, -1.2707040774775], [150, 1150, 10.501861869081], [150, 1150, 10.501861869081], [150, 1200, 6.7355243872105], [100, 1200, -1.2707040774775] ] , \"73\": [ [150, 0, 2], [150, 50, 29.37037037037], [200, 0, -2], [200, 0, -2], [200, 50, 31.956790123457], [150, 50, 29.37037037037] ] , \"74\": [ [150, 50, 29.37037037037], [150, 100, 57.666666666667], [200, 50, 31.956790123457], [200, 50, 31.956790123457], [200, 100, 81.664609053498], [150, 100, 57.666666666667] ] , \"75\": [ [150, 100, 57.666666666667], [150, 150, 22.746913580247], [200, 100, 81.664609053498], [200, 100, 81.664609053498], [200, 150, 76.692729766804], [150, 150, 22.746913580247] ] , \"76\": [ [150, 150, 22.746913580247], [150, 200, 2.3161865569273], [200, 150, 76.692729766804], [200, 150, 76.692729766804], [200, 200, 68.585276634659], [150, 200, 2.3161865569273] ] , \"77\": [ [150, 200, 2.3161865569273], [150, 250, 0.11042524005487], [200, 200, 68.585276634659], [200, 200, 68.585276634659], [200, 250, 53.670629477214], [150, 250, 0.11042524005487] ] , \"78\": [ [150, 250, 0.11042524005487], [150, 300, -1.6710105166895], [200, 250, 53.670629477214], [200, 250, 53.670629477214], [200, 300, 59.370014733526], [150, 300, -1.6710105166895] ] , \"79\": [ [150, 300, -1.6710105166895], [150, 350, 25.78537316466], [200, 300, 59.370014733526], [200, 300, 59.370014733526], [200, 350, 42.994792460499], [150, 350, 25.78537316466] ] , \"80\": [ [150, 350, 25.78537316466], [150, 400, 35.383503530966], [200, 350, 42.994792460499], [200, 350, 42.994792460499], [200, 400, 32.721223052042], [150, 400, 35.383503530966] ] , \"81\": [ [150, 400, 35.383503530966], [150, 450, 94.245008382868], [200, 400, 32.721223052042], [200, 400, 32.721223052042], [200, 450, 68.783244988625], [150, 450, 94.245008382868] ] , \"82\": [ [150, 450, 94.245008382868], [150, 500, 75.238854360127], [200, 450, 68.783244988625], [200, 450, 68.783244988625], [200, 500, 62.755702577207], [150, 500, 75.238854360127] ] , \"83\": [ [150, 500, 75.238854360127], [150, 550, 59.30101836328], [200, 500, 62.755702577207], [200, 500, 62.755702577207], [200, 550, 71.765191766871], [150, 550, 59.30101836328] ] , \"84\": [ [150, 550, 59.30101836328], [150, 600, 42.026770924085], [200, 550, 71.765191766871], [200, 550, 71.765191766871], [200, 600, 68.364327018079], [150, 600, 42.026770924085] ] , \"85\": [ [150, 600, 42.026770924085], [150, 650, 24.1945371867], [200, 600, 68.364327018079], [200, 600, 68.364327018079], [200, 650, 50.695211709621], [150, 650, 24.1945371867] ] , \"86\": [ [150, 650, 24.1945371867], [150, 700, 8.3078734847191], [200, 650, 50.695211709621], [200, 650, 50.695211709621], [200, 700, 31.73254079368], [150, 700, 8.3078734847191] ] , \"87\": [ [150, 700, 8.3078734847191], [150, 750, 13.336611864119], [200, 700, 31.73254079368], [200, 700, 31.73254079368], [200, 750, 24.459008714173], [150, 750, 13.336611864119] ] , \"88\": [ [150, 750, 13.336611864119], [150, 800, 8.5930443020529], [200, 750, 24.459008714173], [200, 750, 24.459008714173], [200, 800, 10.796221626781], [150, 800, 8.5930443020529] ] , \"89\": [ [150, 800, 8.5930443020529], [150, 850, 10.936687513447], [200, 800, 10.796221626781], [200, 800, 10.796221626781], [200, 850, 9.6086511474272], [150, 850, 10.936687513447] ] , \"90\": [ [150, 850, 10.936687513447], [150, 900, 18.844065778101], [200, 850, 9.6086511474272], [200, 850, 9.6086511474272], [200, 900, 12.463134812992], [150, 900, 18.844065778101] ] , \"91\": [ [150, 900, 18.844065778101], [150, 950, 22.794541951472], [200, 900, 12.463134812992], [200, 900, 12.463134812992], [200, 950, 19.533914180855], [150, 950, 22.794541951472] ] , \"92\": [ [150, 950, 22.794541951472], [150, 1000, 20.362693637048], [200, 950, 19.533914180855], [200, 950, 19.533914180855], [200, 1000, 20.897049923125], [150, 1000, 20.362693637048] ] , \"93\": [ [150, 1000, 20.362693637048], [150, 1050, 14.980959867227], [200, 1000, 20.897049923125], [200, 1000, 20.897049923125], [200, 1050, 21.413567809133], [150, 1050, 14.980959867227] ] , \"94\": [ [150, 1050, 14.980959867227], [150, 1100, 9.7413413197475], [200, 1050, 21.413567809133], [200, 1050, 21.413567809133], [200, 1100, 15.045289665369], [150, 1100, 9.7413413197475] ] , \"95\": [ [150, 1100, 9.7413413197475], [150, 1150, 10.501861869081], [200, 1100, 15.045289665369], [200, 1100, 15.045289665369], [200, 1150, 24.262830951399], [150, 1150, 10.501861869081] ] , \"96\": [ [150, 1150, 10.501861869081], [150, 1200, 6.7355243872105], [200, 1150, 24.262830951399], [200, 1150, 24.262830951399], [200, 1200, 19.833405735897], [150, 1200, 6.7355243872105] ] , \"97\": [ [200, 0, -2], [200, 50, 31.956790123457], [250, 0, 9], [250, 0, 9], [250, 50, -17.014403292181], [200, 50, 31.956790123457] ] , \"98\": [ [200, 50, 31.956790123457], [200, 100, 81.664609053498], [250, 50, -17.014403292181], [250, 50, -17.014403292181], [250, 100, 49.202331961591], [200, 100, 81.664609053498] ] , \"99\": [ [200, 100, 81.664609053498], [200, 150, 76.692729766804], [250, 100, 49.202331961591], [250, 100, 49.202331961591], [250, 150, 53.186556927298], [200, 150, 76.692729766804] ] , \"100\": [ [200, 150, 76.692729766804], [200, 200, 68.585276634659], [250, 150, 53.186556927298], [250, 150, 53.186556927298], [250, 200, 78.65485444292], [200, 200, 68.585276634659] ] , \"101\": [ [200, 200, 68.585276634659], [200, 250, 53.670629477214], [250, 200, 78.65485444292], [250, 200, 78.65485444292], [250, 250, 50.636920184931], [200, 250, 53.670629477214] ] , \"102\": [ [200, 250, 53.670629477214], [200, 300, 59.370014733526], [250, 250, 50.636920184931], [250, 250, 50.636920184931], [250, 300, 84.892521465224], [200, 300, 59.370014733526] ] , \"103\": [ [200, 300, 59.370014733526], [200, 350, 42.994792460499], [250, 300, 84.892521465224], [250, 300, 84.892521465224], [250, 350, 56.419109553083], [200, 350, 42.994792460499] ] , \"104\": [ [200, 350, 42.994792460499], [200, 400, 32.721223052042], [250, 350, 56.419109553083], [250, 350, 56.419109553083], [250, 400, 51.378375021874], [200, 400, 32.721223052042] ] , \"105\": [ [200, 400, 32.721223052042], [200, 450, 68.783244988625], [250, 400, 51.378375021874], [250, 400, 51.378375021874], [250, 450, 72.62761435418], [200, 450, 68.783244988625] ] , \"106\": [ [200, 450, 68.783244988625], [200, 500, 62.755702577207], [250, 450, 72.62761435418], [250, 450, 72.62761435418], [250, 500, 56.055520640004], [200, 500, 62.755702577207] ] , \"107\": [ [200, 500, 62.755702577207], [200, 550, 71.765191766871], [250, 500, 56.055520640004], [250, 500, 56.055520640004], [250, 550, 54.192138328027], [200, 550, 71.765191766871] ] , \"108\": [ [200, 550, 71.765191766871], [200, 600, 68.364327018079], [250, 550, 54.192138328027], [250, 550, 54.192138328027], [250, 600, 74.107219037659], [200, 600, 68.364327018079] ] , \"109\": [ [200, 600, 68.364327018079], [200, 650, 50.695211709621], [250, 600, 74.107219037659], [250, 600, 74.107219037659], [250, 650, 59.38891925512], [200, 650, 50.695211709621] ] , \"110\": [ [200, 650, 50.695211709621], [200, 700, 31.73254079368], [250, 650, 59.38891925512], [250, 650, 59.38891925512], [250, 700, 41.43889058614], [200, 700, 31.73254079368] ] , \"111\": [ [200, 700, 31.73254079368], [200, 750, 24.459008714173], [250, 700, 41.43889058614], [250, 700, 41.43889058614], [250, 750, 39.876813364664], [200, 750, 24.459008714173] ] , \"112\": [ [200, 750, 24.459008714173], [200, 800, 10.796221626781], [250, 750, 39.876813364664], [250, 750, 39.876813364664], [250, 800, 26.044014568539], [200, 800, 10.796221626781] ] , \"113\": [ [200, 800, 10.796221626781], [200, 850, 9.6086511474272], [250, 800, 26.044014568539], [250, 800, 26.044014568539], [250, 850, 19.482962447583], [200, 850, 9.6086511474272] ] , \"114\": [ [200, 850, 9.6086511474272], [200, 900, 12.463134812992], [250, 850, 19.482962447583], [250, 850, 19.482962447583], [250, 900, 14.851582802667], [200, 900, 12.463134812992] ] , \"115\": [ [200, 900, 12.463134812992], [200, 950, 19.533914180855], [250, 900, 14.851582802667], [250, 900, 14.851582802667], [250, 950, 15.616210598838], [200, 950, 19.533914180855] ] , \"116\": [ [200, 950, 19.533914180855], [200, 1000, 20.897049923125], [250, 950, 15.616210598838], [250, 950, 15.616210598838], [250, 1000, 20.015724900939], [200, 1000, 20.897049923125] ] , \"117\": [ [200, 1000, 20.897049923125], [200, 1050, 21.413567809133], [250, 1000, 20.015724900939], [250, 1000, 20.015724900939], [250, 1050, 18.775447544399], [200, 1050, 21.413567809133] ] , \"118\": [ [200, 1050, 21.413567809133], [200, 1100, 15.045289665369], [250, 1050, 18.775447544399], [250, 1050, 18.775447544399], [250, 1100, 13.911435006301], [200, 1100, 15.045289665369] ] , \"119\": [ [200, 1100, 15.045289665369], [200, 1150, 24.262830951399], [250, 1100, 13.911435006301], [250, 1100, 13.911435006301], [250, 1150, 19.07318520769], [200, 1150, 24.262830951399] ] , \"120\": [ [200, 1150, 24.262830951399], [200, 1200, 19.833405735897], [250, 1150, 19.07318520769], [250, 1150, 19.07318520769], [250, 1200, 22.723140631662], [200, 1200, 19.833405735897] ] , \"121\": [ [250, 0, 9], [250, 50, -17.014403292181], [300, 0, 5], [300, 0, 5], [300, 50, -20.838134430727], [250, 50, -17.014403292181] ] , \"122\": [ [250, 50, -17.014403292181], [250, 100, 49.202331961591], [300, 50, -20.838134430727], [300, 50, -20.838134430727], [300, 100, 27.783264746228], [250, 100, 49.202331961591] ] , \"123\": [ [250, 100, 49.202331961591], [250, 150, 53.186556927298], [300, 100, 27.783264746228], [300, 100, 27.783264746228], [300, 150, 65.890717878372], [250, 150, 53.186556927298] ] , \"124\": [ [250, 150, 53.186556927298], [250, 200, 78.65485444292], [300, 150, 65.890717878372], [300, 150, 65.890717878372], [300, 200, 44.91070974953], [250, 200, 78.65485444292] ] , \"125\": [ [250, 200, 78.65485444292], [250, 250, 50.636920184931], [300, 200, 44.91070974953], [300, 200, 44.91070974953], [300, 250, 77.567494792461], [250, 250, 50.636920184931] ] , \"126\": [ [250, 250, 50.636920184931], [250, 300, 84.892521465224], [300, 250, 77.567494792461], [300, 250, 77.567494792461], [300, 300, 73.032312147538], [250, 300, 84.892521465224] ] , \"127\": [ [250, 300, 84.892521465224], [250, 350, 56.419109553083], [300, 300, 73.032312147538], [300, 300, 73.032312147538], [300, 350, 56.781314388615], [250, 350, 56.419109553083] ] , \"128\": [ [250, 350, 56.419109553083], [250, 400, 51.378375021874], [300, 350, 56.781314388615], [300, 350, 56.781314388615], [300, 400, 56.526266321191], [250, 400, 51.378375021874] ] , \"129\": [ [250, 400, 51.378375021874], [250, 450, 72.62761435418], [300, 400, 56.526266321191], [300, 400, 56.526266321191], [300, 450, 60.177418565749], [250, 450, 72.62761435418] ] , \"130\": [ [250, 450, 72.62761435418], [250, 500, 56.055520640004], [300, 450, 60.177418565749], [300, 450, 60.177418565749], [300, 500, 54.953517853311], [250, 500, 56.055520640004] ] , \"131\": [ [250, 500, 56.055520640004], [250, 550, 54.192138328027], [300, 500, 54.953517853311], [300, 500, 54.953517853311], [300, 550, 51.567058940448], [250, 550, 54.192138328027] ] , \"132\": [ [250, 550, 54.192138328027], [250, 600, 74.107219037659], [300, 550, 51.567058940448], [300, 550, 51.567058940448], [300, 600, 56.955472102045], [250, 600, 74.107219037659] ] , \"133\": [ [250, 600, 74.107219037659], [250, 650, 59.38891925512], [300, 600, 56.955472102045], [300, 600, 56.955472102045], [300, 650, 57.650536798274], [250, 650, 59.38891925512] ] , \"134\": [ [250, 650, 59.38891925512], [250, 700, 41.43889058614], [300, 650, 57.650536798274], [300, 650, 57.650536798274], [300, 700, 47.492782213178], [250, 700, 41.43889058614] ] , \"135\": [ [250, 700, 41.43889058614], [250, 750, 39.876813364664], [300, 700, 47.492782213178], [300, 700, 47.492782213178], [300, 750, 38.436162054661], [250, 750, 39.876813364664] ] , \"136\": [ [250, 750, 39.876813364664], [250, 800, 26.044014568539], [300, 750, 38.436162054661], [300, 750, 38.436162054661], [300, 800, 35.452329995955], [250, 800, 26.044014568539] ] , \"137\": [ [250, 800, 26.044014568539], [250, 850, 19.482962447583], [300, 800, 35.452329995955], [300, 800, 35.452329995955], [300, 850, 27.326435670692], [250, 850, 19.482962447583] ] , \"138\": [ [250, 850, 19.482962447583], [250, 900, 14.851582802667], [300, 850, 27.326435670692], [300, 850, 27.326435670692], [300, 900, 20.553660306981], [250, 900, 14.851582802667] ] , \"139\": [ [250, 900, 14.851582802667], [250, 950, 15.616210598838], [300, 900, 20.553660306981], [300, 900, 20.553660306981], [300, 950, 15.340484569495], [250, 950, 15.616210598838] ] , \"140\": [ [250, 950, 15.616210598838], [250, 1000, 20.015724900939], [300, 950, 15.340484569495], [300, 950, 15.340484569495], [300, 1000, 14.657473356424], [250, 1000, 20.015724900939] ] , \"141\": [ [250, 1000, 20.015724900939], [250, 1050, 18.775447544399], [300, 1000, 14.657473356424], [300, 1000, 14.657473356424], [300, 1050, 14.316215267254], [250, 1050, 18.775447544399] ] , \"142\": [ [250, 1050, 18.775447544399], [250, 1100, 13.911435006301], [300, 1050, 14.316215267254], [300, 1050, 14.316215267254], [300, 1100, 22.334365939318], [250, 1100, 13.911435006301] ] , \"143\": [ [250, 1100, 13.911435006301], [250, 1150, 19.07318520769], [300, 1100, 22.334365939318], [300, 1100, 22.334365939318], [300, 1150, 22.60632871777], [250, 1150, 19.07318520769] ] , \"144\": [ [250, 1150, 19.07318520769], [250, 1200, 22.723140631662], [300, 1150, 22.60632871777], [300, 1150, 22.60632871777], [300, 1200, 34.46755151904], [250, 1200, 22.723140631662] ] , \"145\": [ [300, 0, 5], [300, 50, -20.838134430727], [350, 0, -1], [350, 0, -1], [350, 50, -21.612711476909], [300, 50, -20.838134430727] ] , \"146\": [ [300, 50, -20.838134430727], [300, 100, 27.783264746228], [350, 50, -21.612711476909], [350, 50, -21.612711476909], [350, 100, -24.889193720469], [300, 100, 27.783264746228] ] , \"147\": [ [300, 100, 27.783264746228], [300, 150, 65.890717878372], [350, 100, -24.889193720469], [350, 100, -24.889193720469], [350, 150, 53.261596301377], [300, 150, 65.890717878372] ] , \"148\": [ [300, 150, 65.890717878372], [300, 200, 44.91070974953], [350, 150, 53.261596301377], [350, 150, 53.261596301377], [350, 200, 102.35434130976], [300, 200, 44.91070974953] ] , \"149\": [ [300, 200, 44.91070974953], [300, 250, 77.567494792461], [350, 200, 102.35434130976], [350, 200, 102.35434130976], [350, 250, 64.944181950583], [300, 250, 77.567494792461] ] , \"150\": [ [300, 250, 77.567494792461], [300, 300, 73.032312147538], [350, 250, 64.944181950583], [350, 250, 64.944181950583], [350, 300, 86.514662963527], [300, 300, 73.032312147538] ] , \"151\": [ [300, 300, 73.032312147538], [300, 350, 56.781314388615], [350, 300, 86.514662963527], [350, 300, 86.514662963527], [350, 350, 3], [300, 350, 56.781314388615] ] , \"152\": [ [300, 350, 56.781314388615], [300, 400, 56.526266321191], [350, 350, 3], [350, 350, 3], [350, 400, 0], [300, 400, 56.526266321191] ] , \"153\": [ [300, 400, 56.526266321191], [300, 450, 60.177418565749], [350, 400, 0], [350, 400, 0], [350, 450, -2], [300, 450, 60.177418565749] ] , \"154\": [ [300, 450, 60.177418565749], [300, 500, 54.953517853311], [350, 450, -2], [350, 450, -2], [350, 500, -3], [300, 500, 54.953517853311] ] , \"155\": [ [300, 500, 54.953517853311], [300, 550, 51.567058940448], [350, 500, -3], [350, 500, -3], [350, 550, -3], [300, 550, 51.567058940448] ] , \"156\": [ [300, 550, 51.567058940448], [300, 600, 56.955472102045], [350, 550, -3], [350, 550, -3], [350, 600, 0], [300, 600, 56.955472102045] ] , \"157\": [ [300, 600, 56.955472102045], [300, 650, 57.650536798274], [350, 600, 0], [350, 600, 0], [350, 650, 8], [300, 650, 57.650536798274] ] , \"158\": [ [300, 650, 57.650536798274], [300, 700, 47.492782213178], [350, 650, 8], [350, 650, 8], [350, 700, 1], [300, 700, 47.492782213178] ] , \"159\": [ [300, 700, 47.492782213178], [300, 750, 38.436162054661], [350, 700, 1], [350, 700, 1], [350, 750, 7], [300, 750, 38.436162054661] ] , \"160\": [ [300, 750, 38.436162054661], [300, 800, 35.452329995955], [350, 750, 7], [350, 750, 7], [350, 800, 6], [300, 800, 35.452329995955] ] , \"161\": [ [300, 800, 35.452329995955], [300, 850, 27.326435670692], [350, 800, 6], [350, 800, 6], [350, 850, 7], [300, 850, 27.326435670692] ] , \"162\": [ [300, 850, 27.326435670692], [300, 900, 20.553660306981], [350, 850, 7], [350, 850, 7], [350, 900, 17.793365325891], [300, 900, 20.553660306981] ] , \"163\": [ [300, 900, 20.553660306981], [300, 950, 15.340484569495], [350, 900, 17.793365325891], [350, 900, 17.793365325891], [350, 950, 18.562503400789], [300, 950, 15.340484569495] ] , \"164\": [ [300, 950, 15.340484569495], [300, 1000, 14.657473356424], [350, 950, 18.562503400789], [350, 950, 18.562503400789], [350, 1000, 19.186820442236], [300, 1000, 14.657473356424] ] , \"165\": [ [300, 1000, 14.657473356424], [300, 1050, 14.316215267254], [350, 1000, 19.186820442236], [350, 1000, 19.186820442236], [350, 1050, 16.720169688638], [300, 1050, 14.316215267254] ] , \"166\": [ [300, 1050, 14.316215267254], [300, 1100, 22.334365939318], [350, 1050, 16.720169688638], [350, 1050, 16.720169688638], [350, 1100, 30.290250298404], [300, 1100, 22.334365939318] ] , \"167\": [ [300, 1100, 22.334365939318], [300, 1150, 22.60632871777], [350, 1100, 30.290250298404], [350, 1100, 30.290250298404], [350, 1150, 21.07698165183], [300, 1150, 22.60632871777] ] , \"168\": [ [300, 1150, 22.60632871777], [300, 1200, 34.46755151904], [350, 1150, 21.07698165183], [350, 1150, 21.07698165183], [350, 1200, 52.883620629547], [300, 1200, 34.46755151904] ] , \"169\": [ [350, 0, -1], [350, 50, -21.612711476909], [400, 0, 2], [400, 0, 2], [400, 50, 10.629096174364], [350, 50, -21.612711476909] ] , \"170\": [ [350, 50, -21.612711476909], [350, 100, -24.889193720469], [400, 50, 10.629096174364], [400, 50, 10.629096174364], [400, 100, -35.290936341005], [350, 100, -24.889193720469] ] , \"171\": [ [350, 100, -24.889193720469], [350, 150, 53.261596301377], [400, 100, -35.290936341005], [400, 100, -35.290936341005], [400, 150, -21.806177920033], [350, 150, 53.261596301377] ] , \"172\": [ [350, 150, 53.261596301377], [350, 200, 102.35434130976], [400, 150, -21.806177920033], [400, 150, -21.806177920033], [400, 200, 36.603253230368], [350, 200, 102.35434130976] ] , \"173\": [ [350, 200, 102.35434130976], [350, 250, 64.944181950583], [400, 200, 36.603253230368], [400, 200, 36.603253230368], [400, 250, 49.633925496904], [350, 250, 64.944181950583] ] , \"174\": [ [350, 250, 64.944181950583], [350, 300, 86.514662963527], [400, 250, 49.633925496904], [400, 250, 49.633925496904], [400, 300, 58.697590137005], [350, 300, 86.514662963527] ] , \"175\": [ [350, 300, 86.514662963527], [350, 350, 3], [400, 300, 58.697590137005], [400, 300, 58.697590137005], [400, 350, 1], [350, 350, 3] ] , \"176\": [ [350, 350, 3], [350, 400, 0], [400, 350, 1], [400, 350, 1], [400, 400, 3], [350, 400, 0] ] , \"177\": [ [350, 400, 0], [350, 450, -2], [400, 400, 3], [400, 400, 3], [400, 450, 9], [350, 450, -2] ] , \"178\": [ [350, 450, -2], [350, 500, -3], [400, 450, 9], [400, 450, 9], [400, 500, -3], [350, 500, -3] ] , \"179\": [ [350, 500, -3], [350, 550, -3], [400, 500, -3], [400, 500, -3], [400, 550, 6], [350, 550, -3] ] , \"180\": [ [350, 550, -3], [350, 600, 0], [400, 550, 6], [400, 550, 6], [400, 600, 5], [350, 600, 0] ] , \"181\": [ [350, 600, 0], [350, 650, 8], [400, 600, 5], [400, 600, 5], [400, 650, 6], [350, 650, 8] ] , \"182\": [ [350, 650, 8], [350, 700, 1], [400, 650, 6], [400, 650, 6], [400, 700, -3], [350, 700, 1] ] , \"183\": [ [350, 700, 1], [350, 750, 7], [400, 700, -3], [400, 700, -3], [400, 750, 6], [350, 750, 7] ] , \"184\": [ [350, 750, 7], [350, 800, 6], [400, 750, 6], [400, 750, 6], [400, 800, -4], [350, 800, 6] ] , \"185\": [ [350, 800, 6], [350, 850, 7], [400, 800, -4], [400, 800, -4], [400, 850, 2], [350, 850, 7] ] , \"186\": [ [350, 850, 7], [350, 900, 17.793365325891], [400, 850, 2], [400, 850, 2], [400, 900, 9.2644551086303], [350, 900, 17.793365325891] ] , \"187\": [ [350, 900, 17.793365325891], [350, 950, 18.562503400789], [400, 900, 9.2644551086303], [400, 900, 9.2644551086303], [400, 950, 10.20677461177], [350, 950, 18.562503400789] ] , \"188\": [ [350, 950, 18.562503400789], [350, 1000, 19.186820442236], [400, 950, 10.20677461177], [400, 950, 10.20677461177], [400, 1000, 15.318699484932], [350, 1000, 19.186820442236] ] , \"189\": [ [350, 1000, 19.186820442236], [350, 1050, 16.720169688638], [400, 1000, 15.318699484932], [400, 1000, 15.318699484932], [400, 1050, 23.741896538602], [350, 1050, 16.720169688638] ] , \"190\": [ [350, 1050, 16.720169688638], [350, 1100, 30.290250298404], [400, 1050, 23.741896538602], [400, 1050, 23.741896538602], [400, 1100, 34.584105508548], [350, 1100, 30.290250298404] ] , \"191\": [ [350, 1100, 30.290250298404], [350, 1150, 21.07698165183], [400, 1100, 34.584105508548], [400, 1100, 34.584105508548], [400, 1150, 26.317112486261], [350, 1150, 21.07698165183] ] , \"192\": [ [350, 1150, 21.07698165183], [350, 1200, 52.883620629547], [400, 1150, 26.317112486261], [400, 1150, 26.317112486261], [400, 1200, 60.092571589213], [350, 1200, 52.883620629547] ] , \"193\": [ [400, 0, 2], [400, 50, 10.629096174364], [450, 0, 1], [450, 0, 1], [450, 50, -11.790301275212], [400, 50, 10.629096174364] ] , \"194\": [ [400, 50, 10.629096174364], [400, 100, -35.290936341005], [450, 50, -11.790301275212], [450, 50, -11.790301275212], [450, 100, 0.84928618604887], [400, 100, -35.290936341005] ] , \"195\": [ [400, 100, -35.290936341005], [400, 150, -21.806177920033], [450, 100, 0.84928618604887], [450, 100, 0.84928618604887], [450, 150, 15.250723975004], [400, 150, -21.806177920033] ] , \"196\": [ [400, 150, -21.806177920033], [400, 200, 36.603253230368], [450, 150, 15.250723975004], [450, 150, 15.250723975004], [450, 200, 11.849266428446], [400, 200, 36.603253230368] ] , \"197\": [ [400, 200, 36.603253230368], [400, 250, 49.633925496904], [450, 200, 11.849266428446], [450, 200, 11.849266428446], [450, 250, 32.695481718573], [400, 250, 49.633925496904] ] , \"198\": [ [400, 250, 49.633925496904], [400, 300, 58.697590137005], [450, 250, 32.695481718573], [450, 250, 32.695481718573], [450, 300, 44.008999117494], [400, 300, 58.697590137005] ] , \"199\": [ [400, 300, 58.697590137005], [400, 350, 1], [450, 300, 44.008999117494], [450, 300, 44.008999117494], [450, 350, 2], [400, 350, 1] ] , \"200\": [ [400, 350, 1], [400, 400, 3], [450, 350, 2], [450, 350, 2], [450, 400, 8], [400, 400, 3] ] , \"201\": [ [400, 400, 3], [400, 450, 9], [450, 400, 8], [450, 400, 8], [450, 450, -3], [400, 450, 9] ] , \"202\": [ [400, 450, 9], [400, 500, -3], [450, 450, -3], [450, 450, -3], [450, 500, 8], [400, 500, -3] ] , \"203\": [ [400, 500, -3], [400, 550, 6], [450, 500, 8], [450, 500, 8], [450, 550, -1], [400, 550, 6] ] , \"204\": [ [400, 550, 6], [400, 600, 5], [450, 550, -1], [450, 550, -1], [450, 600, 3], [400, 600, 5] ] , \"205\": [ [400, 600, 5], [400, 650, 6], [450, 600, 3], [450, 600, 3], [450, 650, 6], [400, 650, 6] ] , \"206\": [ [400, 650, 6], [400, 700, -3], [450, 650, 6], [450, 650, 6], [450, 700, 1], [400, 700, -3] ] , \"207\": [ [400, 700, -3], [400, 750, 6], [450, 700, 1], [450, 700, 1], [450, 750, 5], [400, 750, 6] ] , \"208\": [ [400, 750, 6], [400, 800, -4], [450, 750, 5], [450, 750, 5], [450, 800, 2], [400, 800, -4] ] , \"209\": [ [400, 800, -4], [400, 850, 2], [450, 800, 2], [450, 800, 2], [450, 850, 0], [400, 850, 2] ] , \"210\": [ [400, 850, 2], [400, 900, 9.2644551086303], [450, 850, 0], [450, 850, 0], [450, 900, 16.754818369543], [400, 900, 9.2644551086303] ] , \"211\": [ [400, 900, 9.2644551086303], [400, 950, 10.20677461177], [450, 900, 16.754818369543], [450, 900, 16.754818369543], [450, 950, 6.0753493633146], [400, 950, 10.20677461177] ] , \"212\": [ [400, 950, 10.20677461177], [400, 1000, 15.318699484932], [450, 950, 6.0753493633146], [450, 950, 6.0753493633146], [450, 1000, 28.033607820006], [400, 1000, 15.318699484932] ] , \"213\": [ [400, 1000, 15.318699484932], [400, 1050, 23.741896538602], [450, 1000, 28.033607820006], [450, 1000, 28.033607820006], [450, 1050, 24.364734614513], [400, 1050, 23.741896538602] ] , \"214\": [ [400, 1050, 23.741896538602], [400, 1100, 34.584105508548], [450, 1050, 24.364734614513], [450, 1050, 24.364734614513], [450, 1100, 47.396912220554], [400, 1100, 34.584105508548] ] , \"215\": [ [400, 1100, 34.584105508548], [400, 1150, 26.317112486261], [450, 1100, 47.396912220554], [450, 1100, 47.396912220554], [450, 1150, 64.099376738454], [400, 1150, 26.317112486261] ] , \"216\": [ [400, 1150, 26.317112486261], [400, 1200, 60.092571589213], [450, 1150, 64.099376738454], [450, 1150, 64.099376738454], [450, 1200, 77.169686937976], [400, 1200, 60.092571589213] ] , \"217\": [ [450, 0, 1], [450, 50, -11.790301275212], [500, 0, 2], [500, 0, 2], [500, 50, 3.5698995749293], [450, 50, -11.790301275212] ] , \"218\": [ [450, 50, -11.790301275212], [450, 100, 0.84928618604887], [500, 50, 3.5698995749293], [500, 50, 3.5698995749293], [500, 100, 1.5429614952554], [450, 100, 0.84928618604887] ] , \"219\": [ [450, 100, 0.84928618604887], [450, 150, 15.250723975004], [500, 100, 1.5429614952554], [500, 100, 1.5429614952554], [500, 150, 22.380990552103], [450, 150, 15.250723975004] ] , \"220\": [ [450, 150, 15.250723975004], [450, 200, 11.849266428446], [500, 150, 22.380990552103], [500, 150, 22.380990552103], [500, 200, 19.826993651851], [450, 200, 11.849266428446] ] , \"221\": [ [450, 200, 11.849266428446], [450, 250, 32.695481718573], [500, 200, 19.826993651851], [500, 200, 19.826993651851], [500, 250, 13.95724726629], [450, 250, 32.695481718573] ] , \"222\": [ [450, 250, 32.695481718573], [450, 300, 44.008999117494], [500, 250, 13.95724726629], [500, 250, 13.95724726629], [500, 300, 23.553909367452], [450, 300, 44.008999117494] ] , \"223\": [ [450, 300, 44.008999117494], [450, 350, 2], [500, 300, 23.553909367452], [500, 300, 23.553909367452], [500, 350, 3], [450, 350, 2] ] , \"224\": [ [450, 350, 2], [450, 400, 8], [500, 350, 3], [500, 350, 3], [500, 400, 3], [450, 400, 8] ] , \"225\": [ [450, 400, 8], [450, 450, -3], [500, 400, 3], [500, 400, 3], [500, 450, 5], [450, 450, -3] ] , \"226\": [ [450, 450, -3], [450, 500, 8], [500, 450, 5], [500, 450, 5], [500, 500, 10], [450, 500, 8] ] , \"227\": [ [450, 500, 8], [450, 550, -1], [500, 500, 10], [500, 500, 10], [500, 550, 7], [450, 550, -1] ] , \"228\": [ [450, 550, -1], [450, 600, 3], [500, 550, 7], [500, 550, 7], [500, 600, -1], [450, 600, 3] ] , \"229\": [ [450, 600, 3], [450, 650, 6], [500, 600, -1], [500, 600, -1], [500, 650, 2], [450, 650, 6] ] , \"230\": [ [450, 650, 6], [450, 700, 1], [500, 650, 2], [500, 650, 2], [500, 700, -2], [450, 700, 1] ] , \"231\": [ [450, 700, 1], [450, 750, 5], [500, 700, -2], [500, 700, -2], [500, 750, 10], [450, 750, 5] ] , \"232\": [ [450, 750, 5], [450, 800, 2], [500, 750, 10], [500, 750, 10], [500, 800, -4], [450, 800, 2] ] , \"233\": [ [450, 800, 2], [450, 850, 0], [500, 800, -4], [500, 800, -4], [500, 850, 7], [450, 850, 0] ] , \"234\": [ [450, 850, 0], [450, 900, 16.754818369543], [500, 850, 7], [500, 850, 7], [500, 900, 15.918272789848], [450, 900, 16.754818369543] ] , \"235\": [ [450, 900, 16.754818369543], [450, 950, 6.0753493633146], [500, 900, 15.918272789848], [500, 900, 15.918272789848], [500, 950, 27.082813507569], [450, 950, 6.0753493633146] ] , \"236\": [ [450, 950, 6.0753493633146], [450, 1000, 28.033607820006], [500, 950, 27.082813507569], [500, 950, 27.082813507569], [500, 1000, 29.397256896963], [450, 1000, 28.033607820006] ] , \"237\": [ [450, 1000, 28.033607820006], [450, 1050, 24.364734614513], [500, 1000, 29.397256896963], [500, 1000, 29.397256896963], [500, 1050, 27.265199777161], [450, 1050, 24.364734614513] ] , \"238\": [ [450, 1050, 24.364734614513], [450, 1100, 47.396912220554], [500, 1050, 27.265199777161], [500, 1050, 27.265199777161], [500, 1100, 27.675615537409], [450, 1100, 47.396912220554] ] , \"239\": [ [450, 1100, 47.396912220554], [450, 1150, 64.099376738454], [500, 1100, 27.675615537409], [500, 1100, 27.675615537409], [500, 1150, 46.390634832139], [450, 1150, 64.099376738454] ] , \"240\": [ [450, 1150, 64.099376738454], [450, 1200, 77.169686937976], [500, 1150, 46.390634832139], [500, 1150, 46.390634832139], [500, 1200, 87.55323283619], [450, 1200, 77.169686937976] ] , \"241\": [ [500, 0, 2], [500, 50, 3.5698995749293], [550, 0, 0], [550, 0, 0], [550, 50, 9.8566331916431], [500, 50, 3.5698995749293] ] , \"242\": [ [500, 50, 3.5698995749293], [500, 100, 1.5429614952554], [550, 50, 9.8566331916431], [550, 50, 9.8566331916431], [550, 100, -13.343501912724], [500, 100, 1.5429614952554] ] , \"243\": [ [500, 100, 1.5429614952554], [500, 150, 22.380990552103], [550, 100, -13.343501912724], [550, 100, -13.343501912724], [550, 150, 3.5268167115446], [500, 150, 22.380990552103] ] , \"244\": [ [500, 150, 22.380990552103], [500, 200, 19.826993651851], [550, 150, 3.5268167115446], [550, 150, 3.5268167115446], [550, 200, 22.744933638499], [500, 200, 19.826993651851] ] , \"245\": [ [500, 200, 19.826993651851], [500, 250, 13.95724726629], [550, 200, 22.744933638499], [550, 200, 22.744933638499], [550, 250, 10.843058185547], [500, 250, 13.95724726629] ] , \"246\": [ [500, 250, 13.95724726629], [500, 300, 23.553909367452], [550, 250, 10.843058185547], [550, 250, 10.843058185547], [550, 300, 23.11807160643], [500, 300, 23.553909367452] ] , \"247\": [ [500, 300, 23.553909367452], [500, 350, 3], [550, 300, 23.11807160643], [550, 300, 23.11807160643], [550, 350, 1], [500, 350, 3] ] , \"248\": [ [500, 350, 3], [500, 400, 3], [550, 350, 1], [550, 350, 1], [550, 400, -2], [500, 400, 3] ] , \"249\": [ [500, 400, 3], [500, 450, 5], [550, 400, -2], [550, 400, -2], [550, 450, -2], [500, 450, 5] ] , \"250\": [ [500, 450, 5], [500, 500, 10], [550, 450, -2], [550, 450, -2], [550, 500, 0], [500, 500, 10] ] , \"251\": [ [500, 500, 10], [500, 550, 7], [550, 500, 0], [550, 500, 0], [550, 550, -5], [500, 550, 7] ] , \"252\": [ [500, 550, 7], [500, 600, -1], [550, 550, -5], [550, 550, -5], [550, 600, -1], [500, 600, -1] ] , \"253\": [ [500, 600, -1], [500, 650, 2], [550, 600, -1], [550, 600, -1], [550, 650, -5], [500, 650, 2] ] , \"254\": [ [500, 650, 2], [500, 700, -2], [550, 650, -5], [550, 650, -5], [550, 700, 4], [500, 700, -2] ] , \"255\": [ [500, 700, -2], [500, 750, 10], [550, 700, 4], [550, 700, 4], [550, 750, -3], [500, 750, 10] ] , \"256\": [ [500, 750, 10], [500, 800, -4], [550, 750, -3], [550, 750, -3], [550, 800, 10], [500, 800, -4] ] , \"257\": [ [500, 800, -4], [500, 850, 7], [550, 800, 10], [550, 800, 10], [550, 850, -3], [500, 850, 7] ] , \"258\": [ [500, 850, 7], [500, 900, 15.918272789848], [550, 850, -3], [550, 850, -3], [550, 900, 16.639424263283], [500, 900, 15.918272789848] ] , \"259\": [ [500, 900, 15.918272789848], [500, 950, 27.082813507569], [550, 900, 16.639424263283], [550, 900, 16.639424263283], [550, 950, 12.8801701869], [500, 950, 27.082813507569] ] , \"260\": [ [500, 950, 27.082813507569], [500, 1000, 29.397256896963], [550, 950, 12.8801701869], [550, 950, 12.8801701869], [550, 1000, 18.453413530477], [500, 1000, 29.397256896963] ] , \"261\": [ [500, 1000, 29.397256896963], [500, 1050, 27.265199777161], [550, 1000, 18.453413530477], [550, 1000, 18.453413530477], [550, 1050, 19.7052900682], [500, 1050, 27.265199777161] ] , \"262\": [ [500, 1050, 27.265199777161], [500, 1100, 27.675615537409], [550, 1050, 19.7052900682], [550, 1050, 19.7052900682], [550, 1100, 11.38203512759], [500, 1100, 27.675615537409] ] , \"263\": [ [500, 1100, 27.675615537409], [500, 1150, 46.390634832139], [550, 1100, 11.38203512759], [550, 1100, 11.38203512759], [550, 1150, 31.816095165713], [500, 1150, 46.390634832139] ] , \"264\": [ [500, 1150, 46.390634832139], [500, 1200, 87.55323283619], [550, 1150, 31.816095165713], [550, 1150, 31.816095165713], [550, 1200, 40.586654278014], [500, 1200, 87.55323283619] ] , \"265\": [ [550, 0, 0], [550, 50, 9.8566331916431], [600, 0, -3], [600, 0, -3], [600, 50, -5.047788936119], [550, 50, 9.8566331916431] ] , \"266\": [ [550, 50, 9.8566331916431], [550, 100, -13.343501912724], [600, 50, -5.047788936119], [600, 50, -5.047788936119], [600, 100, 18.821780780933], [550, 100, -13.343501912724] ] , \"267\": [ [550, 100, -13.343501912724], [550, 150, 3.5268167115446], [600, 100, 18.821780780933], [600, 100, 18.821780780933], [600, 150, 22.501698526585], [550, 150, 3.5268167115446] ] , \"268\": [ [550, 150, 3.5268167115446], [550, 200, 22.744933638499], [600, 150, 22.501698526585], [600, 150, 22.501698526585], [600, 200, 6.9244829588762], [550, 200, 22.744933638499] ] , \"269\": [ [550, 200, 22.744933638499], [550, 250, 10.843058185547], [600, 200, 6.9244829588762], [600, 200, 6.9244829588762], [600, 250, 19.337491594307], [550, 250, 10.843058185547] ] , \"270\": [ [550, 250, 10.843058185547], [550, 300, 23.11807160643], [600, 250, 19.337491594307], [600, 250, 19.337491594307], [600, 300, 22.766207128761], [550, 300, 23.11807160643] ] , \"271\": [ [550, 300, 23.11807160643], [550, 350, 1], [600, 300, 22.766207128761], [600, 300, 22.766207128761], [600, 350, 7], [550, 350, 1] ] , \"272\": [ [550, 350, 1], [550, 400, -2], [600, 350, 7], [600, 350, 7], [600, 400, 1], [550, 400, -2] ] , \"273\": [ [550, 400, -2], [550, 450, -2], [600, 400, 1], [600, 400, 1], [600, 450, 8], [550, 450, -2] ] , \"274\": [ [550, 450, -2], [550, 500, 0], [600, 450, 8], [600, 450, 8], [600, 500, -1], [550, 500, 0] ] , \"275\": [ [550, 500, 0], [550, 550, -5], [600, 500, -1], [600, 500, -1], [600, 550, 8], [550, 550, -5] ] , \"276\": [ [550, 550, -5], [550, 600, -1], [600, 550, 8], [600, 550, 8], [600, 600, 9], [550, 600, -1] ] , \"277\": [ [550, 600, -1], [550, 650, -5], [600, 600, 9], [600, 600, 9], [600, 650, -2], [550, 650, -5] ] , \"278\": [ [550, 650, -5], [550, 700, 4], [600, 650, -2], [600, 650, -2], [600, 700, 2], [550, 700, 4] ] , \"279\": [ [550, 700, 4], [550, 750, -3], [600, 700, 2], [600, 700, 2], [600, 750, 3], [550, 750, -3] ] , \"280\": [ [550, 750, -3], [550, 800, 10], [600, 750, 3], [600, 750, 3], [600, 800, 3], [550, 800, 10] ] , \"281\": [ [550, 800, 10], [550, 850, -3], [600, 800, 3], [600, 800, 3], [600, 850, -3], [550, 850, -3] ] , \"282\": [ [550, 850, -3], [550, 900, 16.639424263283], [600, 850, -3], [600, 850, -3], [600, 900, -6.4535252455725], [550, 900, 16.639424263283] ] , \"283\": [ [550, 900, 16.639424263283], [550, 950, 12.8801701869], [600, 900, -6.4535252455725], [600, 900, -6.4535252455725], [600, 950, 10.022023068203], [550, 950, 12.8801701869] ] , \"284\": [ [550, 950, 12.8801701869], [550, 1000, 18.453413530477], [600, 950, 10.022023068203], [600, 950, 10.022023068203], [600, 1000, 23.118535595193], [550, 1000, 18.453413530477] ] , \"285\": [ [550, 1000, 18.453413530477], [550, 1050, 19.7052900682], [600, 1000, 23.118535595193], [600, 1000, 23.118535595193], [600, 1050, 26.425746397957], [550, 1050, 19.7052900682] ] , \"286\": [ [550, 1050, 19.7052900682], [550, 1100, 11.38203512759], [600, 1050, 26.425746397957], [600, 1050, 26.425746397957], [600, 1100, 5.837690531249], [550, 1100, 11.38203512759] ] , \"287\": [ [550, 1100, 11.38203512759], [550, 1150, 31.816095165713], [600, 1100, 5.837690531249], [600, 1100, 5.837690531249], [600, 1150, 23.678606941517], [550, 1150, 31.816095165713] ] , \"288\": [ [550, 1150, 31.816095165713], [550, 1200, 40.586654278014], [600, 1150, 23.678606941517], [600, 1150, 23.678606941517], [600, 1200, 38.027118795081], [550, 1200, 40.586654278014] ] , \"289\": [ [600, 0, -3], [600, 50, -5.047788936119], [650, 0, 5], [650, 0, 5], [650, 50, 15.650737021294], [600, 50, -5.047788936119] ] , \"290\": [ [600, 50, -5.047788936119], [600, 100, 18.821780780933], [650, 50, 15.650737021294], [650, 50, 15.650737021294], [650, 100, 15.808242955369], [600, 100, 18.821780780933] ] , \"291\": [ [600, 100, 18.821780780933], [600, 150, 22.501698526585], [650, 100, 15.808242955369], [650, 100, 15.808242955369], [650, 150, 28.377240754296], [600, 150, 22.501698526585] ] , \"292\": [ [600, 150, 22.501698526585], [600, 200, 6.9244829588762], [650, 150, 28.377240754296], [650, 150, 28.377240754296], [650, 200, 13.434474079919], [600, 200, 6.9244829588762] ] , \"293\": [ [600, 200, 6.9244829588762], [600, 250, 19.337491594307], [650, 200, 13.434474079919], [650, 200, 13.434474079919], [650, 250, 23.232149544368], [600, 250, 19.337491594307] ] , \"294\": [ [600, 250, 19.337491594307], [600, 300, 22.766207128761], [650, 250, 23.232149544368], [650, 250, 23.232149544368], [650, 300, 15.945282755812], [600, 300, 22.766207128761] ] , \"295\": [ [600, 300, 22.766207128761], [600, 350, 7], [650, 300, 15.945282755812], [650, 300, 15.945282755812], [650, 350, -4], [600, 350, 7] ] , \"296\": [ [600, 350, 7], [600, 400, 1], [650, 350, -4], [650, 350, -4], [650, 400, 4], [600, 400, 1] ] , \"297\": [ [600, 400, 1], [600, 450, 8], [650, 400, 4], [650, 400, 4], [650, 450, 0], [600, 450, 8] ] , \"298\": [ [600, 450, 8], [600, 500, -1], [650, 450, 0], [650, 450, 0], [650, 500, 10], [600, 500, -1] ] , \"299\": [ [600, 500, -1], [600, 550, 8], [650, 500, 10], [650, 500, 10], [650, 550, 3], [600, 550, 8] ] , \"300\": [ [600, 550, 8], [600, 600, 9], [650, 550, 3], [650, 550, 3], [650, 600, -2], [600, 600, 9] ] , \"301\": [ [600, 600, 9], [600, 650, -2], [650, 600, -2], [650, 600, -2], [650, 650, -2], [600, 650, -2] ] , \"302\": [ [600, 650, -2], [600, 700, 2], [650, 650, -2], [650, 650, -2], [650, 700, 10], [600, 700, 2] ] , \"303\": [ [600, 700, 2], [600, 750, 3], [650, 700, 10], [650, 700, 10], [650, 750, -4], [600, 750, 3] ] , \"304\": [ [600, 750, 3], [600, 800, 3], [650, 750, -4], [650, 750, -4], [650, 800, 1], [600, 800, 3] ] , \"305\": [ [600, 800, 3], [600, 850, -3], [650, 800, 1], [650, 800, 1], [650, 850, -2], [600, 850, -3] ] , \"306\": [ [600, 850, -3], [600, 900, -6.4535252455725], [650, 850, -2], [650, 850, -2], [650, 900, -9.6511750818575], [600, 900, -6.4535252455725] ] , \"307\": [ [600, 900, -6.4535252455725], [600, 950, 10.022023068203], [650, 900, -9.6511750818575], [650, 900, -9.6511750818575], [650, 950, -2.0275590864089], [600, 950, 10.022023068203] ] , \"308\": [ [600, 950, 10.022023068203], [600, 1000, 23.118535595193], [650, 950, -2.0275590864089], [650, 950, -2.0275590864089], [650, 1000, 20.870999858996], [600, 1000, 23.118535595193] ] , \"309\": [ [600, 1000, 23.118535595193], [600, 1050, 26.425746397957], [650, 1000, 20.870999858996], [650, 1000, 20.870999858996], [650, 1050, 26.805093950715], [600, 1050, 26.425746397957] ] , \"310\": [ [600, 1050, 26.425746397957], [600, 1100, 5.837690531249], [650, 1050, 26.805093950715], [650, 1050, 26.805093950715], [650, 1100, 23.356176959974], [600, 1100, 5.837690531249] ] , \"311\": [ [600, 1100, 5.837690531249], [600, 1150, 23.678606941517], [650, 1100, 23.356176959974], [650, 1100, 23.356176959974], [650, 1150, 5.6241581442467], [600, 1150, 23.678606941517] ] , \"312\": [ [600, 1150, 23.678606941517], [600, 1200, 38.027118795081], [650, 1150, 5.6241581442467], [650, 1150, 5.6241581442467], [650, 1200, 37.609961293615], [600, 1200, 38.027118795081] ] , \"313\": [ [650, 0, 5], [650, 50, 15.650737021294], [700, 0, 4], [700, 0, 4], [700, 50, 20.216912340431], [650, 50, 15.650737021294] ] , \"314\": [ [650, 50, 15.650737021294], [650, 100, 15.808242955369], [700, 50, 20.216912340431], [700, 50, 20.216912340431], [700, 100, 18.558630772365], [650, 100, 15.808242955369] ] , \"315\": [ [650, 100, 15.808242955369], [650, 150, 28.377240754296], [700, 100, 18.558630772365], [700, 100, 18.558630772365], [700, 150, 12.748038160677], [650, 150, 28.377240754296] ] , \"316\": [ [650, 150, 28.377240754296], [650, 200, 13.434474079919], [700, 150, 12.748038160677], [700, 150, 12.748038160677], [700, 200, 17.18658433163], [650, 200, 13.434474079919] ] , \"317\": [ [650, 200, 13.434474079919], [650, 250, 23.232149544368], [700, 200, 17.18658433163], [700, 200, 17.18658433163], [700, 250, 14.617735985306], [650, 250, 23.232149544368] ] , \"318\": [ [650, 250, 23.232149544368], [650, 300, 15.945282755812], [700, 250, 14.617735985306], [700, 250, 14.617735985306], [700, 300, 21.265056095162], [650, 300, 15.945282755812] ] , \"319\": [ [650, 300, 15.945282755812], [650, 350, -4], [700, 300, 21.265056095162], [700, 300, 21.265056095162], [700, 350, 7], [650, 350, -4] ] , \"320\": [ [650, 350, -4], [650, 400, 4], [700, 350, 7], [700, 350, 7], [700, 400, -2], [650, 400, 4] ] , \"321\": [ [650, 400, 4], [650, 450, 0], [700, 400, -2], [700, 400, -2], [700, 450, -3], [650, 450, 0] ] , \"322\": [ [650, 450, 0], [650, 500, 10], [700, 450, -3], [700, 450, -3], [700, 500, -1], [650, 500, 10] ] , \"323\": [ [650, 500, 10], [650, 550, 3], [700, 500, -1], [700, 500, -1], [700, 550, 9], [650, 550, 3] ] , \"324\": [ [650, 550, 3], [650, 600, -2], [700, 550, 9], [700, 550, 9], [700, 600, 8], [650, 600, -2] ] , \"325\": [ [650, 600, -2], [650, 650, -2], [700, 600, 8], [700, 600, 8], [700, 650, -1], [650, 650, -2] ] , \"326\": [ [650, 650, -2], [650, 700, 10], [700, 650, -1], [700, 650, -1], [700, 700, 5], [650, 700, 10] ] , \"327\": [ [650, 700, 10], [650, 750, -4], [700, 700, 5], [700, 700, 5], [700, 750, -5], [650, 750, -4] ] , \"328\": [ [650, 750, -4], [650, 800, 1], [700, 750, -5], [700, 750, -5], [700, 800, -1], [650, 800, 1] ] , \"329\": [ [650, 800, 1], [650, 850, -2], [700, 800, -1], [700, 800, -1], [700, 850, 1], [650, 850, -2] ] , \"330\": [ [650, 850, -2], [650, 900, -9.6511750818575], [700, 850, 1], [700, 850, 1], [700, 900, 11.116274972714], [650, 900, -9.6511750818575] ] , \"331\": [ [650, 900, -9.6511750818575], [650, 950, -2.0275590864089], [700, 900, 11.116274972714], [700, 900, 11.116274972714], [700, 950, 7.3125136014826], [650, 950, -2.0275590864089] ] , \"332\": [ [650, 950, -2.0275590864089], [650, 1000, 20.870999858996], [700, 950, 7.3125136014826], [700, 950, 7.3125136014826], [700, 1000, 55.38531812469], [650, 1000, 20.870999858996] ] , \"333\": [ [650, 1000, 20.870999858996], [650, 1050, 26.805093950715], [700, 1000, 55.38531812469], [700, 1000, 55.38531812469], [700, 1050, 67.353803978134], [650, 1050, 26.805093950715] ] , \"334\": [ [650, 1050, 26.805093950715], [650, 1100, 23.356176959974], [700, 1050, 67.353803978134], [700, 1050, 67.353803978134], [700, 1100, 39.171691629608], [650, 1100, 23.356176959974] ] , \"335\": [ [650, 1100, 23.356176959974], [650, 1150, 5.6241581442467], [700, 1100, 39.171691629608], [700, 1100, 39.171691629608], [700, 1150, 3.2173422446094], [650, 1150, 5.6241581442467] ] , \"336\": [ [650, 1150, 5.6241581442467], [650, 1200, 37.609961293615], [700, 1150, 3.2173422446094], [700, 1150, 3.2173422446094], [700, 1200, 6.1504872274904], [650, 1200, 37.609961293615] ] , \"337\": [ [700, 0, 4], [700, 50, 20.216912340431], [750, 0, -4], [750, 0, -4], [750, 50, 10.738970780144], [700, 50, 20.216912340431] ] , \"338\": [ [700, 50, 20.216912340431], [700, 100, 18.558630772365], [750, 50, 10.738970780144], [750, 50, 10.738970780144], [750, 100, 23.504837964313], [700, 100, 18.558630772365] ] , \"339\": [ [700, 100, 18.558630772365], [700, 150, 12.748038160677], [750, 100, 23.504837964313], [750, 100, 23.504837964313], [750, 150, 12.270502299118], [700, 150, 12.748038160677] ] , \"340\": [ [700, 150, 12.748038160677], [700, 200, 17.18658433163], [750, 150, 12.270502299118], [750, 150, 12.270502299118], [750, 200, 15.735041597142], [700, 200, 17.18658433163] ] , \"341\": [ [700, 200, 17.18658433163], [700, 250, 14.617735985306], [750, 200, 15.735041597142], [750, 200, 15.735041597142], [750, 250, 11.179787304693], [700, 250, 14.617735985306] ] , \"342\": [ [700, 250, 14.617735985306], [700, 300, 21.265056095162], [750, 250, 11.179787304693], [750, 250, 11.179787304693], [750, 300, 14.18752646172], [700, 300, 21.265056095162] ] , \"343\": [ [700, 300, 21.265056095162], [700, 350, 7], [750, 300, 14.18752646172], [750, 300, 14.18752646172], [750, 350, 6], [700, 350, 7] ] , \"344\": [ [700, 350, 7], [700, 400, -2], [750, 350, 6], [750, 350, 6], [750, 400, 3], [700, 400, -2] ] , \"345\": [ [700, 400, -2], [700, 450, -3], [750, 400, 3], [750, 400, 3], [750, 450, -5], [700, 450, -3] ] , \"346\": [ [700, 450, -3], [700, 500, -1], [750, 450, -5], [750, 450, -5], [750, 500, 5], [700, 500, -1] ] , \"347\": [ [700, 500, -1], [700, 550, 9], [750, 500, 5], [750, 500, 5], [750, 550, 5], [700, 550, 9] ] , \"348\": [ [700, 550, 9], [700, 600, 8], [750, 550, 5], [750, 550, 5], [750, 600, 2], [700, 600, 8] ] , \"349\": [ [700, 600, 8], [700, 650, -1], [750, 600, 2], [750, 600, 2], [750, 650, 0], [700, 650, -1] ] , \"350\": [ [700, 650, -1], [700, 700, 5], [750, 650, 0], [750, 650, 0], [750, 700, 8], [700, 700, 5] ] , \"351\": [ [700, 700, 5], [700, 750, -5], [750, 700, 8], [750, 700, 8], [750, 750, 7], [700, 750, -5] ] , \"352\": [ [700, 750, -5], [700, 800, -1], [750, 750, 7], [750, 750, 7], [750, 800, 1], [700, 800, -1] ] , \"353\": [ [700, 800, -1], [700, 850, 1], [750, 800, 1], [750, 800, 1], [750, 850, -5], [700, 850, 1] ] , \"354\": [ [700, 850, 1], [700, 900, 11.116274972714], [750, 850, -5], [750, 850, -5], [750, 900, 20.372091657571], [700, 900, 11.116274972714] ] , \"355\": [ [700, 900, 11.116274972714], [700, 950, 7.3125136014826], [750, 900, 20.372091657571], [750, 900, 20.372091657571], [750, 950, 16.266960077256], [700, 950, 7.3125136014826] ] , \"356\": [ [700, 950, 7.3125136014826], [700, 1000, 55.38531812469], [750, 950, 16.266960077256], [750, 950, 16.266960077256], [750, 1000, 18.988263934476], [700, 1000, 55.38531812469] ] , \"357\": [ [700, 1000, 55.38531812469], [700, 1050, 67.353803978134], [750, 1000, 18.988263934476], [750, 1000, 18.988263934476], [750, 1050, 49.242462012433], [700, 1050, 67.353803978134] ] , \"358\": [ [700, 1050, 67.353803978134], [700, 1100, 39.171691629608], [750, 1050, 49.242462012433], [750, 1050, 49.242462012433], [750, 1100, 97.422652540058], [700, 1100, 39.171691629608] ] , \"359\": [ [700, 1100, 39.171691629608], [700, 1150, 3.2173422446094], [750, 1100, 97.422652540058], [750, 1100, 97.422652540058], [750, 1150, 48.937228804758], [700, 1150, 3.2173422446094] ] , \"360\": [ [700, 1150, 3.2173422446094], [700, 1200, 6.1504872274904], [750, 1150, 48.937228804758], [750, 1150, 48.937228804758], [750, 1200, 51.935019425619], [700, 1200, 6.1504872274904] ] , \"361\": [ [750, 0, -4], [750, 50, 10.738970780144], [800, 0, 3], [800, 0, 3], [800, 50, -3.7536764066188], [750, 50, 10.738970780144] ] , \"362\": [ [750, 50, 10.738970780144], [750, 100, 23.504837964313], [800, 50, -3.7536764066188], [800, 50, -3.7536764066188], [800, 100, 18.163377445946], [750, 100, 23.504837964313] ] , \"363\": [ [750, 100, 23.504837964313], [750, 150, 12.270502299118], [800, 100, 18.163377445946], [800, 100, 18.163377445946], [800, 150, 19.646239236459], [750, 150, 12.270502299118] ] , \"364\": [ [750, 150, 12.270502299118], [750, 200, 15.735041597142], [800, 150, 19.646239236459], [800, 150, 19.646239236459], [800, 200, 15.21726104424], [750, 200, 15.735041597142] ] , \"365\": [ [750, 200, 15.735041597142], [750, 250, 11.179787304693], [800, 200, 15.21726104424], [800, 200, 15.21726104424], [800, 250, 19.544029982025], [750, 250, 11.179787304693] ] , \"366\": [ [750, 250, 11.179787304693], [750, 300, 14.18752646172], [800, 250, 19.544029982025], [800, 250, 19.544029982025], [800, 300, 12.303781249479], [750, 300, 14.18752646172] ] , \"367\": [ [750, 300, 14.18752646172], [750, 350, 6], [800, 300, 12.303781249479], [800, 300, 12.303781249479], [800, 350, 1], [750, 350, 6] ] , \"368\": [ [750, 350, 6], [750, 400, 3], [800, 350, 1], [800, 350, 1], [800, 400, 0], [750, 400, 3] ] , \"369\": [ [750, 400, 3], [750, 450, -5], [800, 400, 0], [800, 400, 0], [800, 450, 10], [750, 450, -5] ] , \"370\": [ [750, 450, -5], [750, 500, 5], [800, 450, 10], [800, 450, 10], [800, 500, 5], [750, 500, 5] ] , \"371\": [ [750, 500, 5], [750, 550, 5], [800, 500, 5], [800, 500, 5], [800, 550, 3], [750, 550, 5] ] , \"372\": [ [750, 550, 5], [750, 600, 2], [800, 550, 3], [800, 550, 3], [800, 600, -5], [750, 600, 2] ] , \"373\": [ [750, 600, 2], [750, 650, 0], [800, 600, -5], [800, 600, -5], [800, 650, -1], [750, 650, 0] ] , \"374\": [ [750, 650, 0], [750, 700, 8], [800, 650, -1], [800, 650, -1], [800, 700, 8], [750, 700, 8] ] , \"375\": [ [750, 700, 8], [750, 750, 7], [800, 700, 8], [800, 700, 8], [800, 750, 1], [750, 750, 7] ] , \"376\": [ [750, 750, 7], [750, 800, 1], [800, 750, 1], [800, 750, 1], [800, 800, 6], [750, 800, 1] ] , \"377\": [ [750, 800, 1], [750, 850, -5], [800, 800, 6], [800, 800, 6], [800, 850, 7], [750, 850, -5] ] , \"378\": [ [750, 850, -5], [750, 900, 20.372091657571], [800, 850, 7], [800, 850, 7], [800, 900, -9.2093027808095], [750, 900, 20.372091657571] ] , \"379\": [ [750, 900, 20.372091657571], [750, 950, 16.266960077256], [800, 900, -9.2093027808095], [800, 900, -9.2093027808095], [800, 950, -1.8567503486607], [750, 950, 16.266960077256] ] , \"380\": [ [750, 950, 16.266960077256], [750, 1000, 18.988263934476], [800, 950, -1.8567503486607], [800, 950, -1.8567503486607], [800, 1000, -2.8671754456428], [750, 1000, 18.988263934476] ] , \"381\": [ [750, 1000, 18.988263934476], [750, 1050, 49.242462012433], [800, 1000, -2.8671754456428], [800, 1000, -2.8671754456428], [800, 1050, 36.954516833756], [750, 1050, 49.242462012433] ] , \"382\": [ [750, 1050, 49.242462012433], [750, 1100, 97.422652540058], [800, 1050, 36.954516833756], [800, 1050, 36.954516833756], [800, 1100, 89.206543795416], [750, 1100, 97.422652540058] ] , \"383\": [ [750, 1100, 97.422652540058], [750, 1150, 48.937228804758], [800, 1100, 89.206543795416], [800, 1100, 89.206543795416], [800, 1150, 81.022141713411], [750, 1150, 48.937228804758] ] , \"384\": [ [750, 1150, 48.937228804758], [750, 1200, 51.935019425619], [800, 1150, 81.022141713411], [800, 1150, 81.022141713411], [800, 1200, 52.631463314596], [750, 1200, 51.935019425619] ] , \"385\": [ [800, 0, 3], [800, 50, -3.7536764066188], [850, 0, -3], [850, 0, -3], [850, 50, 22.748774531127], [800, 50, -3.7536764066188] ] , \"386\": [ [800, 50, -3.7536764066188], [800, 100, 18.163377445946], [850, 50, 22.748774531127], [850, 50, 22.748774531127], [850, 100, 4.0528251901515], [800, 100, 18.163377445946] ] , \"387\": [ [800, 100, 18.163377445946], [800, 150, 19.646239236459], [850, 100, 4.0528251901515], [850, 100, 4.0528251901515], [850, 150, 15.954147290852], [800, 150, 19.646239236459] ] , \"388\": [ [800, 150, 19.646239236459], [800, 200, 15.21726104424], [850, 150, 15.954147290852], [850, 150, 15.954147290852], [850, 200, 24.439215857184], [800, 200, 15.21726104424] ] , \"389\": [ [800, 200, 15.21726104424], [800, 250, 19.544029982025], [850, 200, 24.439215857184], [850, 200, 24.439215857184], [850, 250, 23.066835627816], [800, 250, 19.544029982025] ] , \"390\": [ [800, 250, 19.544029982025], [800, 300, 12.303781249479], [850, 250, 23.066835627816], [850, 250, 23.066835627816], [850, 300, 17.971548953107], [800, 300, 12.303781249479] ] , \"391\": [ [800, 300, 12.303781249479], [800, 350, 1], [850, 300, 17.971548953107], [850, 300, 17.971548953107], [850, 350, -3], [800, 350, 1] ] , \"392\": [ [800, 350, 1], [800, 400, 0], [850, 350, -3], [850, 350, -3], [850, 400, 0], [800, 400, 0] ] , \"393\": [ [800, 400, 0], [800, 450, 10], [850, 400, 0], [850, 400, 0], [850, 450, 1], [800, 450, 10] ] , \"394\": [ [800, 450, 10], [800, 500, 5], [850, 450, 1], [850, 450, 1], [850, 500, 7], [800, 500, 5] ] , \"395\": [ [800, 500, 5], [800, 550, 3], [850, 500, 7], [850, 500, 7], [850, 550, 5], [800, 550, 3] ] , \"396\": [ [800, 550, 3], [800, 600, -5], [850, 550, 5], [850, 550, 5], [850, 600, 7], [800, 600, -5] ] , \"397\": [ [800, 600, -5], [800, 650, -1], [850, 600, 7], [850, 600, 7], [850, 650, -5], [800, 650, -1] ] , \"398\": [ [800, 650, -1], [800, 700, 8], [850, 650, -5], [850, 650, -5], [850, 700, -3], [800, 700, 8] ] , \"399\": [ [800, 700, 8], [800, 750, 1], [850, 700, -3], [850, 700, -3], [850, 750, 8], [800, 750, 1] ] , \"400\": [ [800, 750, 1], [800, 800, 6], [850, 750, 8], [850, 750, 8], [850, 800, -4], [800, 800, 6] ] , \"401\": [ [800, 800, 6], [800, 850, 7], [850, 800, -4], [850, 800, -4], [850, 850, 6], [800, 850, 7] ] , \"402\": [ [800, 850, 7], [800, 900, -9.2093027808095], [850, 850, 6], [850, 850, 6], [850, 900, -17.069767593603], [800, 900, -9.2093027808095] ] , \"403\": [ [800, 900, -9.2093027808095], [800, 950, -1.8567503486607], [850, 900, -17.069767593603], [850, 900, -17.069767593603], [850, 950, 22.621393092309], [800, 950, -1.8567503486607] ] , \"404\": [ [800, 950, -1.8567503486607], [800, 1000, -2.8671754456428], [850, 950, 22.621393092309], [850, 950, 22.621393092309], [850, 1000, -13.534177567332], [800, 1000, -2.8671754456428] ] , \"405\": [ [800, 1000, -2.8671754456428], [800, 1050, 36.954516833756], [850, 1000, -13.534177567332], [850, 1000, -13.534177567332], [850, 1050, 30.18438794026], [800, 1050, 36.954516833756] ] , \"406\": [ [800, 1050, 36.954516833756], [800, 1100, 89.206543795416], [850, 1050, 30.18438794026], [850, 1050, 30.18438794026], [850, 1100, 54.615149523144], [800, 1100, 89.206543795416] ] , \"407\": [ [800, 1100, 89.206543795416], [800, 1150, 81.022141713411], [850, 1100, 54.615149523144], [850, 1100, 54.615149523144], [850, 1150, 74.947945010657], [800, 1150, 81.022141713411] ] , \"408\": [ [800, 1150, 81.022141713411], [800, 1200, 52.631463314596], [850, 1150, 74.947945010657], [850, 1150, 74.947945010657], [850, 1200, 61.033850012888], [800, 1200, 52.631463314596] ] , \"409\": [ [850, 0, -3], [850, 50, 22.748774531127], [900, 0, -5], [900, 0, -5], [900, 50, 20.749591510376], [850, 50, 22.748774531127] ] , \"410\": [ [850, 50, 22.748774531127], [850, 100, 4.0528251901515], [900, 50, 20.749591510376], [900, 50, 20.749591510376], [900, 100, 21.183730410551], [850, 100, 4.0528251901515] ] , \"411\": [ [850, 100, 4.0528251901515], [850, 150, 15.954147290852], [900, 100, 21.183730410551], [900, 100, 21.183730410551], [900, 150, 17.230234297185], [850, 150, 15.954147290852] ] , \"412\": [ [850, 150, 15.954147290852], [850, 200, 24.439215857184], [900, 150, 17.230234297185], [900, 150, 17.230234297185], [900, 200, 20.87453248174], [850, 200, 24.439215857184] ] , \"413\": [ [850, 200, 24.439215857184], [850, 250, 23.066835627816], [900, 200, 20.87453248174], [900, 200, 20.87453248174], [900, 250, 25.46019465558], [850, 250, 23.066835627816] ] , \"414\": [ [850, 250, 23.066835627816], [850, 300, 17.971548953107], [900, 250, 25.46019465558], [900, 250, 25.46019465558], [900, 300, 22.166193078834], [850, 300, 17.971548953107] ] , \"415\": [ [850, 300, 17.971548953107], [850, 350, -3], [900, 300, 22.166193078834], [900, 300, 22.166193078834], [900, 350, 12.712580677314], [850, 350, -3] ] , \"416\": [ [850, 350, -3], [850, 400, 0], [900, 350, 12.712580677314], [900, 350, 12.712580677314], [900, 400, 5.5708602257712], [850, 400, 0] ] , \"417\": [ [850, 400, 0], [850, 450, 1], [900, 400, 5.5708602257712], [900, 400, 5.5708602257712], [900, 450, 11.190286741924], [850, 450, 1] ] , \"418\": [ [850, 450, 1], [850, 500, 7], [900, 450, 11.190286741924], [900, 450, 11.190286741924], [900, 500, 15.063428913975], [850, 500, 7] ] , \"419\": [ [850, 500, 7], [850, 550, 5], [900, 500, 15.063428913975], [900, 500, 15.063428913975], [900, 550, 10.687809637992], [850, 550, 5] ] , \"420\": [ [850, 550, 5], [850, 600, 7], [900, 550, 10.687809637992], [900, 550, 10.687809637992], [900, 600, -2.4373967873362], [850, 600, 7] ] , \"421\": [ [850, 600, 7], [850, 650, -5], [900, 600, -2.4373967873362], [900, 600, -2.4373967873362], [900, 650, -11.812465595779], [850, 650, -5] ] , \"422\": [ [850, 650, -5], [850, 700, -3], [900, 650, -11.812465595779], [900, 650, -11.812465595779], [900, 700, 6.7291781347404], [850, 700, -3] ] , \"423\": [ [850, 700, -3], [850, 750, 8], [900, 700, 6.7291781347404], [900, 700, 6.7291781347404], [900, 750, 39.909726044913], [850, 750, 8] ] , \"424\": [ [850, 750, 8], [850, 800, -4], [900, 750, 39.909726044913], [900, 750, 39.909726044913], [900, 800, 11.303242014971], [850, 800, -4] ] , \"425\": [ [850, 800, -4], [850, 850, 6], [900, 800, 11.303242014971], [900, 800, 11.303242014971], [900, 850, -13.898919328343], [850, 850, 6] ] , \"426\": [ [850, 850, 6], [850, 900, -17.069767593603], [900, 850, -13.898919328343], [900, 850, -13.898919328343], [900, 900, 15.677104359351], [850, 900, -17.069767593603] ] , \"427\": [ [850, 900, -17.069767593603], [850, 950, 22.621393092309], [900, 900, 15.677104359351], [900, 900, 15.677104359351], [900, 950, 11.409576619352], [850, 950, 22.621393092309] ] , \"428\": [ [850, 950, 22.621393092309], [850, 1000, -13.534177567332], [900, 950, 11.409576619352], [900, 950, 11.409576619352], [900, 1000, 6.8322640481099], [850, 1000, -13.534177567332] ] , \"429\": [ [850, 1000, -13.534177567332], [850, 1050, 30.18438794026], [900, 1000, 6.8322640481099], [900, 1000, 6.8322640481099], [900, 1050, 22.82749147368], [850, 1050, 30.18438794026] ] , \"430\": [ [850, 1050, 30.18438794026], [850, 1100, 54.615149523144], [900, 1050, 22.82749147368], [900, 1050, 22.82749147368], [900, 1100, 57.209009645695], [850, 1100, 54.615149523144] ] , \"431\": [ [850, 1100, 54.615149523144], [850, 1150, 74.947945010657], [900, 1100, 57.209009645695], [900, 1100, 57.209009645695], [900, 1150, 62.257368059832], [850, 1150, 74.947945010657] ] , \"432\": [ [850, 1150, 74.947945010657], [850, 1200, 61.033850012888], [900, 1150, 62.257368059832], [900, 1150, 62.257368059832], [900, 1200, 81.079721027792], [850, 1200, 61.033850012888] ] , \"433\": [ [900, 0, -5], [900, 50, 20.749591510376], [950, 0, -3], [950, 0, -3], [950, 50, 7.5831971701252], [900, 50, 20.749591510376] ] , \"434\": [ [900, 50, 20.749591510376], [900, 100, 21.183730410551], [950, 50, 7.5831971701252], [950, 50, 7.5831971701252], [950, 100, 25.005506363684], [900, 100, 21.183730410551] ] , \"435\": [ [900, 100, 21.183730410551], [900, 150, 17.230234297185], [950, 100, 25.005506363684], [950, 100, 25.005506363684], [950, 150, 19.80649035714], [900, 150, 17.230234297185] ] , \"436\": [ [900, 150, 17.230234297185], [900, 200, 20.87453248174], [950, 150, 19.80649035714], [950, 150, 19.80649035714], [950, 200, 18.137085712022], [900, 200, 20.87453248174] ] , \"437\": [ [900, 200, 20.87453248174], [900, 250, 25.46019465558], [950, 200, 18.137085712022], [950, 200, 18.137085712022], [950, 250, 21.490604283114], [900, 250, 25.46019465558] ] , \"438\": [ [900, 250, 25.46019465558], [900, 300, 22.166193078834], [950, 250, 21.490604283114], [950, 250, 21.490604283114], [950, 300, 23.705664005843], [900, 300, 22.166193078834] ] , \"439\": [ [900, 300, 22.166193078834], [900, 350, 12.712580677314], [950, 300, 23.705664005843], [950, 300, 23.705664005843], [950, 350, 22.528145920664], [900, 350, 12.712580677314] ] , \"440\": [ [900, 350, 12.712580677314], [900, 400, 5.5708602257712], [950, 350, 22.528145920664], [950, 350, 22.528145920664], [950, 400, 14.103862274583], [900, 400, 5.5708602257712] ] , \"441\": [ [900, 400, 5.5708602257712], [900, 450, 11.190286741924], [950, 400, 14.103862274583], [950, 400, 14.103862274583], [950, 450, 15.621669747426], [900, 450, 11.190286741924] ] , \"442\": [ [900, 450, 11.190286741924], [900, 500, 15.063428913975], [950, 450, 15.621669747426], [950, 450, 15.621669747426], [950, 500, 10.625128467775], [900, 500, 15.063428913975] ] , \"443\": [ [900, 500, 15.063428913975], [900, 550, 10.687809637992], [950, 500, 10.625128467775], [950, 500, 10.625128467775], [950, 550, 2.1254556732469], [900, 550, 10.687809637992] ] , \"444\": [ [900, 550, 10.687809637992], [900, 600, -2.4373967873362], [950, 550, 2.1254556732469], [950, 550, 2.1254556732469], [950, 600, 2.2919561746341], [900, 600, -2.4373967873362] ] , \"445\": [ [900, 600, -2.4373967873362], [900, 650, -11.812465595779], [950, 600, 2.2919561746341], [950, 600, 2.2919561746341], [950, 650, -2.6526354028269], [900, 650, -11.812465595779] ] , \"446\": [ [900, 650, -11.812465595779], [900, 700, 6.7291781347404], [950, 650, -2.6526354028269], [950, 650, -2.6526354028269], [950, 700, -10.078640954622], [900, 700, 6.7291781347404] ] , \"447\": [ [900, 700, 6.7291781347404], [900, 750, 39.909726044913], [950, 700, -10.078640954622], [950, 700, -10.078640954622], [950, 750, -1.1465789249893], [900, 750, 39.909726044913] ] , \"448\": [ [900, 750, 39.909726044913], [900, 800, 11.303242014971], [950, 750, -1.1465789249893], [950, 750, -1.1465789249893], [950, 800, 53.355463044965], [900, 800, 11.303242014971] ] , \"449\": [ [900, 800, 11.303242014971], [900, 850, -13.898919328343], [950, 800, 53.355463044965], [950, 800, 53.355463044965], [950, 850, 0.91992857719778], [900, 850, -13.898919328343] ] , \"450\": [ [900, 850, -13.898919328343], [900, 900, 15.677104359351], [950, 850, 0.91992857719778], [950, 850, 0.91992857719778], [950, 900, -16.433962130598], [900, 900, 15.677104359351] ] , \"451\": [ [900, 900, 15.677104359351], [900, 950, 11.409576619352], [950, 900, -16.433962130598], [950, 900, -16.433962130598], [950, 950, -19.782427050631], [900, 950, 11.409576619352] ] , \"452\": [ [900, 950, 11.409576619352], [900, 1000, 6.8322640481099], [950, 950, -19.782427050631], [950, 950, -19.782427050631], [950, 1000, -0.51352879438975], [900, 1000, 6.8322640481099] ] , \"453\": [ [900, 1000, 6.8322640481099], [900, 1050, 22.82749147368], [950, 1000, -0.51352879438975], [950, 1000, -0.51352879438975], [950, 1050, 9.7154089091332], [900, 1050, 22.82749147368] ] , \"454\": [ [900, 1050, 22.82749147368], [900, 1100, 57.209009645695], [950, 1050, 9.7154089091332], [950, 1050, 9.7154089091332], [950, 1100, 4.4173033428358], [900, 1100, 57.209009645695] ] , \"455\": [ [900, 1100, 57.209009645695], [900, 1150, 62.257368059832], [950, 1100, 4.4173033428358], [950, 1100, 4.4173033428358], [950, 1150, 17.294560349454], [900, 1150, 62.257368059832] ] , \"456\": [ [900, 1150, 62.257368059832], [900, 1200, 81.079721027792], [950, 1150, 17.294560349454], [950, 1150, 17.294560349454], [950, 1200, 56.710549812359], [900, 1200, 81.079721027792] ] , \"457\": [ [950, 0, -3], [950, 50, 7.5831971701252], [1000, 0, 8], [1000, 0, 8], [1000, 50, -0.30560094329159], [950, 50, 7.5831971701252] ] , \"458\": [ [950, 50, 7.5831971701252], [950, 100, 25.005506363684], [1000, 50, -0.30560094329159], [1000, 50, -0.30560094329159], [1000, 100, 12.094367530173], [950, 100, 25.005506363684] ] , \"459\": [ [950, 100, 25.005506363684], [950, 150, 19.80649035714], [1000, 100, 12.094367530173], [1000, 100, 12.094367530173], [1000, 150, 17.302121416999], [950, 150, 19.80649035714] ] , \"460\": [ [950, 150, 19.80649035714], [950, 200, 18.137085712022], [1000, 150, 17.302121416999], [1000, 150, 17.302121416999], [1000, 200, 18.415232495387], [950, 200, 18.137085712022] ] , \"461\": [ [950, 200, 18.137085712022], [950, 250, 21.490604283114], [1000, 200, 18.415232495387], [1000, 200, 18.415232495387], [1000, 250, 19.514307496841], [950, 250, 21.490604283114] ] , \"462\": [ [950, 250, 21.490604283114], [950, 300, 23.705664005843], [1000, 250, 19.514307496841], [1000, 250, 19.514307496841], [1000, 300, 19.570191928599], [950, 300, 23.705664005843] ] , \"463\": [ [950, 300, 23.705664005843], [950, 350, 22.528145920664], [1000, 300, 19.570191928599], [1000, 300, 19.570191928599], [1000, 350, 24.934667285035], [950, 350, 22.528145920664] ] , \"464\": [ [950, 350, 22.528145920664], [950, 400, 14.103862274583], [1000, 350, 24.934667285035], [1000, 350, 24.934667285035], [1000, 400, 14.522225160094], [950, 400, 14.103862274583] ] , \"465\": [ [950, 400, 14.103862274583], [950, 450, 15.621669747426], [1000, 400, 14.522225160094], [1000, 400, 14.522225160094], [1000, 450, 30.582585727368], [950, 450, 15.621669747426] ] , \"466\": [ [950, 450, 15.621669747426], [950, 500, 10.625128467775], [1000, 450, 30.582585727368], [1000, 450, 30.582585727368], [1000, 500, 40.943127980856], [950, 500, 10.625128467775] ] , \"467\": [ [950, 500, 10.625128467775], [950, 550, 2.1254556732469], [1000, 500, 40.943127980856], [1000, 500, 40.943127980856], [1000, 550, 9.7312373739592], [950, 550, 2.1254556732469] ] , \"468\": [ [950, 550, 2.1254556732469], [950, 600, 2.2919561746341], [1000, 550, 9.7312373739592], [1000, 550, 9.7312373739592], [1000, 600, 2.0495497406134], [950, 600, 2.2919561746341] ] , \"469\": [ [950, 600, 2.2919561746341], [950, 650, -2.6526354028269], [1000, 600, 2.0495497406134], [1000, 600, 2.0495497406134], [1000, 650, 2.0629568374735], [950, 650, -2.6526354028269] ] , \"470\": [ [950, 650, -2.6526354028269], [950, 700, -10.078640954622], [1000, 650, 2.0629568374735], [1000, 650, 2.0629568374735], [1000, 700, 19.777226826675], [950, 700, -10.078640954622] ] , \"471\": [ [950, 700, -10.078640954622], [950, 750, -1.1465789249893], [1000, 700, 19.777226826675], [1000, 700, 19.777226826675], [1000, 750, -8.1493310176454], [950, 750, -1.1465789249893] ] , \"472\": [ [950, 750, -1.1465789249893], [950, 800, 53.355463044965], [1000, 750, -8.1493310176454], [1000, 750, -8.1493310176454], [1000, 800, 34.686517700777], [950, 800, 53.355463044965] ] , \"473\": [ [950, 800, 53.355463044965], [950, 850, 0.91992857719778], [1000, 800, 34.686517700777], [1000, 800, 34.686517700777], [1000, 850, 55.653969774313], [950, 850, 0.91992857719778] ] , \"474\": [ [950, 850, 0.91992857719778], [950, 900, -16.433962130598], [1000, 850, 55.653969774313], [1000, 850, 55.653969774313], [1000, 900, -0.62002125969565], [950, 900, -16.433962130598] ] , \"475\": [ [950, 900, -16.433962130598], [950, 950, -19.782427050631], [1000, 900, -0.62002125969565], [1000, 900, -0.62002125969565], [1000, 950, -7.2788034803083], [950, 950, -19.782427050631] ] , \"476\": [ [950, 950, -19.782427050631], [950, 1000, -0.51352879438975], [1000, 950, -7.2788034803083], [1000, 950, -7.2788034803083], [1000, 1000, -22.52491977511], [950, 1000, -0.51352879438975] ] , \"477\": [ [950, 1000, -0.51352879438975], [950, 1050, 9.7154089091332], [1000, 1000, -22.52491977511], [1000, 1000, -22.52491977511], [1000, 1050, 60.725653446545], [950, 1050, 9.7154089091332] ] , \"478\": [ [950, 1050, 9.7154089091332], [950, 1100, 4.4173033428358], [1000, 1050, 60.725653446545], [1000, 1050, 60.725653446545], [1000, 1100, -2.0472114338288], [950, 1100, 4.4173033428358] ] , \"479\": [ [950, 1100, 4.4173033428358], [950, 1150, 17.294560349454], [1000, 1100, -2.0472114338288], [1000, 1100, -2.0472114338288], [1000, 1150, -9.2784492471796], [950, 1150, 17.294560349454] ] , \"480\": [ [950, 1150, 17.294560349454], [950, 1200, 56.710549812359], [1000, 1150, -9.2784492471796], [1000, 1150, -9.2784492471796], [1000, 1200, 11.575553638211], [950, 1200, 56.710549812359] ] , \"481\": [ [1000, 0, 8], [1000, 50, -0.30560094329159], [1050, 0, 10], [1050, 0, 10], [1050, 50, 6.5647996855695], [1000, 50, -0.30560094329159] ] , \"482\": [ [1000, 50, -0.30560094329159], [1000, 100, 12.094367530173], [1050, 50, 6.5647996855695], [1050, 50, 6.5647996855695], [1050, 100, 5.6178554241502], [1000, 100, 12.094367530173] ] , \"483\": [ [1000, 100, 12.094367530173], [1000, 150, 17.302121416999], [1050, 100, 5.6178554241502], [1050, 100, 5.6178554241502], [1050, 150, 11.671448123774], [1000, 150, 17.302121416999] ] , \"484\": [ [1000, 150, 17.302121416999], [1000, 200, 18.415232495387], [1050, 150, 11.671448123774], [1050, 150, 11.671448123774], [1050, 200, 14.12960067872], [1000, 200, 18.415232495387] ] , \"485\": [ [1000, 200, 18.415232495387], [1000, 250, 19.514307496841], [1050, 200, 14.12960067872], [1050, 200, 14.12960067872], [1050, 250, 19.019713556983], [1000, 250, 19.514307496841] ] , \"486\": [ [1000, 250, 19.514307496841], [1000, 300, 19.570191928599], [1050, 250, 19.019713556983], [1050, 250, 19.019713556983], [1050, 300, 16.368070994141], [1000, 300, 19.570191928599] ] , \"487\": [ [1000, 300, 19.570191928599], [1000, 350, 24.934667285035], [1050, 300, 16.368070994141], [1050, 300, 16.368070994141], [1050, 350, 17.624310069258], [1000, 350, 24.934667285035] ] , \"488\": [ [1000, 350, 24.934667285035], [1000, 400, 14.522225160094], [1050, 350, 17.624310069258], [1050, 350, 17.624310069258], [1050, 400, 21.527067504796], [1000, 400, 14.522225160094] ] , \"489\": [ [1000, 400, 14.522225160094], [1000, 450, 30.582585727368], [1050, 400, 21.527067504796], [1050, 400, 21.527067504796], [1050, 450, 32.210626130752], [1000, 450, 30.582585727368] ] , \"490\": [ [1000, 450, 30.582585727368], [1000, 500, 40.943127980856], [1050, 450, 32.210626130752], [1050, 450, 32.210626130752], [1050, 500, 31.078779946325], [1000, 500, 40.943127980856] ] , \"491\": [ [1000, 500, 40.943127980856], [1000, 550, 9.7312373739592], [1050, 500, 31.078779946325], [1050, 500, 31.078779946325], [1050, 550, 36.584381767047], [1000, 550, 9.7312373739592] ] , \"492\": [ [1000, 550, 9.7312373739592], [1000, 600, 2.0495497406134], [1050, 550, 36.584381767047], [1050, 550, 36.584381767047], [1050, 600, 1.1217229605398], [1000, 600, 2.0495497406134] ] , \"493\": [ [1000, 600, 2.0495497406134], [1000, 650, 2.0629568374735], [1050, 600, 1.1217229605398], [1050, 600, 1.1217229605398], [1050, 650, 21.744743179542], [1000, 650, 2.0629568374735] ] , \"494\": [ [1000, 650, 2.0629568374735], [1000, 700, 19.777226826675], [1050, 650, 21.744743179542], [1050, 650, 21.744743179542], [1050, 700, 62.194975614564], [1000, 700, 19.777226826675] ] , \"495\": [ [1000, 700, 19.777226826675], [1000, 750, -8.1493310176454], [1050, 700, 62.194975614564], [1050, 700, 62.194975614564], [1050, 750, 18.607623807864], [1000, 750, -8.1493310176454] ] , \"496\": [ [1000, 750, -8.1493310176454], [1000, 800, 34.686517700777], [1050, 750, 18.607623807864], [1050, 750, 18.607623807864], [1050, 800, 12.881603496999], [1000, 800, 34.686517700777] ] , \"497\": [ [1000, 800, 34.686517700777], [1000, 850, 55.653969774313], [1050, 800, 12.881603496999], [1050, 800, 12.881603496999], [1050, 850, 71.740696990696], [1000, 850, 55.653969774313] ] , \"498\": [ [1000, 850, 55.653969774313], [1000, 900, -0.62002125969565], [1050, 850, 71.740696990696], [1050, 850, 71.740696990696], [1050, 900, 27.258215168438], [1000, 900, -0.62002125969565] ] , \"499\": [ [1000, 900, -0.62002125969565], [1000, 950, -7.2788034803083], [1050, 900, 27.258215168438], [1050, 900, 27.258215168438], [1050, 950, 51.786463476145], [1000, 950, -7.2788034803083] ] , \"500\": [ [1000, 950, -7.2788034803083], [1000, 1000, -22.52491977511], [1050, 950, 51.786463476145], [1050, 950, 51.786463476145], [1050, 1000, 10.160913406909], [1000, 1000, -22.52491977511] ] , \"501\": [ [1000, 1000, -22.52491977511], [1000, 1050, 60.725653446545], [1050, 1000, 10.160913406909], [1050, 1000, 10.160913406909], [1050, 1050, -7.8794509738855], [1000, 1050, 60.725653446545] ] , \"502\": [ [1000, 1050, 60.725653446545], [1000, 1100, -2.0472114338288], [1050, 1050, -7.8794509738855], [1050, 1050, -7.8794509738855], [1050, 1100, 51.766330346277], [1000, 1100, -2.0472114338288] ] , \"503\": [ [1000, 1100, -2.0472114338288], [1000, 1150, -9.2784492471796], [1050, 1100, 51.766330346277], [1050, 1100, 51.766330346277], [1050, 1150, 40.146889888423], [1000, 1150, -9.2784492471796] ] , \"504\": [ [1000, 1150, -9.2784492471796], [1000, 1200, 11.575553638211], [1050, 1150, 40.146889888423], [1050, 1150, 40.146889888423], [1050, 1200, 84.147998093151], [1000, 1200, 11.575553638211] ] , \"505\": [ [1050, 0, 10], [1050, 50, 6.5647996855695], [1100, 0, -2], [1100, 0, -2], [1100, 50, 3.5215998951898], [1050, 50, 6.5647996855695] ] , \"506\": [ [1050, 50, 6.5647996855695], [1050, 100, 5.6178554241502], [1100, 50, 3.5215998951898], [1100, 50, 3.5215998951898], [1100, 100, 5.2347516683031], [1050, 100, 5.6178554241502] ] , \"507\": [ [1050, 100, 5.6178554241502], [1050, 150, 11.671448123774], [1100, 100, 5.2347516683031], [1100, 100, 5.2347516683031], [1100, 150, 8.0080184054091], [1050, 150, 11.671448123774] ] , \"508\": [ [1050, 150, 11.671448123774], [1050, 200, 14.12960067872], [1100, 150, 8.0080184054091], [1100, 150, 8.0080184054091], [1100, 200, 12.269689069301], [1050, 200, 14.12960067872] ] , \"509\": [ [1050, 200, 14.12960067872], [1050, 250, 19.019713556983], [1100, 200, 12.269689069301], [1100, 200, 12.269689069301], [1100, 250, 15.139667768335], [1050, 250, 19.019713556983] ] , \"510\": [ [1050, 250, 19.019713556983], [1050, 300, 16.368070994141], [1100, 250, 15.139667768335], [1100, 250, 15.139667768335], [1100, 300, 20.842484106486], [1050, 300, 16.368070994141] ] , \"511\": [ [1050, 300, 16.368070994141], [1050, 350, 17.624310069258], [1100, 300, 20.842484106486], [1100, 300, 20.842484106486], [1100, 350, 16.611621723295], [1050, 350, 17.624310069258] ] , \"512\": [ [1050, 350, 17.624310069258], [1050, 400, 21.527067504796], [1100, 350, 16.611621723295], [1100, 350, 16.611621723295], [1100, 400, 24.58766643245], [1050, 400, 21.527067504796] ] , \"513\": [ [1050, 400, 21.527067504796], [1050, 450, 32.210626130752], [1100, 400, 24.58766643245], [1100, 400, 24.58766643245], [1100, 450, 16.775120022666], [1050, 450, 32.210626130752] ] , \"514\": [ [1050, 450, 32.210626130752], [1050, 500, 31.078779946325], [1100, 450, 16.775120022666], [1100, 450, 16.775120022666], [1100, 500, 21.354842033248], [1050, 500, 31.078779946325] ] , \"515\": [ [1050, 500, 31.078779946325], [1050, 550, 36.584381767047], [1100, 500, 21.354842033248], [1100, 500, 21.354842033248], [1100, 550, 49.17266791554], [1050, 550, 36.584381767047] ] , \"516\": [ [1050, 550, 36.584381767047], [1050, 600, 1.1217229605398], [1100, 550, 49.17266791554], [1100, 550, 49.17266791554], [1100, 600, 28.959590881042], [1050, 600, 1.1217229605398] ] , \"517\": [ [1050, 600, 1.1217229605398], [1050, 650, 21.744743179542], [1100, 600, 28.959590881042], [1100, 600, 28.959590881042], [1100, 650, 33.775352340375], [1050, 650, 21.744743179542] ] , \"518\": [ [1050, 650, 21.744743179542], [1050, 700, 62.194975614564], [1100, 650, 33.775352340375], [1100, 650, 33.775352340375], [1100, 700, 45.238357044827], [1050, 700, 62.194975614564] ] , \"519\": [ [1050, 700, 62.194975614564], [1050, 750, 18.607623807864], [1100, 700, 45.238357044827], [1100, 700, 45.238357044827], [1100, 750, 22.513652155752], [1050, 750, 18.607623807864] ] , \"520\": [ [1050, 750, 18.607623807864], [1050, 800, 12.881603496999], [1100, 750, 22.513652155752], [1100, 750, 22.513652155752], [1100, 800, 13.334293153538], [1050, 800, 12.881603496999] ] , \"521\": [ [1050, 800, 12.881603496999], [1050, 850, 71.740696990696], [1100, 800, 13.334293153538], [1100, 800, 13.334293153538], [1100, 850, 62.652197880411], [1050, 850, 71.740696990696] ] , \"522\": [ [1050, 850, 71.740696990696], [1050, 900, 27.258215168438], [1100, 850, 62.652197880411], [1100, 850, 62.652197880411], [1100, 900, 83.217036679848], [1050, 900, 27.258215168438] ] , \"523\": [ [1050, 900, 27.258215168438], [1050, 950, 51.786463476145], [1100, 900, 83.217036679848], [1100, 900, 83.217036679848], [1100, 950, 71.087238441477], [1050, 950, 51.786463476145] ] , \"524\": [ [1050, 950, 51.786463476145], [1050, 1000, 10.160913406909], [1100, 950, 71.087238441477], [1100, 950, 71.087238441477], [1100, 1000, 20.344871774843], [1050, 1000, 10.160913406909] ] , \"525\": [ [1050, 1000, 10.160913406909], [1050, 1050, -7.8794509738855], [1100, 1000, 20.344871774843], [1100, 1000, 20.344871774843], [1100, 1050, -17.791221930711], [1050, 1050, -7.8794509738855] ] , \"526\": [ [1050, 1050, -7.8794509738855], [1050, 1100, 51.766330346277], [1100, 1050, -17.791221930711], [1100, 1050, -17.791221930711], [1100, 1100, -14.634780852773], [1050, 1100, 51.766330346277] ] , \"527\": [ [1050, 1100, 51.766330346277], [1050, 1150, 40.146889888423], [1100, 1100, -14.634780852773], [1100, 1100, -14.634780852773], [1100, 1150, -9.2405202060246], [1050, 1150, 40.146889888423] ] , \"528\": [ [1050, 1150, 40.146889888423], [1050, 1200, 84.147998093151], [1100, 1150, -9.2405202060246], [1100, 1150, -9.2405202060246], [1100, 1200, 86.01812259185], [1050, 1200, 84.147998093151] ] , \"529\": [ [1100, 0, -2], [1100, 50, 3.5215998951898], [1150, 0, 6], [1150, 0, 6], [1150, 50, 2.5071999650633], [1100, 50, 3.5215998951898] ] , \"530\": [ [1100, 50, 3.5215998951898], [1100, 100, 5.2347516683031], [1150, 50, 2.5071999650633], [1150, 50, 2.5071999650633], [1150, 100, 6.9211838428521], [1100, 100, 5.2347516683031] ] , \"531\": [ [1100, 100, 5.2347516683031], [1100, 150, 8.0080184054091], [1150, 100, 6.9211838428521], [1150, 100, 6.9211838428521], [1150, 150, 7.3879846388548], [1100, 150, 8.0080184054091] ] , \"532\": [ [1100, 150, 8.0080184054091], [1100, 200, 12.269689069301], [1150, 150, 7.3879846388548], [1150, 150, 7.3879846388548], [1150, 200, 4.7218973711883], [1100, 200, 12.269689069301] ] , \"533\": [ [1100, 200, 12.269689069301], [1100, 250, 15.139667768335], [1150, 200, 4.7218973711883], [1150, 200, 4.7218973711883], [1150, 250, 10.043751402941], [1100, 250, 15.139667768335] ] , \"534\": [ [1100, 250, 15.139667768335], [1100, 300, 20.842484106486], [1150, 250, 10.043751402941], [1150, 250, 10.043751402941], [1150, 300, 28.675301092587], [1100, 300, 20.842484106486] ] , \"535\": [ [1100, 300, 20.842484106486], [1100, 350, 16.611621723295], [1150, 300, 28.675301092587], [1150, 300, 28.675301092587], [1150, 350, 20.04313564079], [1100, 350, 16.611621723295] ] , \"536\": [ [1100, 350, 16.611621723295], [1100, 400, 24.58766643245], [1150, 350, 20.04313564079], [1150, 350, 20.04313564079], [1150, 400, 11.080807932178], [1100, 400, 24.58766643245] ] , \"537\": [ [1100, 400, 24.58766643245], [1100, 450, 16.775120022666], [1150, 400, 11.080807932178], [1150, 400, 11.080807932178], [1150, 450, 42.814531462431], [1100, 450, 16.775120022666] ] , \"538\": [ [1100, 450, 16.775120022666], [1100, 500, 21.354842033248], [1150, 450, 42.814531462431], [1150, 450, 42.814531462431], [1150, 500, 25.481497839448], [1100, 500, 21.354842033248] ] , \"539\": [ [1100, 500, 21.354842033248], [1100, 550, 49.17266791554], [1150, 500, 25.481497839448], [1150, 500, 25.481497839448], [1150, 550, 60.336335929412], [1100, 550, 49.17266791554] ] , \"540\": [ [1100, 550, 49.17266791554], [1100, 600, 28.959590881042], [1150, 550, 60.336335929412], [1150, 550, 60.336335929412], [1150, 600, 55.322864908665], [1100, 600, 28.959590881042] ] , \"541\": [ [1100, 600, 28.959590881042], [1100, 650, 33.775352340375], [1150, 600, 55.322864908665], [1150, 600, 55.322864908665], [1150, 650, 23.352602710027], [1100, 650, 33.775352340375] ] , \"542\": [ [1100, 650, 33.775352340375], [1100, 700, 45.238357044827], [1150, 650, 23.352602710027], [1150, 650, 23.352602710027], [1150, 700, 34.122104031743], [1100, 700, 45.238357044827] ] , \"543\": [ [1100, 700, 45.238357044827], [1100, 750, 22.513652155752], [1150, 700, 34.122104031743], [1150, 700, 34.122104031743], [1150, 750, 24.624704410774], [1100, 750, 22.513652155752] ] , \"544\": [ [1100, 750, 22.513652155752], [1100, 800, 13.334293153538], [1150, 750, 24.624704410774], [1150, 750, 24.624704410774], [1150, 800, 5.1575499066879], [1100, 800, 13.334293153538] ] , \"545\": [ [1100, 800, 13.334293153538], [1100, 850, 62.652197880411], [1150, 800, 5.1575499066879], [1150, 800, 5.1575499066879], [1150, 850, 64.381346980212], [1100, 850, 62.652197880411] ] , \"546\": [ [1100, 850, 62.652197880411], [1100, 900, 83.217036679848], [1150, 850, 64.381346980212], [1150, 850, 64.381346980212], [1150, 900, 55.916860513491], [1100, 900, 83.217036679848] ] , \"547\": [ [1100, 900, 83.217036679848], [1100, 950, 71.087238441477], [1150, 900, 55.916860513491], [1150, 900, 55.916860513491], [1150, 950, 97.073711878272], [1100, 950, 71.087238441477] ] , \"548\": [ [1100, 950, 71.087238441477], [1100, 1000, 20.344871774843], [1150, 950, 97.073711878272], [1150, 950, 97.073711878272], [1150, 1000, 94.501940698197], [1100, 1000, 20.344871774843] ] , \"549\": [ [1100, 1000, 20.344871774843], [1100, 1050, -17.791221930711], [1150, 1000, 94.501940698197], [1150, 1000, 94.501940698197], [1150, 1050, 9.0185301807766], [1100, 1050, -17.791221930711] ] , \"550\": [ [1100, 1050, -17.791221930711], [1100, 1100, -14.634780852773], [1150, 1050, 9.0185301807766], [1150, 1050, 9.0185301807766], [1150, 1100, -7.8024908675692], [1100, 1100, -14.634780852773] ] , \"551\": [ [1100, 1100, -14.634780852773], [1100, 1150, -9.2405202060246], [1150, 1100, -7.8024908675692], [1150, 1100, -7.8024908675692], [1150, 1150, 15.107402691211], [1100, 1150, -9.2405202060246] ] , \"552\": [ [1100, 1150, -9.2405202060246], [1100, 1200, 86.01812259185], [1150, 1150, 15.107402691211], [1150, 1150, 15.107402691211], [1150, 1200, 38.295001692345], [1100, 1200, 86.01812259185] ] , \"553\": [ [1150, 0, 6], [1150, 50, 2.5071999650633], [1200, 0, 9], [1200, 0, 9], [1200, 50, 5.5023999883544], [1150, 50, 2.5071999650633] ] , \"554\": [ [1150, 50, 2.5071999650633], [1150, 100, 6.9211838428521], [1200, 50, 5.5023999883544], [1200, 50, 5.5023999883544], [1200, 100, 6.9769279320899], [1150, 100, 6.9211838428521] ] , \"555\": [ [1150, 100, 6.9211838428521], [1150, 150, 7.3879846388548], [1200, 100, 6.9769279320899], [1200, 100, 6.9769279320899], [1200, 150, 12.595365471266], [1150, 150, 7.3879846388548] ] , \"556\": [ [1150, 150, 7.3879846388548], [1150, 200, 4.7218973711883], [1200, 150, 12.595365471266], [1200, 150, 12.595365471266], [1200, 200, 12.23508249377], [1150, 200, 4.7218973711883] ] , \"557\": [ [1150, 200, 4.7218973711883], [1150, 250, 10.043751402941], [1200, 200, 12.23508249377], [1200, 200, 12.23508249377], [1200, 250, 19.000243755966], [1150, 250, 10.043751402941] ] , \"558\": [ [1150, 250, 10.043751402941], [1150, 300, 28.675301092587], [1200, 250, 19.000243755966], [1200, 250, 19.000243755966], [1200, 300, 17.239765417165], [1150, 300, 28.675301092587] ] , \"559\": [ [1150, 300, 28.675301092587], [1150, 350, 20.04313564079], [1200, 300, 17.239765417165], [1200, 300, 17.239765417165], [1200, 350, 21.986067383514], [1150, 350, 20.04313564079] ] , \"560\": [ [1150, 350, 20.04313564079], [1150, 400, 11.080807932178], [1200, 350, 21.986067383514], [1200, 350, 21.986067383514], [1200, 400, 5.7033369854939], [1150, 400, 11.080807932178] ] , \"561\": [ [1150, 400, 11.080807932178], [1150, 450, 42.814531462431], [1200, 400, 5.7033369854939], [1200, 400, 5.7033369854939], [1200, 450, 9.3662254600345], [1150, 450, 42.814531462431] ] , \"562\": [ [1150, 450, 42.814531462431], [1150, 500, 25.481497839448], [1200, 450, 9.3662254600345], [1200, 450, 9.3662254600345], [1200, 500, 47.554084920638], [1150, 500, 25.481497839448] ] , \"563\": [ [1150, 500, 25.481497839448], [1150, 550, 60.336335929412], [1200, 500, 47.554084920638], [1200, 500, 47.554084920638], [1200, 550, 27.957306229833], [1150, 550, 60.336335929412] ] , \"564\": [ [1150, 550, 60.336335929412], [1150, 600, 55.322864908665], [1200, 550, 27.957306229833], [1200, 550, 27.957306229833], [1200, 600, 33.872169022637], [1150, 600, 55.322864908665] ] , \"565\": [ [1150, 600, 55.322864908665], [1150, 650, 23.352602710027], [1200, 600, 33.872169022637], [1200, 600, 33.872169022637], [1200, 650, 20.18254554711], [1150, 650, 23.352602710027] ] , \"566\": [ [1150, 650, 23.352602710027], [1150, 700, 34.122104031743], [1200, 650, 20.18254554711], [1200, 650, 20.18254554711], [1200, 700, 25.88575076296], [1150, 700, 34.122104031743] ] , \"567\": [ [1150, 700, 34.122104031743], [1150, 750, 24.624704410774], [1200, 700, 25.88575076296], [1200, 700, 25.88575076296], [1200, 750, 63.210853068492], [1150, 750, 24.624704410774] ] , \"568\": [ [1150, 750, 24.624704410774], [1150, 800, 5.1575499066879], [1200, 750, 63.210853068492], [1200, 750, 63.210853068492], [1200, 800, 78.997702461985], [1150, 800, 5.1575499066879] ] , \"569\": [ [1150, 800, 5.1575499066879], [1150, 850, 64.381346980212], [1200, 800, 78.997702461985], [1200, 800, 78.997702461985], [1200, 850, 49.512199782962], [1150, 850, 64.381346980212] ] , \"570\": [ [1150, 850, 64.381346980212], [1150, 900, 55.916860513491], [1200, 850, 49.512199782962], [1200, 850, 49.512199782962], [1200, 900, 59.603469092222], [1150, 900, 55.916860513491] ] , \"571\": [ [1150, 900, 55.916860513491], [1150, 950, 97.073711878272], [1200, 900, 59.603469092222], [1200, 900, 59.603469092222], [1200, 950, 48.698013827995], [1150, 950, 97.073711878272] ] , \"572\": [ [1150, 950, 97.073711878272], [1150, 1000, 94.501940698197], [1200, 950, 48.698013827995], [1200, 950, 48.698013827995], [1200, 1000, 50.091222134821], [1150, 1000, 94.501940698197] ] , \"573\": [ [1150, 1000, 94.501940698197], [1150, 1050, 9.0185301807766], [1200, 1000, 50.091222134821], [1200, 1000, 50.091222134821], [1200, 1050, 86.203897671265], [1150, 1050, 9.0185301807766] ] , \"574\": [ [1150, 1050, 9.0185301807766], [1150, 1100, -7.8024908675692], [1200, 1050, 86.203897671265], [1200, 1050, 86.203897671265], [1200, 1100, 54.806645661491], [1150, 1100, -7.8024908675692] ] , \"575\": [ [1150, 1100, -7.8024908675692], [1150, 1150, 15.107402691211], [1200, 1100, 54.806645661491], [1200, 1100, 54.806645661491], [1200, 1150, 13.037185828378], [1150, 1150, 15.107402691211] ] , \"576\": [ [1150, 1150, 15.107402691211], [1150, 1200, 38.295001692345], [1200, 1150, 13.037185828378], [1200, 1150, 13.037185828378], [1200, 1200, 6.1465300706446], [1150, 1200, 38.295001692345] ]}');
+
+INSERT INTO `nodes_vr_level` (`id`, `project_id`, `name`, `text`, `image`, `rotation`, `scale`) VALUES
+(1, 1, 'Level 1', '', '', 0, 1);
+
+INSERT INTO `nodes_vr_link` (`id`, `project_id`, `level_id`, `scene_id`, `url`, `position`, `scale`) VALUES
+(1, 1, 1, 1, 'https://www.google.com/streetview/#disney-parks-resorts/magic-kingdom-theme-park', '63.40730220987402 12.19268584598054 -76.95365584629462', '10 10 10');
+
+
+INSERT INTO `nodes_vr_navigation` (`id`, `project_id`, `level_id`, `scene_id`, `target`, `position`, `scale`) VALUES
+(1, 1, 1, 2, 1, '-44.205586857763734 10.596400647944476 89.4980964592546', '10 10 10'),
+(2, 1, 1, 1, 2, '-98.17099845635533 18.55431146442364 -12.951148738090106', '10 10 10');
+
+
+INSERT INTO `nodes_vr_object` (`id`, `scene_id`, `level_id`, `project_id`, `text`, `width`, `height`, `color`, `base64`, `position`, `rotation`, `scale`) VALUES
+(1, 1, 1, 1, 'Demo message', 252, 85, 'white', 'iVBORw0KGgoAAAANSUhEUgAAAPwAAABVCAIAAADi2h4WAAALqElEQVR4nO2bf0xTVxvHH0pHSqmuVMQOyFq3qkgaICzbMtQmMEfIgrr4A5EoEjFGk4bxByPGEOPI4hZDYqPsh8ZshmwMG+cPNKYhUYlBJWgI8eeFVVa1KmlIxU7rFa+97x/n3cl929K1pS3kPc/nr/Kcb+99znO/Pfeccy9JoigCgrCEbLoTQJBEg6ZHmANNjzAHmh5hDjQ9whxoeoQ50PQIc6DpEeZA0yPMgaZHmANNjzAHmh5hDjQ9whxoeoQ50PQIc6DpEeZA0yPMgaZHmANNjzAHmh5hDjQ9whxoeoQ50PQIc6DpEeZA0yPMgaZHmANNjzAHmh5hDjQ9whxxN/3p06eT/pfk5OT09PQFCxasW7fu0KFDf//9d7xzQBAp0zDS+3y+8fFxu91+/Pjx7du36/X6gwcPJj4NhFkSZ3qe5wVBEATB4/Fcv369o6OjqalJpVK53e76+vrNmzcnLBOEdcQ4c+rUKXIiQRACWx0OR0VFBRHs2bMn3skgiCiK07yQ1el0Z86cKS0tBYCWlpZ79+5Nbz4IC8yI3RuLxSKXy30+X2tra2Drq1evDh48uGzZsjlz5syaNevjjz+uq6sbGhoKVO7YsSMpKenYsWNv3rz58ccflyxZkp6enpqaOn/+/Lq6urt37xLZ1atXN23apNPpUlNTdTrdZ599dvr06RDp/fLLLxs2bCgoKEhNTZ03b96nn3566NCh169fh9m7eGQVfk0A4OLFi2vWrFm8eHFaWtqcOXMKCgo2bdp08uTJly9fRiEDgPPnz9fV1X3yySfvvPNOWlra4sWLV6xYcf78+aBnf/369f79+0tKSrKzs5OCcezYsai7FiXxvpWEnt5QqqurASAnJ8cv7nA4cnNzyRFkMplKpSKfFQqFxWLxE2/fvh0A6uvrTSYTlclk//1hK5XK3t7elpYWaYTWobGxMTArh8NB7kL0aPSz0Wh88OBBOBWIR1bh16ShoYEq1Wq1XC6nB+/r64tUJoqitCBKpTIjI4P+2dTU5Hf2sbExkqpKpTKZTOXl5VlZWUScmZlZWVnZ1NTEcVx0XYuamWL6ffv2EZnD4aBBQRCMRiMA5Obm2mw2r9criqLT6TSbzcQiNptNehBiL0JDQ4PdbhdF0ev1tre3k/Kp1WoAMBgMNpvN4/GIojgyMvLFF18AgFwuv3XrlvRoExMTBoMBALRardVqHR0dJWc/evSoRqMBgPz8/NCdikdWEdWku7ubGO7XX3/leZ58fXh4uLW1taamJlIZobW11WQyHTlyxOl0ksjY2NiWLVuITQcGBqRiMpYVFRVR8cTEhNlsJr0eHx+PumtTYaaY/sSJE0TW29tLgz/99BMA5OTk+FVHFMVt27YRo0xMTNAgtdfOnTv99Hv37iVNarXa7XZLm7xer1arBYBvvvlGGv/uu+8AQKPRELtLGRkZIX5ta2v7twLEOKuIatLc3AwAGzduDJ1hmLIQCIJARuh9+/bRoMfjCbymoijyPE+61t7eHnXXpsJMMf2NGzeIrKuriwZJaY4cORKoHx4eJvrr16/TILFXSkpKoE0HBgYmc54oipWVlQCwZcsWaXD27NmBnqPs3LmT/CRCdCoeWUVUkwMHDgCA0WgM7ZUwZaEhg/3WrVtppK+vj9ysAg9bVlYGALt27ZIGI73cUTMjFrIAQGe0KSkp5MOTJ09GR0cBYPny5YH69957jyg5jvNr0uv18+bN8wvSqWRRUVHg0Uir0+mkkb/++osMVGvXrg2aMLlxu93u+/fvh+xZLLOKtCbl5eVKpfLWrVsmk+ny5cuT5RamLDSZmZkAMD4+TiNutxsA5HL5W2+95ScmqyPpGinqyx0FM8X0pEAAQBdGdrudfNDr9YFLfjJ+SGUU6iQpdGWWk5MzWavP56MROrS8++67QROmcaoMTUyyirQmCxYsOHv27OzZs/v6+pYuXVpQUPD999+/ePHC70Rhyih//vnn119/vWHDhmXLlul0OrIZRWaDUhYuXAgAPM/fvn3br4nc2PPz86Pu2lSQ/7skIQwODgKATCbT6/Uk4nA4SITUbjLIKlCKdD8hEOneSAjI+KpSqVJTU4MK3n77bYVCwfO8dCQOQUyyiqImJSUlIyMjFovl559/vnHjhtlsbm5uNpvNu3fvlg7AYcqePHlSVVV16dIlAFAoFFlZWXq9XqPRKJXKgYEBv2H4/fffLy4uvnLlitlsPnHiRHp6Ool/++23Dodj4cKFZJITddeiZ+ozpNCEOadfuXIlAOTl5dEI2VKQyWTPnz8P81xk9rx27drAprGxMZLG4OBgYGtjYyMALF++nEbowprsIQRC7+Pd3d0JyyqKmlAEQejs7CwuLiZnLCoqCtq1EDK6/2gwGKxWq9/Xg3aT4ziy05WRkbFy5crq6mqyP5ORkdHf3y9VTqVrkTIjpjdDQ0Nnz54FgNWrV9NgXl4eAPh8vjt37iQ+JTp7ISNQIA8ePCAfQo9MsWUqNUlOTl6/fv3ly5c7OzsVCsXAwIDFYolI1tXVxXFcSkpKT0/PunXr/O6BQe94ixYt6uvrUyqV4+PjPT09586dUygUDQ0Nw8PDH374Yay6FinTb/pXr17V1NT4fD6lUllfX0/j2dnZZJDo6OhIfFYffPABmYV3dnYGFZCs1Gq1TqdLWFYxqcn69evJqEx2V8KXkQ+FhYXZ2dl+4jdv3pAJqh/Pnj2rrKwkv5Nnz549ffr02rVr+/fvp1MdSiIv9zSb/uHDh6Wlpf39/QBw4MCBuXPnSlv37NkDAG1tbVevXk18brW1tSSrR48e+TU9fPiwra0NAMgOdyKJSU3I4phsEYYvI6Z0uVyByr179wYd6bu6ugYHBysrK5csWfKvWSXucsd7/kTn9PTVYvIyvdVqra2tpRuUzc3NQb/+0UcfAYBcLm9qaurv7/d4PF6v126322w2s9lcWloqFcdw9iyKIs/z5J6bmZlptVpdLpcoii6Xq6Ojg6xKc3Nzw9nYjm1WYiQ1aWlp2bp1a09PD33c8/z588OHD5O9wuPHj0ckI1NQAKivrydPjgVB4DiupqZGJpMRsV83yROAvLy8kZGRcJ5eR3S5oyZxpp8Mg8Fw6tSpyb7ucrmqqqpCfFcqjrm9nE4nuQwE+ioIAJSVlUX07k0Mswq/JuQIBLVanZGRQZ+HmM3mSGXiP68VAIBMJtNqtXTMqq6uJs9T/br5+PFjuh1HUSgUubm5Gzdu9HvDIqKuTYVp2LJMSUnRaDRarba4uLisrKyioiI5OXky8dy5c3///ffa2lqr1Xrnzh2O4wRByMzMzMnJ+fzzz6UL33iQnZ3d29trtVqPHj3KcZzb7c7PzzcajWVlZdP4Xy/h16SxsVGr1XZ1dTmdztHRUZ/Pl5eXZzQazWazdL4RpgwAfvvtt/Ly8sOHD9vtdrfbrdFoioqKtm3btmrVqsDNeAAYHBzU6/V+mwE8z3Mcx3FcZ2dnd3d3SUlJFF2bEjH56SBIIGTBU1hYaLPZXC4Xz/M8z3u93sePH1+4cGHp0qUQu8E7IpJEUYzNrwdBJNy8ebOwsFCpVNrt9sD3LwBgaGiI7Pq73e7AzZy4Mv1blsj/Jb29vT6fr7CwMKjj4Z8Xb+RyOV0YJAw0PRIXyPsC5B2yoLS3twNAfn5+Wlpa4tICADQ9EidMJpNCobDb7V9++eXTp0+lTffu3fvqq692794tk8l27dqV+NxwTo/Eiz/++KOqqkoQBIVCYTAYNBqNx+MZHR0lw79KpbJYLHV1dYlPDE2PxJH79+//8MMPPT09TqdzbGxMo9FkZWVlZWVVVFRUV1fPmjVrWrJC0yPMgXN6hDnQ9AhzoOkR5kDTI8yBpkeYA02PMAeaHmEOND3CHGh6hDnQ9AhzoOkR5kDTI8yBpkeYA02PMAeaHmEOND3CHGh6hDnQ9AhzoOkR5kDTI8yBpkeYA02PMAeaHmEOND3CHGh6hDnQ9AhzoOkR5vgPpfqrVHTHxL8AAAAASUVORK5CYII=', '-34.71028662025142 15.776599215128522 -93.11433634368225', '30 30 0', '10 10 10');
+
+
+INSERT INTO `nodes_vr_project` (`id`, `name`, `url`, `text`) VALUES
+(1, 'Test', '', '');
+
+
+INSERT INTO `nodes_vr_scene` (`id`, `project_id`, `level_id`, `name`, `position`, `rotation`, `lat`, `lng`, `top`, `left`, `height`, `floor_position`, `floor_radius`, `logo_size`) VALUES
+(1, 1, 1, 'Scene №1', '0 3 0', '0 0 0', 0, 0, 0, 0, 0, '-30 -2 -10', 20, 4),
+(2, 1, 1, 'Scene №2', '0 3 0', '0 0 0', 0, 0, 0, 0, 0, '-20 -2 30', 20, 4);
 ";
             $arr = explode(";
 ", $query);
@@ -2001,14 +2457,16 @@ INSERT INTO `nodes_property_data` (`id`, `product_id`, `property_id`, `data_id`)
             foreach($arr as $a){
                 $a = trim($a);
                 if(!empty($a)){
-                    @mysql_query("SET NAMES utf8");
-                    mysql_query($a) or die(mysql_error());
+                    @mysqli_query($link, "SET NAMES utf8");
+                    mysqli_query($link, $a) or die(mysqli_error($link));
                     $flag++;
                 }
             }
             require_once("engine/core/file.php");
-            file::copy($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/data", $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/img/data");
-            unlink($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/data");
+            file::copy($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/img", $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/img");
+            file::copy($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/res", $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/res");
+            unlink($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/img");
+            unlink($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/res");
             $output .= 'Ok.<br/>';
         }
         if($_POST["protocol"] == "https"){
@@ -2020,9 +2478,9 @@ INSERT INTO `nodes_property_data` (`id`, `product_id`, `property_id`, `data_id`)
             fclose($file);
         }
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "1"';
-        @mysql_query("SET NAMES utf8");
-        $res = mysql_query($query) or die(mysql_error());
-        $data = mysql_fetch_array($res);
+        @mysqli_query($link, "SET NAMES utf8");
+        $res = mysqli_query($link, $query) or die(mysqli_error($link));
+        $data = mysqli_fetch_array($res);
         unset($data["pass"]);
         unset($data[5]);
         unset($data["token"]);
@@ -2067,7 +2525,7 @@ function new_update(){
     if(function_exists('eval')&&function_exists('base64_decode')&&function_exists('base64_encode')){
         $options = '<option value="1" selected>Yes</option><option value="0">No</option>';
     }
-    if(is_dir($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/data")){
+    if(is_dir($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"]."/temp/img")){
         $options1 = '<option value="1">Yes</option><option value="0">No</option>';  
     }else{
         $options1 = '<option value="1" disabled>Yes</option><option value="0" selected>No</option>';
@@ -2088,7 +2546,7 @@ function new_update(){
     <div style="width: 110px; float: left; margin-right: 10px;">Admin pass</div> <input class="input" required="required" type="text" name="admin_pass" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site protocol</div> <select class="input" style="width:160px;" required="required" type="text" name="protocol"> <option value="http">http</option> <option value="https">https</option> </select><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site name</div> <input class="input" required="required" type="text" name="name" value="Nodes Studio" ><br/>
-    <div style="width: 110px; float: left; margin-right: 10px;">Site description</div> <input class="input" required="required" type="text" name="description" value="Web 2.0 Framework" ><br/>
+    <div style="width: 110px; float: left; margin-right: 10px;">Site description</div> <input class="input" required="required" type="text" name="description" value="WebVR Framework" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site language</div> <input class="input" required="required" type="text" name="language" value="en" ><br/>
     <div style="width: 110px; float: left; margin-right: 10px;">Site languages</div> <input class="input" required="required" type="text" name="languages" value="en;ru;" ><br/>
     <div style="width: 210px; float: left; margin-right: 10px;">Base64 encode config file</div> <select class="input" type="text" name="encoding">'.$options.'</select><br/>
@@ -2102,20 +2560,17 @@ function new_update(){
 <div style="clear:both;"></div>';
 }return $output;
 }
-ini_set('session.name', 'session_id');
-ini_set('session.save_path', $_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/session');
-ini_set('session.gc_maxlifetime', 604800);
-ini_set('session.entropy_file', '/dev/urandom');
-ini_set('session.entropy_length', '512');
-session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
+$session_lifetime = 2592000;
+session_set_cookie_params($session_lifetime, '/', '.'.$_SERVER["HTTP_HOST"]);
 session_name('token');
 session_start();
 if(empty($_SESSION["Lang"])) $_SESSION["Lang"] = "en";
 if(!empty($_POST["mysql_test"])){
-    if(mysql_connect($_POST["server"], 
+    $link = mysqli_connect($_POST["server"], 
         $_POST["login"],
-        $_POST["pass"])){
-        if(mysql_select_db($_POST["db"])){ 
+        $_POST["pass"]);
+    if($link){
+        if(mysqli_select_db($link, $_POST["db"])){ 
             if(!empty($_SERVER["HTTP_HOST"])&&
                 !empty($_SERVER["DOCUMENT_ROOT"])) die('2');
             else die('1');
@@ -2131,12 +2586,12 @@ if(!empty($_POST["mysql_test"])){
 <title>Nodes Studio - Framework Setup</title>
 <meta charset="UTF-8" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<meta name="description" content="Nodes Studio - Web 2.0 Framework" />
-<meta property="og:description" content="Nodes Studio - Web 2.0 Framework" />
+<meta name="description" content="Nodes Studio - WebVR Framework" />
+<meta property="og:description" content="Nodes Studio - WebVR Framework" />
 <link href="<?php echo $_SERVER["DIR"]; ?>/template/nodes.css" rel="stylesheet" type="text/css" />
 <link href="<?php echo $_SERVER["DIR"]; ?>/template/default/template.css" rel="stylesheet" type="text/css" />
 <?php
-require_once('template/meta.php');
+require_once('engine/nodes/meta.php');
 echo $fout;
 ?>
 </head>

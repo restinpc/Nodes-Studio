@@ -3,9 +3,9 @@
 * Print order confirmation page.
 * @path /engine/core/account/print_order_confirm.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -22,14 +22,14 @@
 function print_order_confirm($site){
     $query = 'SELECT * FROM `nodes_product_order` WHERE `id` = "'.intval($_GET[2]).'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data)){
         $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$data["product_id"].'"';
         $r = engine::mysql($query);
-        $product = mysql_fetch_array($r);
+        $product = mysqli_fetch_array($r);
         $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.$data["order_id"].'"';
         $r = engine::mysql($query);
-        $order = mysql_fetch_array($r);
+        $order = mysqli_fetch_array($r);
         if($order["user_id"] != $_SESSION["user"]["id"]){
             $site->title = lang("Access denied").' - '.$site->title;
             $site->onload .= ' parent.window.location = "'.$_SERVER["DIR"].'/account"; ';
@@ -39,7 +39,7 @@ function print_order_confirm($site){
             $rating = intval($_POST["rating"]);
             $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$product["user_id"].'"';
             $r = engine::mysql($query);
-            $seller = mysql_fetch_array($r);
+            $seller = mysqli_fetch_array($r);
             if(!empty($_POST["comment"])){
                 $url = '/product/'.$product["id"];
                 $url = trim(str_replace('"', "'", urldecode($url)));
@@ -47,7 +47,7 @@ function print_order_confirm($site){
                 $text = str_replace("\n", "<br/>", $text);
                 $query = 'SELECT * FROM `nodes_comment` WHERE `text` LIKE "'.$text.'" AND `url` LIKE "'.$url.'" AND `user_id` = "'.$_SESSION["user"]["id"].'"';
                 $res = engine::mysql($query);
-                $d = mysql_fetch_array($res);
+                $d = mysqli_fetch_array($res);
                 if(empty($d) && intval($_SESSION["user"]["id"]>0)){
                     $query = 'INSERT INTO `nodes_comment` (`url`, `reply`, `user_id`, `text`, `date`) '
                     . 'VALUES("'.$url.'", "'.intval($_POST["reply"]).'", "'.$_SESSION["user"]["id"].'", "'.$text.'", "'.date("U").'")';
@@ -81,8 +81,8 @@ function print_order_confirm($site){
                             <div class="rating_votes"></div>
                         </div>
                     </div><br/>
-                    <textarea name="comment" class="input delivery_textarea" placeHolder="'.lang("Your comment here").'"></textarea><br/><br/>
-                    <input type="submit" class="btn w280" value="'.lang("Submit").'" /><br/>
+                    <textarea vr-control id="textarea-comment" name="comment" class="input delivery_textarea" placeHolder="'.lang("Your comment here").'"></textarea><br/><br/>
+                    <input vr-control id="input-submit-confirmation" type="submit" class="btn w280" value="'.lang("Submit").'" /><br/>
                 </form>
                 </div>
             </div>

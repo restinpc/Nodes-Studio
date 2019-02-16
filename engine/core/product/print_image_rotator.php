@@ -3,9 +3,9 @@
 * Prints an image rotator block.
 * @path /engine/core/product/print_image_rotator.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -29,7 +29,7 @@ function print_image_rotator($site, $caption, $images){
     $fout = '
     <div id="jssor_1" style="position: relative; margin: 0 auto; left: 0px; width: 600px; height: 500px; overflow: hidden; visibility: hidden;">
         <div data-u="slides" id="slider_block" style="cursor: default; position: relative; width: 600px; top: 0px; left: 0px; height: 500px; overflow: hidden;">
-            <div><a onClick=\'onpop_state = 1; document.getElementById("g0").click();\'><img data-u="image" src="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'"  /></a> </div>';
+            <div><a vr-control id="link-g0" onClick=\'onpop_state = 1; document.getElementById("g0").click();\'><img data-u="image" src="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'"  /></a> </div>';
     $size = getimagesize($_SERVER["DIR"].'/img/data/big/'.$images[0]);
     if(!$size[0]){
         $size = getimagesize($images[0]);
@@ -42,7 +42,7 @@ function print_image_rotator($site, $caption, $images){
     }
     $galery = '
     <figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject" '.$class.'>
-        <a target="_blank" href="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
+        <a vr-control id="link-g00" target="_blank" href="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
             <img id="g0" src="'.$_SERVER["DIR"].'/img/data/big/'.$images[0].'" itemprop="thumbnail" alt="'.$caption.' 1" />
         </a>
         <figcaption itemprop="caption description">'.$caption.'</figcaption>                                 
@@ -59,12 +59,12 @@ function print_image_rotator($site, $caption, $images){
                     }
                 }     
                 $fout .= '<div style="display:none;"> '
-                    . '<a onClick=\'onpop_state = 1; document.getElementById("g'.$i.'").click();\'>'
+                    . '<a vr-control id="link-'.$i.'" onClick=\'onpop_state = 1; document.getElementById("g'.$i.'").click();\'>'
                     . '<img data-u="image" src="'.$_SERVER["DIR"].'/img/data/big/'.$images[$i].'"  />'
                     . '</a></div>';
                 $galery .= '
                     <figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject" >
-                        <a target="_blank" href="'.$_SERVER["DIR"].'/img/data/big/'.$images[$i].'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
+                        <a vr-control id="link-g'.($i).'" target="_blank" href="'.$_SERVER["DIR"].'/img/data/big/'.$images[$i].'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
                             <img id="g'.($i).'" src="'.$_SERVER["DIR"].'/img/data/big/'.$images[$i].'" itemprop="thumbnail" alt="'.$caption.' '.($i+1).'" />
                         </a>
                         <figcaption itemprop="caption description">'.$caption.'</figcaption>                                 
@@ -92,10 +92,9 @@ function print_image_rotator($site, $caption, $images){
             <div class="pswp__ui pswp__ui--hidden">
                 <div class="pswp__top-bar">
                     <div class="pswp__counter"></div>
-                    <button class="pswp__button pswp__button--close" title="'.lang("Close").'"></button>
-                    <button class="pswp__button pswp__button--share" title="'.lang("Share").'"></button>
-                    <button class="pswp__button pswp__button--fs" title="'.lang("Toggle fullscreen").'"></button>
-                    <button class="pswp__button pswp__button--zoom" title="'.lang("Zoom in/out").'"></button>
+                    <button vr-control id="pswp-button-close" class="pswp__button pswp__button--close" title="'.lang("Close").'"></button>
+                    <button vr-control id="pswp-button-fs" class="pswp__button pswp__button--fs" title="'.lang("Toggle fullscreen").'"></button>
+                    <button vr-control id="pswp-button-zoom" class="pswp__button pswp__button--zoom" title="'.lang("Zoom in/out").'"></button>
                     <div class="pswp__preloader">
                         <div class="pswp__preloader__icn">
                           <div class="pswp__preloader__cut">
@@ -107,9 +106,9 @@ function print_image_rotator($site, $caption, $images){
                 <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
                     <div class="pswp__share-tooltip"></div> 
                 </div>
-                <button class="pswp__button pswp__button--arrow--left" title="'.lang("Previous (arrow left)").'">
+                <button vr-control id="pswp-button-prev" class="pswp__button pswp__button--arrow--left" title="'.lang("Previous (arrow left)").'">
                 </button>
-                <button class="pswp__button pswp__button--arrow--right" title="'.lang("Next (arrow right)").'">
+                <button vr-control id="pswp-button-next" class="pswp__button pswp__button--arrow--right" title="'.lang("Next (arrow right)").'">
                 </button>
                 <div class="pswp__caption">
                     <div class="pswp__caption__center"></div>

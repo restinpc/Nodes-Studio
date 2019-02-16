@@ -3,9 +3,9 @@
 * Print product page.
 * @path /engine/core/product/print_product.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -56,13 +56,13 @@ function print_product($site, $data){
             . 'ORDER BY `product_property`.`id` ASC';
     $res = engine::mysql($query);
     $flag = 0;
-    while($d = mysql_fetch_array($res)){
+    while($d = mysqli_fetch_array($res)){
         $flag = 1;
         $list .= '<li>'.lang($d["name"]).': <b>'.lang($d["value"]).'</b></li>';
     }
     $list .= '</ul><br/>';
     if($flag) $fout .= $list;
-    $fout .= '<div class="btn w280" ';
+    $fout .= '<div vr-control id="buy-now-'.$data["id"].'" class="btn w280" ';
         if($data["user_id"]==$_SESSION["user"]["id"]){
             $fout .= ' onClick=\'alert("'.lang("Unable to purchase your own product").'")\' ';  
         }else{
@@ -77,10 +77,10 @@ function print_product($site, $data){
                         <div class="label_2 cart_img">&nbsp;</div>
                         <div class="label_3">&nbsp;$'.intval($data["price"]).'</div>    
                     </div>
-                </div><a href="#comments" onClick=\'document.getElementById("comments_block").style.display="block"; this.style.display="none";\'><button class="btn w280 mt15" >'.lang("Show comments").'</button></a>';
+                </div><a vr-control id="show_comments" href="#comments" onClick=\'document.getElementById("comments_block").style.display="block"; this.style.display="none";\'><button class="btn w280 mt15" >'.lang("Show comments").'</button></a>';
     if($_SESSION["user"]["id"]=="1"){
         $fout .= '<br/><br/>
-                <a href="'.$_SERVER["DIR"].'/admin/?mode=products&action=edit&id='.$data["id"].'"><button class="btn w280">'.lang("Edit product").'</button></a>';
+                <a vr-control id="edit-product" href="'.$_SERVER["DIR"].'/admin/?mode=products&action=edit&id='.$data["id"].'"><button class="btn w280">'.lang("Edit product").'</button></a>';
     }
     $fout .= '</div>
             <div class="clear"><br/></div>

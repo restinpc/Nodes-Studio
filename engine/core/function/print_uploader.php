@@ -3,9 +3,9 @@
 * Prints image uploader form.
 * @path /engine/core/function/print_uploder.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @param int $count Images count.
 * @return string Returns content of form on success, or die with error.
@@ -23,7 +23,7 @@ function print_uploader($count=1){
         }
     $fout .= '
     <div class="clear"></div><br/>
-    <input type="button" class="btn w280" id="uploading_button1" value="'.lang("Upload new image").'" onClick=\' try{  
+    <input vr-control id="input-upload-new" type="button" class="btn w280" id="uploading_button1" value="'.lang("Upload new image").'" onClick=\' try{  
         parent.document.getElementById("uploading_button1").style.display="none"; 
         parent.document.getElementById("new_img1").style.display="block"; 
     }catch(e){ } \' />

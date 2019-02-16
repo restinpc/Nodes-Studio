@@ -3,25 +3,25 @@
 * Google OAuth script.
 * @path /engine/api/oauth/google_auth.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "name"';
 $res = engine::mysql($query);
-$name = mysql_fetch_array($res);
+$name = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "gp_id"';
 $res = engine::mysql($query);
-$gp_id = mysql_fetch_array($res);
+$gp_id = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "gp_secret"';
 $res = engine::mysql($query);
-$gp_secret = mysql_fetch_array($res);
+$gp_secret = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "gp_dev"';
 $res = engine::mysql($query);
-$gp_dev = mysql_fetch_array($res);
+$gp_dev = mysqli_fetch_array($res);
 global $apiConfig;
 $apiConfig = array(
     'use_objects' => true,
@@ -90,11 +90,11 @@ if (!empty($_GET["code"])) {
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["email"].'"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
         }else{
             $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$user->link.'"'; 
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             if(empty($data)){
                 $path = '';
                 $ext = explode('.', $user->picture);
@@ -107,7 +107,7 @@ if (!empty($_GET["code"])) {
                 $res = engine::mysql($query);
                 $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$user->link.'"';
                 $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
+                $data = mysqli_fetch_array($res);
             }
         }
         unset($data["pass"]);

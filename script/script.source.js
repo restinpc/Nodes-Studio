@@ -1,12 +1,12 @@
 /**
-* Framework JavaScript library source file.
+* Nodes Framework JavaScript library source file.
 * Do not edit directly.
 * @path /script/script.source.js
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
-*/
+* @license http://www.apache.org/licenses/LICENSE-2.0
+*/ 
 var ua = navigator.userAgent.toLowerCase();         // Navigator
 var isOpera = (ua.indexOf('opera')  > -1);          // is Opera browser
 var isIE = (!isOpera && ua.indexOf('msie') > -1);   // is IE browser
@@ -125,22 +125,22 @@ function insertAfter( node, referenceNode ) {
 */
 function js_pos_wnd(){
     try{
-        var wnd_height = parent.document.getElementById("nodes_login").clientHeight;
+        var wnd_height = document.getElementById("nodes_login").clientHeight;
         var top = ((getViewportHeight()-wnd_height)/3);
         if(top<0) top = 0;
-        parent.document.getElementById("nodes_login").style.top = top+"px"; 
+        document.getElementById("nodes_login").style.top = top+"px"; 
     }catch(e){}
     try{
-        var wnd_height = parent.document.getElementById("nodes_popup").clientHeight;
-        var wnd_width = parent.document.getElementById("nodes_popup").clientWidth;
+        var wnd_height = document.getElementById("nodes_popup").clientHeight;
+        var wnd_width = document.getElementById("nodes_popup").clientWidth;
         if(getViewportWidth()>600){
-            parent.document.getElementById("nodes_popup").style.marginLeft = "-"+(wnd_width/2)+"px"; 
+            document.getElementById("nodes_popup").style.marginLeft = "-"+(wnd_width/2)+"px"; 
         }else{
-            parent.document.getElementById("nodes_popup").style.marginLeft = "0px";
+            document.getElementById("nodes_popup").style.marginLeft = "0px";
         }
         var top = ((getViewportHeight()-wnd_height)/3);
         if(top<0) top = 0;
-        parent.document.getElementById("nodes_popup").style.top = top+"px"; 
+        document.getElementById("nodes_popup").style.top = top+"px"; 
     }catch(e){}
 }
 //------------------------------------------------------------------------------
@@ -149,15 +149,15 @@ function js_pos_wnd(){
 */
 function js_hide_wnd(){
     enableScroll();
-    parent.document.body.style.overflow = "auto";
+    document.body.style.overflow = "auto";
     try{
-        parent.document.body.removeChild(parent.document.getElementById("nodes_window"));
+        document.body.removeChild(document.getElementById("nodes_window"));
     }catch(e){}
     try{
-        parent.document.body.removeChild(parent.document.getElementById("nodes_popup"));
+        document.body.removeChild(document.getElementById("nodes_popup"));
     }catch(e){}
     try{
-        parent.document.body.removeChild(parent.document.getElementById("nodes_login")); 
+        document.body.removeChild(document.getElementById("nodes_login")); 
     }catch(e){}
     removeSiteFade();
 }
@@ -169,11 +169,11 @@ function show_window(content){
     if(content&&content!="undefined"){
         window.scrollTo(0,0);
         disableScroll();
-        parent.document.body.style.overflow = "hidden";
-        var a = parent.document.createElement("div");
+        document.body.style.overflow = "hidden";
+        var a = document.createElement("div");
         a.id = "nodes_window";
         a.innerHTML='<div class="close_button close_wnd" onClick=\'js_hide_wnd();\'>&nbsp;</div>'+content;
-        top.document.body.appendChild(a);
+        document.body.appendChild(a);
         addSiteFade();
     }else{
         js_hide_wnd();
@@ -187,11 +187,11 @@ function show_popup_window(content){
     if(content&&content!="undefined"){
         //window.scrollTo(0,0);
         disableScroll();
-        parent.document.body.style.overflow = "hidden";
-        var a = parent.document.createElement("div");
+        document.body.style.overflow = "hidden";
+        var a = document.createElement("div");
         a.id = "nodes_popup";
         a.innerHTML='<div class="close_button close_wnd" onClick=\'js_hide_wnd();\'>&nbsp;</div>'+content;
-        top.document.body.appendChild(a);
+        document.body.appendChild(a);
         addSiteFade();
         js_pos_wnd();
         addHandler(window, "resize", js_pos_wnd);
@@ -220,8 +220,8 @@ function add_comment(caption, submit, reply){
             '<div id="new_comment">'+'\n'+
             '<input type="hidden" name="reply" value="'+reply+'" />'+'\n'+
                 '<strong>'+caption+'</strong><br/><br/>'+'\n'+
-                '<textarea name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>'+'\n'+
-                '<center><input type="submit" class="btn w280" value="'+submit+'" /></center><br/>'+'\n'+
+                '<textarea id="comment_textarea" vr-control name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>'+'\n'+
+                '<center><input vr-control id="submit-comment" type="submit" class="btn w280" value="'+submit+'" /></center><br/>'+'\n'+
             '</div>'+'\n'+
         '</form>');  
 }
@@ -257,7 +257,7 @@ function show_photo_uploader(){
 * Displays photo editor.
 */
 function show_photo_editor(id, pos){
-    show_window('<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/images.php?id='+id+'&pos='+pos+'" scrolling="yes" style="margin-top: 10px;" />');
+    show_window('<iframe width=100% height=95% id="img_editor" frameborder=0 src="'+root_dir+'/images.php?id='+id+'&pos='+pos+'" scrolling="yes" style="margin-top: 10px;" />');
 }
 //------------------------------------------------------------------------------
 /**
@@ -268,40 +268,17 @@ function show_order(){
 }
 //------------------------------------------------------------------------------
 /**
-* Displays login popup window.
-*/
-function login(){
-    if(parent.document.getElementById("nodes_login"))  js_hide_wnd();
-    var content = '<div class="close_button close_wnd" onClick=\'js_hide_wnd();\'>&nbsp;</div><img src="'+root_dir+'/img/load.gif" id="loader">'+
-        '<iframe frameborder=0 style="display:none;" width=200 height=260 id="nodes_iframe" src="'+root_dir+'/account.php" '+
-        'onLoad=\'document.getElementById("loader").style.display="none"; this.style.display="block"; js_pos_wnd();\'></iframe>';
-    disableScroll();
-    parent.document.body.style.overflow = "hidden";
-    var a = parent.document.createElement("div");
-    a.id = "nodes_login";
-    a.innerHTML= content;
-    parent.document.body.appendChild(a);
-    addSiteFade();
-    addHandler(window, "resize", js_pos_wnd);
-    js_pos_wnd();
-    try{ 
-        scrolltoTop();
-        hideMenu(); 
-    }catch(e){};
-}
-//------------------------------------------------------------------------------
-/**
 * Destorys current user http-session and resets cookie data.
 */
 function logout(){
     try{ scrolltoTop(); }catch(e){};
     var content = '<iframe frameborder=0 id="nodes_iframe" class="hidden" src="'+root_dir+'/account.php?mode=logout"></iframe>';
     disableScroll();
-    parent.document.body.style.overflow = "hidden";
-    var a = parent.document.createElement("div");
+    document.body.style.overflow = "hidden";
+    var a = document.createElement("div");
     a.id = "nodes_login";
     a.innerHTML= content;
-    parent.document.body.appendChild(a);
+    document.body.appendChild(a);
     addSiteFade();
 }
 //------------------------------------------------------------------------------
@@ -423,7 +400,7 @@ jQuery(function() {
     }, 3000);
     if(!alertify){
         alert = function alert(text){
-            show_popup_window('<br/><p>'+text+'</p><br/><br/><input type="button" value="OK" onClick=\'js_hide_wnd();\' class="btn w130" /><br/><br/>');
+            show_popup_window('<br/><p>'+text+'</p><br/><br/><input vr-control id="input-ok-btn" type="button" value="OK" onClick=\'js_hide_wnd();\' class="btn w130" /><br/><br/>');
             return false;
         };
     }else{
@@ -441,17 +418,19 @@ jQuery(function() {
 * Submits patterns from user to server.
 */
 function submitPatterns() {
-    if(pattern[0]){
-        jQuery.ajax({
-            url: root_dir+'/behavior.php',
-            data: { "patterns" : pattern },
-            type: "POST",
-            success: function (data) {
-                pattern = Array();
-                pattern_size = 0;
-                seconds = new Date().getTime() / 1000;
-            }
-        });
+    if(submit_patterns){
+        if(pattern[0]){
+            jQuery.ajax({
+                url: root_dir+'/behavior.php',
+                data: { "patterns" : pattern },
+                type: "POST",
+                success: function (data) {
+                    pattern = Array();
+                    pattern_size = 0;
+                    seconds = new Date().getTime() / 1000;
+                }
+            });
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -469,7 +448,7 @@ function ajaxing(){
     window_state = 0;
     jQuery('a').on('click', function(e) {
         if(jQuery(this).attr('href')){
-            if(jQuery(this).attr('target') != "_blank" && jQuery(this).attr('target') != "_parent"){
+            if(jQuery(this).attr('target') != "_blank" && jQuery(this).attr('target') != "_parent" && jQuery(this).attr('target') != "_top"){
                 try{
                     if(jQuery('.mdl-layout__drawer').attr('aria-hidden')=="false"){
                         jQuery('.mdl-layout__obfuscator').click();
@@ -511,6 +490,7 @@ function goto(href) {
             submitPatterns();
             document.documentElement.style.background = "#fff url(/img/load.gif) no-repeat center center fixed";
             window_state = 1;
+            try{$id("load_bar").style.display="block";}catch(e){};
             jQuery("#content").animate({opacity: 0}, 300);
             try{ scrolltoTop(); }catch(e){}
             var to = setTimeout(function(){ 
@@ -547,6 +527,17 @@ function goto(href) {
                         showAnchor(anchor);
                     }
                 }, 300);
+                /*
+                try{
+                    alert("x"+vr_control_state);
+                    if(vr_control_state > 0){
+                        jQuery(".vr_left_eye").css("top", "0px");
+                        jQuery(".vr_right_eye").css("top", "0px");
+                        vr_load_state = 2;
+                        load_frame();
+                    }
+                }catch(e){alert("error");}
+                */
             },
             error: function(){
                 jQuery("#content").html(error); 
@@ -617,9 +608,10 @@ function admin_init(){
 */
 function tinymce_init(){
     var script = document.createElement('script');
-    script.src = root_dir+"/script/tinymce.js"
+    script.src = root_dir+"/script/tinymce/tinymce.js"
     document.body.appendChild(script);
-    script.onload = function() { tinymce.init({ selector:'textarea#editable',   
+    script.onload = function() { 
+        tinymce.init({ selector:'textarea#editable',   
             plugins: [
             'advlist autolink lists link image charmap print preview anchor',
             'searchreplace visualblocks code fullscreen',
@@ -631,7 +623,7 @@ function tinymce_init(){
                     a.id = "mceu_91";
                     a.className = "mce-widget mce-btn";
                     a.title = "Upload photo"
-                    a.innerHTML='<button tabindex="-1" id="mceu_91-button" role="presentation" type="button" onClick="show_photo_uploader();"><i class="mce-ico mce-i-image"></i></button>';
+                    a.innerHTML='<button vr-control id="tiny_button_'+parseInt(Math.random()*10000)+'"  tabindex="-1" id="mceu_91-button" role="presentation" type="button" onClick="show_photo_uploader();"><i class="mce-ico mce-i-image"></i></button>';
                     insertAfter(a, $id("mceu_9"));
                 });
             },
@@ -653,7 +645,7 @@ function submit_search_form(){
 */
 function addSiteFade() {
     if (jQuery('#nodes_fade').length == 0) {
-        return jQuery("<div id='nodes_fade'></div>").appendTo('body').fadeIn(500);
+        return jQuery("<div id='nodes_fade' onClick=\'js_hide_wnd();\'></div>").appendTo('body').fadeIn(500);
     }
 }
 //------------------------------------------------------------------------------
@@ -702,7 +694,7 @@ function buy_now(id, t0, t1, t2){
             try{ show_bin(); }catch(e){ }
         }
     });
-    show_popup_window('<br/><p>'+t0+'</p><br/><br/><input type="button" value="'+t1+'" onClick=\'js_hide_wnd();\' class="btn w130" /> &nbsp; <input value="'+t2+'" class="btn w130" type="button" onClick=\'js_hide_wnd(); setTimeout(show_order, 500);\' /><br/><br/>');
+    show_popup_window('<br/><p>'+t0+'</p><br/><br/><input vr-control id="input-card-1" type="button" value="'+t1+'" onClick=\'js_hide_wnd();\' class="btn w130" /> &nbsp; <input vr-control id="input-card-2" value="'+t2+'" class="btn w130" type="button" onClick=\'js_hide_wnd(); setTimeout(show_order, 500);\' /><br/><br/>');
 }
 //------------------------------------------------------------------------------
 /**
@@ -761,13 +753,17 @@ function process_payment(id, price){
 function post_message(id){
     var txt = jQuery("#nodes_message_text").val();
     jQuery("#nodes_message_text").val("");
+    jQuery("#nodes_chat").html(document.getElementById("nodes_chat").innerHTML+
+            '<br/><div class="chat_loader"><img src="/img/load.gif" /></div>');
+    jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight);
     jQuery.ajax({
         type: "POST",
         data: { "text" : txt },
         url: root_dir+'/bin.php?message='+id,
         success: function(data){
-            jQuery("#chat").html(data);
-            jQuery("#chat").scrollTop(jQuery("#chat")[0].scrollHeight);
+            console.log(data);
+            jQuery("#nodes_chat").html(data);
+            jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight);
         }
     });
 }
@@ -921,7 +917,7 @@ function capture_mousemove(e){
 * Enabling handlers
 */
 addHandler(window, "load", material_icons);
-if(submit_patterns){
+if(submit_patterns && !vr_state){
     addHandler(window, "click", capture_click);
     addHandler(window, "mousemove", capture_mousemove);
     seconds = new Date().getTime() / 1000;

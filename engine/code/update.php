@@ -3,9 +3,9 @@
 * Framework updater.
 * @path /engine/code/update.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -22,18 +22,18 @@ function update(){
     }else{
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $email = $data["value"];
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "version"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $old_version = $data["value"];
         $version = file_get_contents($url."updater.php?version=".$old_version.'&host='.$_SERVER["HTTP_HOST"].'&email='.$email);
         if($version<=$old_version) return;
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "version"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $v = $data["value"];
     $output .= "<b>".lang("Updating engine from version")." 2.0.".$v." ".lang("to")." 2.0.".$version.".</b><br/>";
     $filelist = '';
@@ -133,8 +133,8 @@ function update(){
     foreach($arr as $a){
         $a = trim($a);
         if(!empty($a)){
-            @mysql_query("SET NAMES utf8");
-            mysql_query($a) or die(mysql_error());
+            @mysqli_query($_SERVER["sql_connection"], "SET NAMES utf8");
+            mysqli_query($_SERVER["sql_connection"], $a) or die(mysqli_error($_SERVER["sql_connection"]));
             $flag++;
         }
     }if($flag) $output .= "Ok.<br/>".lang("Executed")." ".$flag." MySQL ".lang("commands").".</br>";

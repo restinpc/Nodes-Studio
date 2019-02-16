@@ -3,9 +3,9 @@
 * Backend profile pages file.
 * @path /engine/site/profile.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -24,7 +24,7 @@ if(empty($_GET[1])||!empty($_GET[2])){
 }
 $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.intval($_GET[1]).'"';
 $res = engine::mysql($query);
-$user = mysql_fetch_array($res);
+$user = mysqli_fetch_array($res);
 if(empty($user) || empty($user["pass"])){
     $this->content = engine::error();
     return;    
@@ -33,9 +33,9 @@ if(empty($user) || empty($user["pass"])){
     $this->content = engine::print_header($this, intval($_GET[1]));
     if($this->configs["free_message"]){
         if(empty($_SESSION["user"]["id"])){
-            $button = '<a target="_parent" onClick="event.preventDefault(); login();" href="'.$_SERVER["DIR"].'/login"><input type="button" class="btn w280" value="'.lang("Login to Send message").'" /><br/><br/>';
+            $button = '<a vr-control id="link-send-message" href="'.$_SERVER["DIR"].'/login" href="'.$_SERVER["DIR"].'/login"><input type="button" class="btn w280" value="'.lang("Login to Send message").'" /><br/><br/>';
         }else{
-            $button = '<a href="'.$_SERVER["DIR"].'/account/inbox/'.$user["id"].'"><input type="button" class="btn w280" value="'.lang("Send message").'" /><br/><br/>';
+            $button = '<a vr-control id="link-send-message" href="'.$_SERVER["DIR"].'/account/inbox/'.$user["id"].'"><input type="button" class="btn w280" value="'.lang("Send message").'" /><br/><br/>';
         }
     }
     $rating = number_format(($user["rating"]/$user["votes"]),2);

@@ -3,9 +3,9 @@
 * Prints see also content block.
 * @path /engine/core/content/print_more_articles.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -23,7 +23,7 @@
 function print_more_articles($site, $url){
     $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     // print articles based on [expert] selection
     $brain = engine::match_patterns($url);
     $urls = explode(";", $brain);
@@ -33,7 +33,7 @@ function print_more_articles($site, $url){
         if(!empty($page_url)){
             $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$page_url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
             $r = engine::mysql($query); 
-            $d = mysql_fetch_array($r);
+            $d = mysqli_fetch_array($r);
             if(!empty($d)){
                 $count++;
                 $fout .= engine::print_preview($site, $d);
@@ -50,7 +50,7 @@ function print_more_articles($site, $url){
         $res = engine::mysql($query);
         $arr = array();
         $i = 0;
-        while($d = mysql_fetch_array($res)){
+        while($d = mysqli_fetch_array($res)){
             if($arr[$i][0] != $d["value"]){
                 $arr[$i++] = array($d["value"], $d["date"]);
             }
@@ -67,7 +67,7 @@ function print_more_articles($site, $url){
         $query = 'SELECT * FROM `nodes_content` WHERE `cat_id` = "'.$data["cat_id"].'" AND `id` <> "'.$data["id"].'" '
                 . 'AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND() DESC';
         $res = engine::mysql($query); 
-        while($d = mysql_fetch_array($res)){
+        while($d = mysqli_fetch_array($res)){
             if(!in_array($d["id"], $urls) && !in_array($d["url"], $pattern_urls)){
                 $count++;
                 $fout .= engine::print_preview($site, $d);
@@ -79,7 +79,7 @@ function print_more_articles($site, $url){
             $query = 'SELECT * FROM `nodes_content` WHERE `id` <> "'.$data["id"].'" '
                     . 'AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND() DESC';
             $res = engine::mysql($query); 
-            while($d = mysql_fetch_array($res)){
+            while($d = mysqli_fetch_array($res)){
                 if(!in_array($d["id"], $urls) && !in_array($d["url"], $pattern_urls)){
                     if($count>5) break;
                     $count++;
@@ -93,7 +93,7 @@ function print_more_articles($site, $url){
             $query = 'SELECT * FROM `nodes_content` WHERE `id` <> "'.$data["id"].'" '
                     . 'AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY RAND() DESC';
             $res = engine::mysql($query); 
-            while($d = mysql_fetch_array($res)){
+            while($d = mysqli_fetch_array($res)){
                 if(!in_array($d["id"], $urls)){
                     if($count>5) break;
                     $count++;

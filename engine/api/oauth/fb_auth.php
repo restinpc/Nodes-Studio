@@ -3,19 +3,19 @@
 * Facebook OAuth script.
 * @path /engine/api/oauth/fb_auth.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 require_once("engine/nodes/mysql.php");
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "fb_id"';
 $res = engine::mysql($query);
-$id = mysql_fetch_array($res);
+$id = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "fb_secret"';
 $res = engine::mysql($query);
-$secret = mysql_fetch_array($res);
+$secret = mysqli_fetch_array($res);
 $_SESSION["request"] = date("U");
 preg_match('#code=(.*+)#six',$_SERVER["REQUEST_URI"], $m);
 $code = $m[1];
@@ -37,17 +37,17 @@ if(empty($code)){
                 engine::mysql($query);
                 $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
                 $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
+                $data = mysqli_fetch_array($res);
             }else{
                 $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$link.'"'; 
                 $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
+                $data = mysqli_fetch_array($res);
                 if(empty($data)){
                     $query = 'INSERT INTO `nodes_user`(name, photo, url, online, confirm) VALUES("'.$oUser->name.'", "anon.jpg", "'.$link.'", "'.date("U").'", "1")';
                     $res = engine::mysql($query);
                     $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$link.'"';
                     $res = engine::mysql($query);
-                    $data = mysql_fetch_array($res);
+                    $data = mysqli_fetch_array($res);
                 }
             }
             unset($data["pass"]);

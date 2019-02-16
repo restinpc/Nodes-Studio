@@ -3,9 +3,9 @@
 * Prints Yandex payment form.
 * @path /engine/core/function/print_yandex_form.php
 * 
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -29,11 +29,11 @@ function print_yandex_form($invoice_id, $sum, $return, $autopay=0){
     if(empty($_SESSION["user"]["email"])) return engine::error(401);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "yandex_money"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $id = $data["value"];
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "payment_description"';
     $res = engine::mysql($query);
-    $paypal = mysql_fetch_array($res);
+    $paypal = mysqli_fetch_array($res);
     $paypal_desc = $paypal["value"];
     if(strpos("http", $return) != 0){
         $return = $_SERVER["PROTOCOL"].'://'.$_SERVER['HTTP_HOST'].$_SERVER["DIR"].$return;
@@ -52,7 +52,7 @@ function print_yandex_form($invoice_id, $sum, $return, $autopay=0){
             <input type="hidden" name="need-phone" value="false">    
             <input type="hidden" name="need-address" value="false"> 
             <input type="hidden" name="successURL" value="'.$return.'" />
-            <button type="submit" class="btn w280">'.lang("Make a payment").'</button>
+            <button vr-control id="yandex-button-payment" type="submit" class="btn w280">'.lang("Make a payment").'</button>
         </form>';
     if($autopay){
         $fout.= '<script>document.getElementById("yandex_form").submit();</script>';

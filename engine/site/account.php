@@ -3,9 +3,9 @@
 * Backend account pages file.
 * @path /engine/site/account.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -22,7 +22,7 @@ if(!empty($_GET[3])){
 if(!empty($_SESSION["user"]["id"])){
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$_SESSION["user"]["id"].'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     if(!$user["confirm"]){
         $this->title = lang("Account confirmation").' - '.$this->title;
         $this->content .= engine::print_email_confirm($this);
@@ -53,7 +53,7 @@ if(!empty($_SESSION["user"]["id"])){
             $this->content .= engine::print_navigation($this, $title);
             $this->content .= engine::print_inbox($this);
         }else if($_GET[1]=="finances"){
-            if(!empty($_GET[2])){ $this->content = engine::error(); return; }
+            if(!empty($_GET[3])){ $this->content = engine::error(); return; }
             $title = lang("Finances");
             $this->title = $title.' - '.$this->title;
             $this->content .= engine::print_navigation($this, $title);

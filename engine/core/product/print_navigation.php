@@ -3,9 +3,9 @@
 * Print product navigation menu.
 * @path /engine/core/product/print_navigation.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -21,21 +21,21 @@
 * @usage <code> engine::print_navigation($site, lang("Product")); </code>
 */
 function print_navigation($site, $title){
+    $i = 0;
     $fout = '<div class="profile_menu">
         <div class="container">
-            <span class="profile_menu_item show_all selected" ><a>'.$title.'</a>
+            <span vr-control id="span-show-nav" class="profile_menu_item show_all selected" ><a>'.$title.'</a>
                 <div class="fr nav_button" alt="'.lang("Show navigation").'">&nbsp;</div>    
             </span>';
         $fout .= '
-        <span class="profile_menu_item '.($title == lang("Products")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
-        . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/product">'. lang("Products").'</a></span>';
+        <span vr-control id="profile_menu_span_'.$i.'" class="profile_menu_item '.($title == lang("Products")?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
+        . '<a vr-control id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/product">'. lang("Products").'</a></span>';
     $query = 'SELECT * FROM `nodes_product_data` WHERE `cat_id` = "1" AND `url` <> "" ORDER BY `order` DESC';
     $res = engine::mysql($query);
-    $i = 0;
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         $fout .= '
-        <span class="profile_menu_item '.($title == $data["value"]?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
-        . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/product/'.$data["url"].'">'.$data["value"].'</a></span>';
+        <span vr-control id="profile_menu_span_'.$i.'" class="profile_menu_item '.($title == $data["value"]?'selected':'').'" onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
+        . '<a vr-control id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/product/'.$data["url"].'">'.$data["value"].'</a></span>';
     }
         $fout .= '</div>'
     . '</div>';

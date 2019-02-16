@@ -3,9 +3,9 @@
 * Pattern color library.
 * @path /engine/core/color.php
 * 
-* @name    Nodes Studio    @version 2.0.4
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 * 
 * @example <code> $color = engine::pattern_color(); </code>
 */
@@ -131,7 +131,7 @@ static function pattern_color($base_color=''){
     }
     $res = engine::mysql($query);
     $colors = array();
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         $url = str_replace($_SERVER["PUBLIC_URL"].'/', '', $data["value"]);
         if(!empty($url)){
             $pos = mb_strpos($url, '#');
@@ -141,11 +141,11 @@ static function pattern_color($base_color=''){
             if($product_id>0){
                 $query = 'SELECT `img` FROM `nodes_product` WHERE `id` = "'.$product_id.'"';
                 $r = engine::mysql($query);
-                $d = mysql_fetch_array($r);
+                $d = mysqli_fetch_array($r);
                 $imgs = explode(';', $d["img"]);
                 $query = 'SELECT `color` FROM `nodes_image` WHERE `name` = "'.$imgs[0].'"';
                 $r = engine::mysql($query);
-                $image = mysql_fetch_array($r);
+                $image = mysqli_fetch_array($r);
                 if(!empty($image)){
                     array_push($colors, $image["color"]);
                 }   
@@ -154,7 +154,7 @@ static function pattern_color($base_color=''){
                         . 'LEFT JOIN `nodes_image` AS `image` ON `image`.`name` = `content`.`img` '
                         . 'WHERE `content`.`url` = "'.$url.'" AND `content`.`lang` = "'.$_SESSION["Lang"].'"';
                 $r = engine::mysql($query);
-                $image = mysql_fetch_array($r);
+                $image = mysqli_fetch_array($r);
                 if(!empty($image)){
                     array_push($colors, $image["color"]);
                 }
@@ -186,18 +186,18 @@ static function page_color($base_color){
         if($product_id>0){
             $query = 'SELECT `img` FROM `nodes_product` WHERE `id` = "'.$product_id.'"';
             $r = engine::mysql($query);
-            $d = mysql_fetch_array($r);
+            $d = mysqli_fetch_array($r);
             $imgs = explode(';', $d["img"]);
             $query = 'SELECT `color` FROM `nodes_image` WHERE `name` = "'.$imgs[0].'"';
             $r = engine::mysql($query);
-            $image = mysql_fetch_array($r);
+            $image = mysqli_fetch_array($r);
             if(!empty($image)) return self::pattern_color($base_color);
         }else if(engine::is_article($url)){
             $query = 'SELECT `image`.`color` AS `color` FROM `nodes_content` AS `content` '
                     . 'LEFT JOIN `nodes_image` AS `image` ON `image`.`name` = `content`.`img` '
                     . 'WHERE `content`.`url` = "'.$url.'" AND `content`.`lang` = "'.$_SESSION["Lang"].'"';
             $r = engine::mysql($query);
-            $image = mysql_fetch_array($r);
+            $image = mysqli_fetch_array($r);
             if(!empty($image)) return self::pattern_color($base_color);
         }else return self::pattern_color($base_color);
     }else return self::pattern_color($base_color);

@@ -3,9 +3,9 @@
 * Prints PayPal payment form.
 * @path /engine/core/function/print_paypal_form.php
 * 
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -29,7 +29,7 @@ function print_paypal_form($invoice_id, $sum, $return, $autopay=0){
     if(empty($_SESSION["user"]["id"])) return engine::error(401);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_test"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($data["value"]) $domain = 'www.sandbox.paypal.com';
     else $domain = 'www.paypal.com';
     if(strpos("http", $return) != 0){
@@ -37,11 +37,11 @@ function print_paypal_form($invoice_id, $sum, $return, $autopay=0){
     }
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_id"';
     $res = engine::mysql($query);
-    $paypal = mysql_fetch_array($res);
+    $paypal = mysqli_fetch_array($res);
     $paypal_id = $paypal["value"];
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "payment_description"';
     $res = engine::mysql($query);
-    $paypal = mysql_fetch_array($res);
+    $paypal = mysqli_fetch_array($res);
     $paypal_desc = $paypal["value"];
     $fout .= '<form id="paypal_form" action="https://'.$domain.'/cgi-bin/webscr" method="post" target="_top" '.($autopay?' class="hidden"':'').'>			
         <input type="hidden" name="cmd" value="_xclick">
@@ -53,7 +53,7 @@ function print_paypal_form($invoice_id, $sum, $return, $autopay=0){
         <input type="hidden" name="return" value="'.$return.'">
         <input type="hidden" name="no_shipping" value="1">
         <input type="hidden" name="notify_url" value="'.$_SERVER["PUBLIC_URL"].'/paypal.php?invoice_id='.$invoice_id.'">
-        <button type="submit" class="btn w280">'.lang("Make a payment").'</button>
+        <button vr-control id="paypal-button-payment" type="submit" class="btn w280">'.lang("Make a payment").'</button>
     </form>';
     if($autopay){
         $fout.= '<script>document.getElementById("paypal_form").submit();</script>';

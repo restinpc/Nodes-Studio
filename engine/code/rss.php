@@ -3,19 +3,19 @@
 * RSS-feed generator.
 * @path /engine/code/rss.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
 header('Content-Type: application/rss+xml; charset=utf-8');
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "name"';
 $res = engine::mysql($query);
-$title = mysql_fetch_array($res);
+$title = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "description"';
 $res = engine::mysql($query);
-$description = mysql_fetch_array($res);
+$description = mysqli_fetch_array($res);
 echo '<?xml version="1.0" encoding="utf-8"?>
 <rss xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
 <channel>
@@ -24,7 +24,7 @@ echo '<?xml version="1.0" encoding="utf-8"?>
 <description>'.$description["value"].'</description>';
 $query = 'SELECT * FROM `nodes_content` ORDER BY `date` DESC LIMIT 0, 50';
 $res = engine::mysql($query);
-while($data = mysql_fetch_array($res)){
+while($data = mysqli_fetch_array($res)){
     echo '<item>
     <title>'.$data["caption"].'</title>
     <link>'.$_SERVER["PUBLIC_URL"].'/'.$data["url"].'</link>

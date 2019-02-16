@@ -3,9 +3,9 @@
 * Print email confirmation page.
 * @path /engine/core/account/print_email_confirm.php
 * 
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -38,9 +38,9 @@ function print_email_confirm($site){
     $fout = '<div class="document640">
             <h3>'.lang("Account confirmation").'</h3><br/><br/>'
             . '<form method="POST">'
-            . '<input type="text" class="input w280" required name="code" placeHolder="'.lang("Confirmation code").'" />'
+            . '<input vr-control id="confirmation-code" type="text" class="input w280" required name="code" placeHolder="'.lang("Confirmation code").'" />'
             . '<br/><br/>'
-            . '<input type="submit" class="btn w280" value="'.lang("Submit").'" />'
+            . '<input vr-control id="input-submit" type="submit" class="btn w280" value="'.lang("Submit").'" />'
             . '</form>'
         . '</div>';
     return $fout;

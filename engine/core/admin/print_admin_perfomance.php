@@ -3,9 +3,9 @@
 * Print admin perfomance page.
 * @path /engine/core/admin/print_admin_perfomance.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_perfomance($cms){
             . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
             . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -32,25 +32,25 @@ function print_admin_perfomance($cms){
     }
     if($_GET["action"]=="stat" || empty($_GET["action"])){
         $stat = '<b>'.lang("Statistic").'</b>';
-        $pages = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
+        $pages = '<a vr-control id="perfomance-pages" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action=pages&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Pages").'</a>';
     }else if($_GET["action"]=="pages"){
-        $stat = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
+        $stat = '<a vr-control id="perfomance-stat" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action=stat&interval='.$_GET["interval"].'&date='.$_GET["date"].'">'.lang("Statistic").'</a>';
         $pages = '<b>'.lang("Pages").'</b>';
     }
     $from = '';
     $to = '';
     if($_GET["interval"]=="hour" || empty($_GET["interval"])){
         $by_hour = '<b>'.lang("By hours").'</b>';
-        $by_day = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
-        $by_week = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
-        $by_month = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
+        $by_day = '<a vr-control id="by-days" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
+        $by_week = '<a vr-control id="by-weeks" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
+        $by_month = '<a vr-control id="by-months" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
         if(empty($_GET["date"])){
             $from = strtotime(date('Y-m-d')." 00:00:00");
             $to = date("U");
             $timeStamp = strtotime(date('Y-m-d')." 00:00:00 - 1 days");
             $date1 = date('d/m/Y', $timeStamp);
             $url_date1 = date("Y-m-d", $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$url_date1.'">&laquo; '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$url_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$url_date1.'">&laquo; '.$date1.'</a>';
             $now = '<b>'.date("d/m/Y").'</b>';
             $next = '&nbsp;';
         }else{
@@ -62,27 +62,27 @@ function print_admin_perfomance($cms){
             $timeStamp = strtotime($_GET["date"]." 00:00:00 + 1 days");
             $date2 = date('d/m/Y', $timeStamp);
             $url_date2 = date("Y-m-d", $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$url_date1.'">&laquo; '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$url_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$url_date1.'">&laquo; '.$date1.'</a>';
             $now = '<b>'.date("d/m/Y", strtotime($_GET["date"])).'</b>';
             if(strtotime($url_date2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$url_date2.'">'.$date2.' &raquo;</a>'; 
+                $next = '<a vr-control id="date-'.$url_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$url_date2.'">'.$date2.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             } 
         }
     }
     if($_GET["interval"]=="day"){
-        $by_hour = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$_GET["date"].'">'.lang("By hours").'</a>';
+        $by_hour = '<a vr-control id="by-hours" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$_GET["date"].'">'.lang("By hours").'</a>';
         $by_day = '<b>'.lang("By days").'</b>';
-        $by_week = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
-        $by_month = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
+        $by_week = '<a vr-control id="by-weeks" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
+        $by_month = '<a vr-control id="by-months" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
         if(empty($_GET["date"])){
             $from = strtotime(date('Y-m-d')." 00:00:00");
             $to = date("U");
             $timeStamp = strtotime(date('Y-m-d')." 00:00:00 - 1 days");
             $date1 = date('d/m/Y', $timeStamp);
             $url_date1 = date("Y-m-d", $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$url_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
             $now = '<b>'.date("d/m/Y").'</b>';
             $next = '&nbsp;';
         }else{
@@ -94,19 +94,19 @@ function print_admin_perfomance($cms){
             $timeStamp = strtotime($_GET["date"]." 00:00:00 + 1 days");
             $date2 = date('d/m/Y', $timeStamp);
             $url_date2 = date("Y-m-d", $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$url_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$url_date1.'">&laquo; '.$date1.'</a>';
             $now = '<b>'.date("d/m/Y", strtotime($_GET["date"])).'</b>';
             if(strtotime($url_date2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$url_date2.'">'.$date2.' &raquo;</a>'; 
+                $next = '<a vr-control id="date-'.$url_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$url_date2.'">'.$date2.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             } 
         }
     }else if($_GET["interval"]=="week"){
-        $by_hour = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$_GET["date"].'">'.lang("By hours").'</a>';
-        $by_day = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
+        $by_hour = '<a vr-control id="by-hours" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$_GET["date"].'">'.lang("By hours").'</a>';
+        $by_day = '<a vr-control id="by-days" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
         $by_week = '<b>'.lang("By weeks").'</b>';
-        $by_month = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
+        $by_month = '<a vr-control id="by-months" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$_GET["date"].'">'.lang("By months").'</a>';
         $prev = ' - 7 days';
         $prev2 = ' - 14 days';
         $next = ' + 0 days';
@@ -119,7 +119,7 @@ function print_admin_perfomance($cms){
             $link_date1 = date('Y-m-d', $timeStamp); 
             $timeStamp = strtotime(date('Y-m-d')." 00:00:00".$prev2);
             $date11 = date('d.m', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.date("d.m").'</b>';
             $next = '&nbsp;';
         }else{
@@ -136,18 +136,18 @@ function print_admin_perfomance($cms){
             $timeStamp = strtotime($_GET["date"]."00:00:00".$next2);
             $date22 = date('d.m', $timeStamp);
             $link_date2 = date('Y-m-d', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.$date.'</b>';
             if(strtotime($_GET["date"]."00:00:00".$next2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
+                $next = '<a vr-control id="date-'.$link_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             }
         }  
     }else if($_GET["interval"]=="month"){
-        $by_hour = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$_GET["date"].'">'.lang("By hours").'</a>';
-        $by_day = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
-        $by_week = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
+        $by_hour = '<a vr-control id="by-hours" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=hour&date='.$_GET["date"].'">'.lang("By hours").'</a>';
+        $by_day = '<a vr-control id="by-days" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=day&date='.$_GET["date"].'">'.lang("By days").'</a>';
+        $by_week = '<a vr-control id="by-weeks" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=week&date='.$_GET["date"].'">'.lang("By weeks").'</a>';
         $by_month = '<b>'.lang("By months").'</b>';
         $prev = ' - 1 month';
         $prev2 = ' - 2 month';
@@ -161,7 +161,7 @@ function print_admin_perfomance($cms){
             $link_date1 = date('Y-m-d', $timeStamp); 
             $timeStamp = strtotime(date('Y-m-d')."00:00:00".$prev2);
             $date11 = date('m.Y', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.date("m.Y").'</b>';
             $next = '&nbsp;';
         }else{
@@ -178,10 +178,10 @@ function print_admin_perfomance($cms){
             $timeStamp = strtotime($_GET["date"]."00:00:00".$next2);
             $date22 = date('m.Y', $timeStamp);
             $link_date2 = date('Y-m-d', $timeStamp);
-            $prev = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
+            $prev = '<a vr-control id="date-'.$link_date1.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$link_date1.'">&laquo; '.$date11.' - '.$date1.'</a>';
             $now = '<b>'.$date1.' - '.$date.'</b>';
             if(strtotime($_GET["date"]."00:00:00".$next2)<=strtotime(date("Y-m-d"))){
-                $next = '<a href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
+                $next = '<a id="date-'.$link_date2.'" href="'.$_SERVER["DIR"].'/admin?mode=perfomance&action='.$_GET["action"].'&interval=month&date='.$link_date2.'">'.$date2.' - '.$date22.' &raquo;</a>'; 
             }else{
                 $next = '&nbsp;'; 
             }
@@ -189,10 +189,10 @@ function print_admin_perfomance($cms){
     }
     $query = 'SELECT AVG(`script_time`) FROM `nodes_perfomance` WHERE `script_time` > 0';
     $res = engine::mysql($query);
-    $mid_script = mysql_fetch_array($res);
+    $mid_script = mysqli_fetch_array($res);
     $query = 'SELECT AVG(`server_time`) FROM `nodes_perfomance` WHERE `server_time` > 0';
     $res = engine::mysql($query);
-    $mid_server = mysql_fetch_array($res);
+    $mid_server = mysqli_fetch_array($res);
     $fout = '<div class="statistic">
         <div class="statistic_head w200">
             <table>
@@ -229,7 +229,7 @@ function print_admin_perfomance($cms){
         $res = engine::mysql($query);
         $pages = array();
         $perfomance = array();
-        while($data = mysql_fetch_array($res)){
+        while($data = mysqli_fetch_array($res)){
             $pages[$data["cache_id"]]++;
             $perfomance[$data["cache_id"]]+=$data["script_time"];
         }
@@ -250,15 +250,15 @@ function print_admin_perfomance($cms){
             if(!$count) continue;
             $query = 'SELECT `url` FROM `nodes_cache` WHERE `id` = "'.$page.'"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             if($count>$mid_script[0]) $color = 'red';
             else $color = 'blue';
             if($count > $max_val){
-                $table = '<tr><td align=left><a href="'.$data["url"].'" class="'.$color.'" target="_blank">'.$data["url"].'</a></td>'
+                $table = '<tr><td align=left><a vr-control id="link-'.$page.'" href="'.$data["url"].'" class="'.$color.'" target="_blank">'.$data["url"].'</a></td>'
                         . '<td>'.$count.' '.lang("seconds").'</td></tr>'.$table;
                 $max_val=$count;
             }else{
-                $table .= '<tr><td align=left><a href="'.$data["url"].'" class="'.$color.'" target="_blank">'.$data["url"].'</a></td>'
+                $table .= '<tr><td align=left><a vr-control id="link-'.$page.'" href="'.$data["url"].'" class="'.$color.'" target="_blank">'.$data["url"].'</a></td>'
                         . '<td>'.$count.' '.lang("seconds").'</td></tr>';  
                 $min_val = $count;
             }

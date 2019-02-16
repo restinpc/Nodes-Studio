@@ -3,9 +3,9 @@
 * Print admin navigation menu.
 * @path /engine/core/admin/print_admin_navigation.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -21,20 +21,20 @@
 function print_admin_navigation($cms){
     $i=1;
     $fout = '<span class="profile_menu_item show_all selected" ><a>'.$cms->title.'</a>
-            <div class="fr nav_button" alt="'.lang("Show navigation").'">&nbsp;</div>     
-        </span><span class="profile_menu_item '.($cms->title == lang("Admin")?'selected':'').'" '
+            <div vr-control id="profile_menu_show_nav" class="fr nav_button" alt="'.lang("Show navigation").'">&nbsp;</div>     
+        </span><span vr-control id="profile_menu_span_'.$i.'" class="profile_menu_item '.($cms->title == lang("Admin")?'selected':'').'" '
         . 'onClick=\'document.getElementById("profile_menu_link_0").click();\'>'
-        . '<a id="profile_menu_link_0" href="'.$_SERVER["DIR"].'/admin">'.lang("Admin").'</a></span>';
+        . '<a vr-control id="profile_menu_link_0" href="'.$_SERVER["DIR"].'/admin">'.lang("Admin").'</a></span>';
     $query = 'SELECT `admin`.*, `access`.`access` FROM `nodes_access` AS `access` '
             . 'LEFT JOIN `nodes_admin` AS `admin` ON `admin`.`id` = `access`.`admin_id` '
             . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
             . 'ORDER BY `admin`.`id` ASC';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($data["access"]){
-            $fout .= '<span class="profile_menu_item '.($cms->title == lang($data["name"])?'selected':'').'" '
+            $fout .= '<span vr-control id="profile_menu_span_'.$i.'" class="profile_menu_item '.($cms->title == lang($data["name"])?'selected':'').'" '
             . 'onClick=\'document.getElementById("profile_menu_link_'.$i.'").click();\'>'
-            . '<a id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/admin/?mode='.$data["url"].'">'.lang($data["name"]).'</a></span>';
+            . '<a vr-control id="profile_menu_link_'.$i++.'" href="'.$_SERVER["DIR"].'/admin/?mode='.$data["url"].'">'.lang($data["name"]).'</a></span>';
         }
     }
     return $fout;

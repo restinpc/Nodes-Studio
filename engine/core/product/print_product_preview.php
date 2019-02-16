@@ -3,9 +3,9 @@
 * Print product preview page.
 * @path /engine/core/product/print_product_preview.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -30,7 +30,7 @@ function print_product_preview($site, $data, $right=0){
         $fout .= 'right';
     }
     $fout .= '">
-    <a href="'.$_SERVER["DIR"].'/product/'.$data["id"].'">
+    <a vr-control id="product-'.$data["id"].'" href="'.$_SERVER["DIR"].'/product/'.$data["id"].'">
         <div class="title">
             <b>'.$data["title"].'</b>
         </div>
@@ -40,7 +40,7 @@ function print_product_preview($site, $data, $right=0){
     </a>';
     if($data["status"]){
         $fout .= '<div class="clear h7"></div>
-        <div class="buy_now"';
+        <div vr-control id="buy-now-'.$data["id"].'" class="buy_now"';
         if($data["user_id"]==$_SESSION["user"]["id"]){
             $fout .= ' onClick=\'alert("'.lang("Unable to purchase your own product").'")\' ';  
         }else{

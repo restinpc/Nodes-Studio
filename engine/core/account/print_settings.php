@@ -3,9 +3,9 @@
 * Print account settings page.
 * @path /engine/core/account/print_settings.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -32,12 +32,12 @@ function print_settings($site){
     }else{
         $fout .= '<div class="document640">';
         if(!empty($_POST["name"])){
-            $name = strip_tags(mysql_real_escape_string($_POST["name"]));
-            $email = strip_tags(strtolower(mysql_real_escape_string($_POST["email"])));
+            $name = strip_tags(engine::escape_string($_POST["name"]));
+            $email = strip_tags(strtolower(engine::escape_string($_POST["email"])));
             $bulk_ignore = intval($_POST["bulk_ignore"]);
             $query = 'SELECT `id` FROM `nodes_user` WHERE `email` = "'.$email.'" AND `id` <> "'.$_SESSION["user"]["id"].'"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             if(!empty($data)){
                 $site->onload .= ' alert("'.lang("Sorry, this email already registered").'"); ';
             }else{
@@ -73,43 +73,43 @@ function print_settings($site){
                     <div class="ml100">
                         '.lang("Profile image").':
                         <br/><br/>
-                        <input type="button" class="btn w280" value="'.lang("Change picture").'" onClick=\'show_photo_editor(0, 0);\' /><br/>
+                        <input vr-control id="change-picture" type="button" class="btn w280" value="'.lang("Change picture").'" onClick=\'show_photo_editor(0, 0);\' /><br/>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td align=right class="settings_caption">'.lang("Name").':</td>
-                <td class="pb10"><input type="text" name="name" value="'.$_SESSION["user"]["name"].'" class="input w280" /></td>
+                <td class="pb10"><input vr-control id="input-name" type="text" name="name" value="'.$_SESSION["user"]["name"].'" class="input w280" /></td>
             </tr>';
 
         if(!empty($_SESSION["user"]["email"])){
             $fout .= '
             <tr>
                 <td align=right class="settings_caption">'.lang("Email").':</td>
-                <td class="pb10"><input type="text" name="email" value="'.$_SESSION["user"]["email"].'" class="input w280" /></td>
+                <td class="pb10"><input vr-control id="input-email" type="text" name="email" value="'.$_SESSION["user"]["email"].'" class="input w280" /></td>
             </tr>
             <tr>
                 <td align=right class="settings_caption">'.lang("Password").':</td>
-                <td class="pb10"><input type="password" name="pass" value="" placeHolder="'.lang("New password").'" class="input w280" /></td>
+                <td class="pb10"><input vr-control id="input-password" type="password" name="pass" value="" placeHolder="'.lang("New password").'" class="input w280" /></td>
             </tr>';
         }else{
             $fout .= '
             <tr>
                 <td align=right class="settings_caption">'.lang("Email").':</td>
-                <td class="pb10"><input required type="text" name="email" placeHolder="'.lang("Enter your email").'" class="input w280" /></td>
+                <td class="pb10"><input vr-control id="input-email" required type="text" name="email" placeHolder="'.lang("Enter your email").'" class="input w280" /></td>
             </tr>
             <tr>
                 <td align=right class="settings_caption">'.lang("Password").':</td>
-                <td class="pb10"><input required type="password" name="pass" value="" placeHolder="'.lang("Enter your password").'" class="input w280" /></td>
+                <td class="pb10"><input vr-control id="input-password" required type="password" name="pass" value="" placeHolder="'.lang("Enter your password").'" class="input w280" /></td>
             </tr>'; 
         }
         $fout .= '
         <tr>
             <td align=right class="settings_caption">'.lang("Subscription").':</td>
             <td class="pb10">
-                <select name="bulk_ignore" class="input w280" >
-                    <option value="0">'.lang("Enabled").'</option>
-                    <option value="1" '.($_SESSION["user"]["bulk_ignore"]?'selected':'').'>'.lang("Disabled").'</option>
+                <select vr-control id="select-subscription" name="bulk_ignore" class="input w280" >
+                    <option vr-control id="option-enabled" value="0">'.lang("Enabled").'</option>
+                    <option vr-control id="option-disabled" value="1" '.($_SESSION["user"]["bulk_ignore"]?'selected':'').'>'.lang("Disabled").'</option>
                 </select>
             </td>
         </tr> 
@@ -119,16 +119,16 @@ function print_settings($site){
         $fout .= '<td colspan=2 class="p5">';
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "vk_id"';
         $res = engine::mysql($query);
-        $vk = mysql_fetch_array($res);
+        $vk = mysqli_fetch_array($res);
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "fb_id"';
         $res = engine::mysql($query);
-        $fb_id = mysql_fetch_array($res);
+        $fb_id = mysqli_fetch_array($res);
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "tw_key"';
         $res = engine::mysql($query);
-        $tw_key = mysql_fetch_array($res);
+        $tw_key = mysqli_fetch_array($res);
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "gp_id"';
         $res = engine::mysql($query);
-        $gp_id = mysql_fetch_array($res);
+        $gp_id = mysqli_fetch_array($res);
         if(!empty($fb_id["value"])||
             !empty($tw_key["value"])||
             !empty($gp_id["value"])||
@@ -148,8 +148,8 @@ function print_settings($site){
             </tr>
             <tr>
                 <td class="pt20" colspan=2>
-                    <input type="submit" class="btn w280" value="'.lang("Save changes").'" /><br/><br/>
-                    <input type="button" class="btn w280" value="'.lang("Delete account").'" onClick=\'alertify.confirm("'.lang("Are you sure you want to delete your account").'?", function(){ window.location = "/account/settings/delete"; }, function(){ alertify.confirm().destroy();} );\' />
+                    <input vr-control id="input-save-changes" type="submit" class="btn w280" value="'.lang("Save changes").'" /><br/><br/>
+                    <input vr-control id="input-delete-account" type="button" class="btn w280" value="'.lang("Delete account").'" onClick=\'alertify.confirm("'.lang("Are you sure you want to delete your account").'?", function(){ window.location = "/account/settings/delete"; }, function(){ alertify.confirm().destroy();} );\' />
                 </td>
             </tr>
             </table>

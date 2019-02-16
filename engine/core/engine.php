@@ -3,9 +3,9 @@
 * Framework engine class.
 * @path /engine/core/engine.php
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 * 
 * @example <code> engine::timezone_list(); </code>
 */
@@ -120,14 +120,12 @@ static function error($error_code='0'){
         }$_SERVER["SCRIPT_URI"] = str_replace("\$h", $_SERVER["PROTOCOL"]."://", $_SERVER["SCRIPT_URI"]);
         if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]="/";
         $get = $session = $post = '';
-        foreach($_GET as $key=>$value) $get .= ' | '.$key.'='.$value;
-        foreach($_POST as $key=>$value) $post .= ' | '.$key.'='.$value;
-        foreach($_SESSION as $key=>$value)
-            if($key != "Lang" && $key != "REQUEST_URI" && $key != "user")
-                $session .= ' | '.$key.'='.$value;
-        $get = mysql_real_escape_string($get);
-        $post = mysql_real_escape_string($post);
-        $session = mysql_real_escape_string($session);
+        $get = print_r($_GET, 1);
+        $post = print_r($_POST, 1);
+        $session = print_r($_SESSION, 1);
+        $get = engine::escape_string($get);
+        $post = engine::escape_string($post);
+        $session = engine::escape_string($session);
         $query = 'DELETE FROM `nodes_cache` WHERE `url` = "'.$_SERVER["SCRIPT_URI"].'" '
                 . 'AND `lang` = "'.$_SESSION["Lang"].'"';
         engine::mysql($query);
@@ -139,7 +137,7 @@ static function error($error_code='0'){
                 . '`post` = "'.$post.'" AND '
                 . '`session` = "'.$session.'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(empty($data)){
             $query = 'INSERT INTO `nodes_error`(`url`, `lang`, `date`, `ip`, `get`, `post`, `session`, `count`) '
             . 'VALUES("'.$_SERVER["SCRIPT_URI"].'", '
@@ -168,12 +166,12 @@ static function error($error_code='0'){
     }
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "debug"';
     $res = self::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($data[0]){
         echo "<!--------------------------------------"."\n"."PHP:"."\n";
         print_r(error_get_last());
         echo "\n"."----------------------------------------"."\n"."MySQL:"."\n";
-        print_r(mysql_error());
+        print_r(mysqli_error($_SERVER["sql_connection"]));
         echo "\n"."----------------------------------------"."\n"."--!>";
     }die();
 }
@@ -185,15 +183,26 @@ static function error($error_code='0'){
 * @return mixed Returns a resource on success, or die with error.
 * @usage <code>
 *  $res = engine::mysql($query); 
-*  $data = mysql_fetch_array($res);
+*  $data = mysqli_fetch_array($res);
 * </code>
 */
 static function mysql($query){
     array_push($_SERVER["CONSOLE"], "engine::mysql(".  str_replace('"', '\"', $query).")");
     require_once("engine/nodes/mysql.php");
-    @mysql_query("SET NAMES utf8");
-    $res = mysql_query($query) or die(self::error(500));
+    @mysqli_query($_SERVER["sql_connection"], "SET NAMES utf8");
+    $res = mysqli_query($_SERVER["sql_connection"], $query) or die(self::error(500));
     return $res;
+}
+//------------------------------------------------------------------------------
+/**
+* Escapes special characters in a string for use in an SQL statement.
+* 
+* @param string $string Input string.
+* @return string an escaped string.
+* @usage <code> engine::escape_string("hello world"); </code>
+*/
+static function escape_string($string){
+    return mysqli_real_escape_string($_SERVER["sql_connection"], trim($string));
 }
 //------------------------------------------------------------------------------
 /**
@@ -214,7 +223,7 @@ static function send_mail($email, $header, $theme, $message){
     $text .= "Theme: ".$theme."\n";
     $text .= "Text: ".$message;
     preg_replace('/<style>.*?<\/style>/', '', $text);
-    $text = mysql_real_escape_string(strip_tags($text, '<a><br/>'));
+    $text = engine::escape_string(strip_tags($text, '<a><br/>'));
     $header = "From: {$header}\nContent-Type: text/html; charset=utf-8";
     $theme = '=?utf-8?B?' . base64_encode($theme) . '?=';
     if(mail($email, "{$theme}\n", $message, $header)){
@@ -235,11 +244,10 @@ static function send_mail($email, $header, $theme, $message){
 *  engine::send_notification("..", "Test notification", "Text text text", "http://../image.png", "http://../");
 * </code>
 */
-//------------------------------------------------------------------------------
 static function send_notification($token, $title, $body, $image, $url){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "firebase_server_key"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $api_key = $data["value"];
     if(!empty($api_key)){
         $request_body = array(
@@ -367,10 +375,91 @@ static function curl_post_query($url, $query, $format=0){
     }return $html;
 }
 //------------------------------------------------------------------------------
+/**
+* Redirect to target URL.
+* 
+* @param string $url target URL.
+* @usage <code> engine::redirect("/"); </code>
+*/
 static function redirect($url){
     array_push($_SERVER["CONSOLE"], "engine::redirect");
-    header( 'Location: '.$url );
     die('<script>window.location = "'.$url.'";</script>');
+}
+//------------------------------------------------------------------------------
+/**
+* Encrypt string.
+* 
+* @param string $password Password to be encoded.
+* @return array Returns an array with hashed password and salt.
+* @usage <code> engine::encode_password("qwerty"); </code>
+*/
+static function encode_password($password){
+    require_once("engine/nodes/config.php");
+    $salt = substr(md5(date("U").$_SERVER["REMOTE_ADDR"]),0,22);
+    $salt = '$'.implode('$',array( "2y", str_pad(11, 2, "0", STR_PAD_LEFT), str_replace("+",".",$salt)));
+    $salt = substr($salt, 0, (strlen($salt) - strlen($_SERVER["config"]["crypt_salt"]))-1);
+    $key = $salt.$_SERVER["config"]["crypt_salt"].'.';
+    $hashed_password = crypt($password, $key);
+    $hashed_password = str_replace($key, '', $hashed_password);
+    $fout = array("pass" => $hashed_password, "salt" => $salt);
+    return $fout;
+}
+//------------------------------------------------------------------------------
+/**
+* Match encrypted and non-encrypted strings.
+* 
+* @param string $password Non-encrypted password string.
+* @param string $hashed_password Encrypted password.
+* @param string $salt Salt string of encrypted password.
+* @return bool Returns TRUE on success, FALSE on failure.
+* @usage <code> engine::match_passwords("qwerty", "dc89syffwhue", "^b033#4dk"); </code>
+*/
+static function match_passwords($password, $hashed_password, $salt){
+    require_once("engine/nodes/config.php");
+    $key = $salt.$_SERVER["config"]["crypt_salt"].'.';
+    $valid_password = crypt($password, $key);
+    $valid_password = str_replace($key, '', $valid_password);
+    if($hashed_password == $valid_password){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Creates a new object from HTML data.
+* 
+* @param string $html String based HTML code.
+* @return object Returns an object with HTML structure.
+* @usage <code> engine::html_to_obj("<html></html>"); </code>
+*/
+static function html_to_obj($html) {
+    $dom = new DOMDocument();
+    $dom->loadHTML($html);
+    return engine::element_to_obj($dom->documentElement);
+}
+//------------------------------------------------------------------------------
+/**
+* Converts HTML element to object.
+* 
+* @param object $element DOM object.
+* @return object Returns an object with HTML structure.
+* @usage <code> engine::element_to_obj(document.body); </code>
+*/
+static function element_to_obj($element) {
+    $obj = array( "tag" => $element->tagName );
+    foreach ($element->attributes as $attribute) {
+        $obj[$attribute->name] = $attribute->value;
+    }
+    foreach ($element->childNodes as $subElement) {
+        if ($subElement->nodeType == XML_TEXT_NODE) {
+            $obj["html"] = $subElement->wholeText;
+        }
+        else {
+            $obj["children"][] = engine::element_to_obj($subElement);
+        }
+    }
+    return $obj;
 }
 //------------------------------------------------------------------------------
 /**
@@ -403,11 +492,11 @@ static function is_article($url){
     if(strpos($url, "content/")!==FALSE) $url = mb_substr($url, 8);
     $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data)) return 1;
     $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$url.'" AND `lang` = "'.$_SESSION["Lang"].'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data)) return 1;
     return 0;
 }
@@ -425,7 +514,7 @@ static function is_product($url){
         $id = intval(mb_substr($url, 8));
         $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$id.'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(!empty($data)) return $id;
     }else return 0;
 }
@@ -447,7 +536,7 @@ static function match_patterns($url){
             . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
             . 'WHERE `att`.`token` = "'.session_id().'" ORDER BY `att`.`date` DESC';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $cache_id = $data["cache_id"];
     $is_article = $is_product = 0;
     if(engine::is_article($url)) $is_article = 1;
@@ -455,23 +544,21 @@ static function match_patterns($url){
     else die();
     $pattern = array($url);
     $i = 1;
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if(!empty($data["value"])){
             $pattern[$i++] = $data["value"];
         }
     }
-    // echo "Current pattern: "; print_r($pattern); echo '<br/><hr/>';
     $query = 'SELECT `att`.`token` as `token` '
         . 'FROM `nodes_attendance` AS `att` '
         . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
         . 'WHERE `cache`.`id` = "'.$cache_id.'" AND `att`.`token` <> "'.session_id().'"';
     $res = engine::mysql($query);
     $nodes = array();
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if(!in_array($data["token"], $nodes))
             array_push($nodes, $data["token"]);
     }
-    // echo "Same patterns: "; print_r($nodes); echo '<br/><hr/>';
     $output = array();
     foreach($nodes as $node){
         $query = 'SELECT `cache`.`url` AS `value`, `att`.`date` AS `date`, `cache`.`id` as `cache_id` '
@@ -479,7 +566,7 @@ static function match_patterns($url){
             . 'LEFT JOIN `nodes_cache` AS `cache` ON `cache`.`id` = `att`.`cache_id` '
             . 'WHERE `att`.`token` = "'.$node.'"';
         $r = engine::mysql($query);
-        while($d = mysql_fetch_array($r)){
+        while($d = mysqli_fetch_array($r)){
             if($is_article){ 
                 if(engine::is_article($d["value"])){
                     $output[$d["value"]]++;
@@ -491,7 +578,6 @@ static function match_patterns($url){
             }
         }
     }
-    // echo "Unsorted pages: "; print_r($output); echo '<br/><hr/>';
     $pages = array();
     $views = array();
     $i = 0;
@@ -513,7 +599,6 @@ static function match_patterns($url){
             }
         }
     } 
-    // echo "Sorted pages: "; print_r($pages); echo '<br/><hr/>';
     $fout = '';
     for($i = 0; $i < count($pages); $i++){
         $pages[$i] = str_replace($_SERVER["PUBLIC_URL"].'/', '', $pages[$i]);

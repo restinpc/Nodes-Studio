@@ -3,9 +3,9 @@
 * API file
 * @path /engine/code/api.php
 *
-* @name    Nodes Studio    @version 2.0.6
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/session.php");
 header('Content-Type: application/json; charset=utf-8');
@@ -17,15 +17,15 @@ if(!empty($_POST["email"]) && !empty($_POST["pass"])){
     $pass = trim(strtolower($_POST["pass"]));
     $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.$pass.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     if(!empty($user)){
         if($_GET["mode"] == "send_message"){
-            $name = mysql_real_escape_string($_POST["sender_name"]);
-            $email = strtolower(mysql_real_escape_string($_POST["sender_email"]));
+            $name = engine::escape_string($_POST["sender_name"]);
+            $email = strtolower(engine::escape_string($_POST["sender_email"]));
             $subject = "Message from ".$_SERVER["HTTP_HOST"];
             $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             engine::send_mail(
                $data["value"],
                '"'.$name.'" <'.$email.'>', 
@@ -46,7 +46,7 @@ if(!empty($_POST["email"]) && !empty($_POST["pass"])){
         $email = str_replace('"', "'", $_POST["email"]);
         $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(!empty($data)){
             $code = mb_substr(md5($email.date("Y-m-d")), 0, 4);
             email::restore_password($data["email"], $code);
@@ -64,7 +64,7 @@ if(!empty($_POST["email"]) && !empty($_POST["pass"])){
     $pass = md5(trim(strtolower($_POST["password"])));
     $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'" AND `pass` = "'.$pass.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     if(!empty($user)){
         $fout .= '<user>';
         foreach($user as $key=>$value){

@@ -3,9 +3,9 @@
 * Email library.
 * @path /engine/core/email.php
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 * 
 * @example <code> email::daily_report(); </code>
 */
@@ -20,10 +20,10 @@ class email{
 static function email_template($text){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "name"';
     $res = engine::mysql($query);
-    $site_name = mysql_fetch_array($res);
+    $site_name = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email_image"';
     $res = engine::mysql($query);
-    $site_image = mysql_fetch_array($res);
+    $site_image = mysqli_fetch_array($res);
     $css = file_get_contents("template/email.css");
     if(empty($css)) $css = file_get_contents ($_SERVER["DOCUMENT_ROOT"].$_SERVER["DIR"].'/template/email.css');
     if($site_image["value"][0]=="/") $site_image["value"] = 
@@ -49,16 +49,16 @@ static function email_template($text){
 static function bulk_mail($data){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $language = $_SESSION["Lang"];
     $query = 'SELECT `id`,`name`,`email`, `lang` FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $_SESSION["Lang"] = $user["lang"];
     $query = 'SELECT * FROM `nodes_outbox` WHERE `id` = "'.$data["outbox_id"].'"';
     $res = engine::mysql($query);
-    $outbox = mysql_fetch_array($res);
+    $outbox = mysqli_fetch_array($res);
     if($outbox["action"] == 1){
         $query = 'INSERT INTO `nodes_inbox`(`from`, `to`, `text`, `date`) '
             . 'VALUES("1", "'.intval($user["id"]).'", "'.$outbox["text"].'", "'.date("U").'")';
@@ -75,11 +75,11 @@ static function bulk_mail($data){
     }else if($outbox["action"] == 2){
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "image"';
         $r = engine::mysql($query);
-        $d = mysql_fetch_array($r);
+        $d = mysqli_fetch_array($r);
         $image = $d["value"];
         $query = 'SELECT * FROM `nodes_firebase` WHERE `user_id` = "'.$outbox["user_id"].'"';
         $fr = engine::mysql($query);
-        while($fd = mysql_fetch_array($fr)){
+        while($fd = mysqli_fetch_array($fr)){
             if(!empty($fd["token"])){
                 $body = str_replace("<br/>", "\r\n", $outbox["text"]);
                 engine::send_notification($fd["token"], $outbox["caption"], $body, $image, $_SERVER["PUBLIC_URL"]);
@@ -103,24 +103,24 @@ static function bulk_mail($data){
 static function daily_report(){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"'; 
     $r_email = engine::mysql($query);
-    $d_email = mysql_fetch_array($r_email);
+    $d_email = mysqli_fetch_array($r_email);
     $from = strtotime(date("Y-m-d")." 00:00:00");
     $to = strtotime(date("Y-m-d").' 23:59:59');
     $query = 'SELECT COUNT(`id`) FROM `nodes_attendance` WHERE `display` = 1 AND `date` >= "'.$from.'" AND `date` <= "'.$to.'"';
     $res = engine::mysql($query);
-    $d = mysql_fetch_array($res);
+    $d = mysqli_fetch_array($res);
     $views = round($d[0]);
     $query = 'SELECT COUNT(DISTINCT(`token`)) FROM `nodes_attendance` WHERE `display` = 1 AND `date` >= "'.$from.'" AND `date` <= "'.$to.'"';
     $res = engine::mysql($query);
-    $d = mysql_fetch_array($res);
+    $d = mysqli_fetch_array($res);
     $visitors = round($d[0]);
     $query = 'SELECT AVG(`script_time`) FROM `nodes_perfomance` WHERE `script_time` > 0 AND `date` >= "'.$from.'" AND `date` <= "'.$to.'"';
     $res = engine::mysql($query);
-    $d = mysql_fetch_array($res);
+    $d = mysqli_fetch_array($res);
     $perfomance = round($d[0],2);
     $file = engine::curl_get_query($_SERVER["PUBLIC_URL"].'/perfomance.php?interval=day&date='.date("Y-m-d"));
     $perfomance_image = base64_encode($file);
@@ -146,7 +146,7 @@ static function daily_report(){
 static function registration($email, $name){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $caption = lang('Registration at').' '.$_SERVER["HTTP_HOST"];
     $body = lang('Dear').' '.$name.'!<br/><br/>'
@@ -165,7 +165,7 @@ static function registration($email, $name){
 static function confirmation($email, $name, $code){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $caption = lang('Registration at').' '.$_SERVER["HTTP_HOST"];
     $body = lang('Dear').' '.$name.',<br/><br/>'
@@ -187,11 +187,11 @@ static function confirmation($email, $name, $code){
 static function restore_password($email, $new_pass, $code){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$email.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $body = lang("Dear").' '.$user["name"].'!<br/><br/>'.
         lang("New password is")." <b>".$new_pass.'</b><br/>'
         . '<br/>'.lang("To confirm this password, use").
@@ -209,14 +209,14 @@ static function restore_password($email, $new_pass, $code){
 static function new_comment($user_id, $url){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"'; 
     $r_email = engine::mysql($query);
-    $d_email = mysql_fetch_array($r_email);
+    $d_email = mysqli_fetch_array($r_email);
     $caption = lang("New comment at")." ".$_SERVER["HTTP_HOST"];
     $message = lang("User").' '.$_SESSION["user"]["name"].' '.lang("add new comment").'!<br/>'.
             lang("For details, click").' <a href="'.$_SERVER["PUBLIC_URL"].$url.'" target="_blank">'.lang("here").'</a>';
@@ -232,11 +232,11 @@ static function new_comment($user_id, $url){
 static function new_transaction($user_id, $amount){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $caption = lang("The funds have been added to your account balance").' '.$_SERVER["HTTP_HOST"];
     $body = lang('Dear').' '.$user["name"].'!<br/><br/>
         '.lang('The funds').' ( $'.$amount.' ) '.lang("has beed added to your account balance").'!<br/>
@@ -253,14 +253,14 @@ static function new_transaction($user_id, $amount){
 static function new_message($user_id, $sender_id){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$sender_id.'"';
     $res = engine::mysql($query);
-    $sender = mysql_fetch_array($res);
+    $sender = mysqli_fetch_array($res);
     $caption = lang("New message at").' '.$_SERVER["HTTP_HOST"];
     $body = lang('Dear').' '.$user["name"].'!<br/><br/>
         '.lang("User").' '.$sender["name"].' '.lang("sent a message for you").'!<br/>
@@ -275,25 +275,30 @@ static function new_message($user_id, $sender_id){
 * @param double $amount Widthdrawal sum.
 * @param string $paypal Receiver PayPal ID.
 */
-static function new_withdrawal($user_id, $amount, $paypal){
+static function new_withdrawal($user_id, $amount, $wallet, $id){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"';
     $res = engine::mysql($query);
-    $email = mysql_fetch_array($res);
+    $email = mysqli_fetch_array($res);
     $caption = lang("Withdrawal request at")." ".$_SERVER["HTTP_HOST"];
+    if($wallet == "PayPal"){
+        $wallet_string = lang("on your PayPal account");
+    }else if($wallet == "Yandex"){
+        $wallet_string = lang("on your Yandex Money account");
+    }
     $body = lang('Dear').' '.$user["name"].'!<br/><br/>
         '.lang("You withdrawal request is pending now").'.<br/>
-        '.lang("After some time you will receive").' $'.$amount.' '.lang("on your PayPal account").' <b>'.$paypal.'</b>.';
+        '.lang("After some time you will receive").' $'.$amount.' '.$wallet_string.' <b>'.$id.'</b>.';
     engine::send_mail($user["email"], $site_name."<no-reply@".$_SERVER["HTTP_HOST"].'>', $caption, email::email_template($body));
     $body =  lang("Dear").' Admin!<br/><br/>'
         . lang("There in new withdrawal request at").' '.$_SERVER["HTTP_HOST"].'.<br/>'
-        . lang("Need to pay").' $'.$amount.' '.lang("on PayPal account").' <b>'.$paypal.'</b> '.lang("and confirm request").'.<br/>'
+        . lang("Need to pay").' $'.$amount.' '.$wallet_string.' <b>'.$id.'</b> '.lang("and confirm request").'.<br/>'
         . lang("Details").' <a target="_blank" href="'.$_SERVER["PUBLIC_URL"].'/admin/?mode=finance">'.lang("here").'</a>.';
     engine::send_mail($email["value"], $site_name."<no-reply@".$_SERVER["HTTP_HOST"].'>', $caption, email::email_template($body));
 }
@@ -306,11 +311,11 @@ static function new_withdrawal($user_id, $amount, $paypal){
 static function finish_withdrawal($user_id){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $caption = lang("Withdrawal is complete at")." ".$_SERVER["HTTP_HOST"];
     $body = lang("Dear").' '.$user["name"].'!<br/><br/>
         '.lang("You withdrawal is complete").'!<br/>
@@ -326,14 +331,14 @@ static function finish_withdrawal($user_id){
 static function new_purchase($id){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.$id.'"';
     $res = engine::mysql($query);
-    $order = mysql_fetch_array($res);
+    $order = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$order["user_id"].'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $caption = lang("New purchase at").' '.$_SERVER["HTTP_HOST"];
     $body = lang("Dear").' '.$user["name"].'!<br/><br/>
         '.lang("Congratulations on your purchase at").' '.$_SERVER["HTTP_HOST"].'.<br/>
@@ -341,10 +346,10 @@ static function new_purchase($id){
     engine::send_mail($user["email"], $site_name."<no-reply@".$_SERVER["HTTP_HOST"].'>', $caption, email::email_template($body));
     $query = 'SELECT * FROM `nodes_transaction` WHERE `order_id` = "'.$order["id"].'"';
     $res = engine::mysql($query);
-    $transaction = mysql_fetch_array($res);
+    $transaction = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "email"';
     $res = engine::mysql($query);
-    $email = mysql_fetch_array($res);
+    $email = mysqli_fetch_array($res);
     $caption = lang("New purchase at").' '.$_SERVER["HTTP_HOST"];
     $body = lang("Dear").' Admin!<br/><br/>'
             . lang("There in new purchase at").' '.$_SERVER["HTTP_HOST"].'. '
@@ -366,20 +371,20 @@ static function new_purchase($id){
 static function shipping_confirmation($id){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_product_order` WHERE `id` = "'.intval($id).'"';
     $res = engine::mysql($query);
-    $product_order = mysql_fetch_array($res);
+    $product_order = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.$product_order["order_id"].'"';
     $res = engine::mysql($query);
-    $order = mysql_fetch_array($res);
+    $order = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$product_order["product_id"].'"';
     $res = engine::mysql($query);
-    $product = mysql_fetch_array($res);
+    $product = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$order["user_id"].'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $caption = lang("Your order has been shipped at").' '.$_SERVER["HTTP_HOST"];
     $body = lang("Dear").' '.$user["name"].'!<br/><br/>
         '.lang("Your order").' "'.$product["title"].'" '.lang("has been shipped").'.<br/>
@@ -398,20 +403,20 @@ static function shipping_confirmation($id){
 static function delivery_confirmation($id){
     $query = 'SELECT `value` FROM `nodes_config` WHERE `name` = "name"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $site_name = $d["value"];
     $query = 'SELECT * FROM `nodes_product_order` WHERE `id` = "'.intval($id).'"';
     $res = engine::mysql($query);
-    $product = mysql_fetch_array($res);
+    $product = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.$product["order_id"].'"';
     $res = engine::mysql($query);
-    $order = mysql_fetch_array($res);
+    $order = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$product["product_id"].'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $caption = lang("Your order has been completed at").' '.$_SERVER["HTTP_HOST"];
     $body = lang("Dear").' '.$user["name"].'!<br/><br/>
         '.lang("Your order has been completed").'! '; 

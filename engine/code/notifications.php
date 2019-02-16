@@ -1,12 +1,20 @@
 <?php
+/**
+* Firebase notifications processor.
+* @path /engine/code/notifications.php
+*
+* @name    Nodes Studio    @version 3.0.0.1
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0
+*/
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/session.php");
 header("Content-type: text/javascript");
 if(!empty($_POST["token"])){
-    $token = mysql_real_escape_string($_POST["token"]);
+    $token = engine::escape_string($_POST["token"]);
     $query = 'SELECT * FROM `nodes_firebase` WHERE `token` = "'.$token.'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data) && $data["user_id"] != $_SESSION["user"]["id"]){
         $query = 'UPDATE `nodes_firebase` SET `user_id` = "'.$_SESSION["user"]["id"].'" WHERE `token` = "'.$token.'"';
         engine::mysql($query);
@@ -19,7 +27,7 @@ if(!empty($_POST["token"])){
 }
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "firebase_sender_id"';
 $res = engine::mysql($query);
-$data = mysql_fetch_array($res);
+$data = mysqli_fetch_array($res);
 $sender_id = $data["value"];
 if(empty($sender_id)) die();
 ?>

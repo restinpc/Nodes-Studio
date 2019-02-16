@@ -3,9 +3,9 @@
 * Print account chat page.
 * @path /engine/core/account/print_chat.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 * 
 * @param int $user_id @mysql[nodes_user]->id.
 * @return string Returns content of page on success, or die with error.
@@ -16,7 +16,7 @@ function print_chat($user_id){
         . '(`from` = '.$user_id.' AND `to` = '.$_SESSION["user"]["id"].') ORDER BY `date` ASC';
     $res = engine::mysql($query);
     $fout = '<table class="chat_table" border=0 >';
-    while( $data = mysql_fetch_array($res)){
+    while( $data = mysqli_fetch_array($res)){
         if($data["from"] == $_SESSION["user"]["id"]){
             if($data["readed"]=="0"){
                 $fout .= '<tr><td class="chat_unreaded">';

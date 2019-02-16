@@ -3,9 +3,9 @@
 * Print admin orders page.
 * @path /engine/core/admin/print_admin_orders.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_orders($cms){
             . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
             . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -35,10 +35,10 @@ function print_admin_orders($cms){
     $res = engine::mysql($query);
     $flag = 0;
     $orders = array();
-    while($data=mysql_fetch_array($res)){
+    while($data=mysqli_fetch_array($res)){
         $query = 'SELECT * FROM `nodes_product_order` WHERE `product_id` = "'.$data["id"].'" AND `status` < 2 ORDER BY `status` ASC';
         $r = engine::mysql($query);
-        while($d = mysql_fetch_array($r)){
+        while($d = mysqli_fetch_array($r)){
             if(!in_array($d, $orders)) 
                 array_push($orders, $d);
         }   

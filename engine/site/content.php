@@ -3,9 +3,9 @@
 * Backend content pages file.
 * @path /engine/site/content.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -41,14 +41,14 @@ if($_SESSION["method"]!="DESC") $_SESSION["method"] = "DESC";
 if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){      
     $query = 'SELECT * FROM `nodes_catalog` WHERE `url` = "'.$link.'" AND `lang` = "'.$_SESSION["Lang"].'"';
     $res = engine::mysql($query); 
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data)){
         $this->title = $data["caption"].' - '.$this->title;
         $this->description = mb_substr(strip_tags($data["text"], 0, 400));
         if(!empty($data["img"])) $this->img = $_SERVER["DIR"]."/img/data/big/".$data["img"];
         $query = 'SELECT COUNT(*) FROM `nodes_content` WHERE `cat_id` = "'.$data["id"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
         $res = engine::mysql($query);
-        $d = mysql_fetch_array($res);
+        $d = mysqli_fetch_array($res);
         if($data['visible']) $this->content .= engine::print_navigation($this, $data["caption"]);
         $this->content .= '<div class="document980">';
         if($d[0]) $this->content .= engine::print_articles($this, $data);  
@@ -57,14 +57,14 @@ if($_GET[0]!="content" || (!empty($_GET[1]) && $_GET[0]=="content")){
     }else{
         $query = 'SELECT * FROM `nodes_content` WHERE `url` = "'.$link.'" AND `lang` = "'.$_SESSION["Lang"].'"';
         $res = engine::mysql($query); 
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(empty($data)){
             engine::error();
             exit();  
         }else{
             $query = 'SELECT * FROM `nodes_catalog` WHERE `id` = "'.$data["cat_id"].'"';
             $r = engine::mysql($query);
-            $catalog = mysql_fetch_array($r);
+            $catalog = mysqli_fetch_array($r);
             $this->title = $data["caption"].' - '.$this->title;
             $this->description = mb_substr(strip_tags($data["text"]));
             $this->content .= engine::print_navigation($this, $catalog["caption"]);

@@ -3,9 +3,9 @@
 * Prints an image viewer and updates pictures inside article
 * @path /engine/core/function/print_image_viewer.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -34,7 +34,7 @@ function print_image_viewer($site, $text, $caption, $images, $captions){
             $image = $images[$i];
             $image = str_replace('../img', '/img', $image);
             $size = getimagesize($image);
-            $text = str_replace($images[$i].'"', $image.'" alt="'.$image.'" onClick=\'nodes_galery("'.$image.'");\' class="img pointer"', $text);
+            $text = str_replace($images[$i].'"', $image.'" vr-control id="viewer-image-'.$i.'" alt="'.$image.'" onClick=\'nodes_galery("'.$image.'");\' class="img pointer"', $text);
             if(!$size[0]){
                 $size = getimagesize($_SERVER["PUBLIC_URL"].$image);
             }  
@@ -42,7 +42,7 @@ function print_image_viewer($site, $text, $caption, $images, $captions){
                 if(!empty($captions[$i])) $title = $captions[$i];
                 else $title = $caption;
                 $galery .= '<figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
-                    <a target="_blank" href="'.$image.'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
+                    <a vr-control id="image-'.$i.'" target="_blank" href="'.$image.'" itemprop="contentUrl" data-size="'.$size[0].'x'.$size[1].'">
                         <img id="nodes_galery_'.$i.'" src="'.$image.'" itemprop="thumbnail" alt="'.$image.'" title="'.$title.'" />
                     </a>
                     <figcaption itemprop="caption description">'.$title.'</figcaption>                                 
@@ -66,9 +66,9 @@ function print_image_viewer($site, $text, $caption, $images, $captions){
                 <div class="pswp__ui pswp__ui--hidden">
                     <div class="pswp__top-bar">
                         <div class="pswp__counter"></div>
-                        <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-                        <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-                        <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                        <button vr-control id="pswp-button-close" class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                        <button vr-control id="pswp-button-fs" class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                        <button vr-control id="pswp-button-zoom" class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
                         <div class="pswp__preloader">
                             <div class="pswp__preloader__icn">
                               <div class="pswp__preloader__cut">
@@ -80,9 +80,9 @@ function print_image_viewer($site, $text, $caption, $images, $captions){
                     <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
                         <div class="pswp__share-tooltip"></div> 
                     </div>
-                    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                    <button vr-control id="pswp-button-prev" class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
                     </button>
-                    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                    <button vr-control id="pswp-button-next" class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
                     </button>
                     <div class="pswp__caption">
                         <div class="pswp__caption__center"></div>

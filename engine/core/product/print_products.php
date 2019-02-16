@@ -3,9 +3,9 @@
 * Print products page.
 * @path /engine/core/product/print_products.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -39,8 +39,8 @@ function print_products($site){
     $fout .= '<div class="document980 products">';
     $query = 'SELECT `product`.* FROM `nodes_product` AS `product`';
     if(!empty($_POST["request"])){
-        $query .= ' AND (`product`.`title` LIKE "%'.  mysql_real_escape_string($_POST["request"]).'%"'
-                . ' OR `product`.`text` LIKE "%'.  mysql_real_escape_string($_POST["request"]).'%") ';
+        $query .= ' AND (`product`.`title` LIKE "%'.  engine::escape_string($_POST["request"]).'%"'
+                . ' OR `product`.`text` LIKE "%'.  engine::escape_string($_POST["request"]).'%") ';
     }
     $i = 0;
     if(!empty($_SESSION["details"])){
@@ -48,7 +48,7 @@ function print_products($site){
             if($key != "details" && $key != "category"){
                 $requery = 'SELECT * FROM `nodes_product_property` WHERE `id` = "'.$key.'"';
                 $r = engine::mysql($requery);
-                $d = mysql_fetch_array($r);
+                $d = mysqli_fetch_array($r);
                 if($value>0){
                     $i++;
                     $query .= ' INNER JOIN `nodes_property_data` AS `pd_'.$i.'` '
@@ -60,9 +60,9 @@ function print_products($site){
         }
     }
     if(!empty($_GET[1])){
-        $requery = 'SELECT * FROM `nodes_product_data` WHERE `url` LIKE "'. mysql_real_escape_string(strtolower($_GET[1])).'"';
+        $requery = 'SELECT * FROM `nodes_product_data` WHERE `url` LIKE "'. engine::escape_string(strtolower($_GET[1])).'"';
         $r = engine::mysql($requery);
-        $d = mysql_fetch_array($r);
+        $d = mysqli_fetch_array($r);
         if(!empty($d)){
             $i++;
             $site->title = $d["value"].' - '.$site->title;
@@ -86,13 +86,13 @@ function print_products($site){
     $query .= ' GROUP BY `product`.`id` ORDER BY `order` DESC LIMIT '.($from-1).', '.$_SESSION["count"];
     $res = engine::mysql($query);
     $r = engine::mysql($requery);
-    $d = mysql_fetch_array($r);
+    $d = mysqli_fetch_array($r);
     $count = $d[0];
     $from = ($_SESSION["page"]-1)*$_SESSION["count"]+1;
     $to = ($_SESSION["page"]-1)*$_SESSION["count"]+$_SESSION["count"];
     $arr_count = 0;
     $table = '<div class="preview_blocks">';
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         $arr_count++;
         $table .= engine::print_product_preview($site, $data);
     }$table .= '<div class="clear"></div><br/></div>';
@@ -107,11 +107,11 @@ function print_products($site){
     <div class="total-entry">';
     if($to > $count) $to = $count;
     if($count>0){
-        $fout .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-            <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-             <option'; if($_SESSION["count"]=="20") $fout .= ' selected'; $fout .= '>20</option>
-             <option'; if($_SESSION["count"]=="50") $fout .= ' selected'; $fout .= '>50</option>
-             <option'; if($_SESSION["count"]=="100") $fout .= ' selected'; $fout .= '>100</option>
+        $fout.= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+            <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+             <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $fout.= ' selected'; $fout.= '>20</option>
+             <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $fout.= ' selected'; $fout.= '>50</option>
+             <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $fout.= ' selected'; $fout.= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$fout .= '
     </div><div class="cr"></div>';
@@ -119,7 +119,7 @@ function print_products($site){
        $fout .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
             if($_SESSION["page"]>1){
-                $fout .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                $fout .= '<span vr-control id="page-prev" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$fout .= '<ul>';
             $a = $b = $c = $d = $e = $f = 0;
             for($i = 1; $i <= $pages; $i++){
@@ -132,7 +132,7 @@ function print_products($site){
                         $b = 1; $e = 0;
                        $fout .= '<li class="active-page">'.$i.'</li>';
                     }else{
-                        $fout .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                        $fout .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                     }
                 }else if((!$c||!$b) && !$f && $i<$pages){
                     $f = 1; $e = 0;
@@ -141,7 +141,7 @@ function print_products($site){
                     $fout .= '<li class="dots">. . .</li>';
                 }
             }if($_SESSION["page"]<$pages){
-                $fout .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+                $fout .= '<li vr-control id="page-next" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
             }$fout .= '
         </ul>
         </div>';

@@ -3,9 +3,9 @@
 * Backend search page file.
 * @path /engine/site/search.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $this->title - Page title.
 * @var $this->content - Page HTML data.
@@ -22,10 +22,10 @@ if(!empty($_GET[2])){
     $this->content = '<div class="clear_block">'.lang("Empty search query").'</div>';
     return;
 }
-$request = mysql_real_escape_string(urldecode($_GET[1]));
+$request = engine::escape_string(urldecode($_GET[1]));
 $this->title = lang("Search").' - '.$this->title;
 $this->description = lang("Search results for").' '.$request;
-$this->content .= '<div class="document">'.
+$this->content .= '<div class="document pt20">'.
     lang("Search results for").'<br/><br/>'
     . '<h1> "'.$request.'"</h1><br/><br/>';
 if(!empty($_POST["from"])) $_SESSION["from"] = $_POST["from"];
@@ -44,7 +44,7 @@ $query = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.  $request.'%" o
 . ' AND `lang` = "'.$_SESSION["Lang"].'" ORDER BY `'.$_SESSION["order"].'` '.$_SESSION["method"];
 $requery = 'SELECT * FROM `nodes_cache` WHERE (`content` LIKE "%'.$request.'%" or `title` LIKE "%'.$request.'%") AND `interval` > -2  AND `lang` = "'.$_SESSION["Lang"].'"';
 $res = engine::mysql($query);
-while($data = mysql_fetch_array($res)){
+while($data = mysqli_fetch_array($res)){
     if(strpos($data["url"], "search")===FALSE){
         if(empty($data["url"])) $data["url"] = "/";
         if(!empty($data["title"])) $title = $data["title"];
@@ -67,7 +67,7 @@ while($data = mysql_fetch_array($res)){
     }
 }
 $res = engine::mysql($requery);
-while($data = mysql_fetch_array($res)){
+while($data = mysqli_fetch_array($res)){
     if(empty($data["url"])) $data["url"] = "/";
     if(!empty($data["title"])) $title = $data["title"];
     else $title = $data["url"];
@@ -88,11 +88,11 @@ if($arr_count){
     <div class="total-entry">';
     if($to > $count) $to = $count;
     if($count>0){
-        $this->content .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-            <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-             <option'; if($_SESSION["count"]=="20") $this->content .= ' selected'; $this->content .= '>20</option>
-             <option'; if($_SESSION["count"]=="50") $this->content .= ' selected'; $this->content .= '>50</option>
-             <option'; if($_SESSION["count"]=="100") $this->content .= ' selected'; $this->content .= '>100</option>
+        $this->content.= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+            <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+             <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $this->content.= ' selected'; $this->content.= '>20</option>
+             <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $this->content.= ' selected'; $this->content.= '>50</option>
+             <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $this->content.= ' selected'; $this->content.= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$this->content .= '
     </div><div class="cr">';
@@ -100,7 +100,7 @@ if($arr_count){
        $this->content .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
            if($_SESSION["page"]>1){
-                $this->content .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                $this->content .= '<span vr-control id="page-prev" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$this->content .= '<ul>';
            $a = $b = $c = $d = $e = $f = 0;
            for($i = 1; $i <= $pages; $i++){
@@ -113,7 +113,7 @@ if($arr_count){
                        $b = 1; $e = 0;
                       $this->content .= '<li class="active-page">'.$i.'</li>';
                    }else{
-                       $this->content .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                       $this->content .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                    }
                }else if((!$c||!$b) && !$f && $i<$pages){
                    $f = 1; $e = 0;
@@ -122,7 +122,7 @@ if($arr_count){
                    $this->content .= '<li class="dots">. . .</li>';
                }
            }if($_SESSION["page"]<$pages){
-               $this->content .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+               $this->content .= '<li vr-control id="page-next" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
            }$this->content .= '
      </ul>
     </div>';

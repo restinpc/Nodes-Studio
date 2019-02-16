@@ -3,9 +3,9 @@
 * Paypal payment processor.
 * @path /engine/code/paypal.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/session.php");
 if(!empty($_GET["invoice_id"]) && !empty($_POST["mc_gross"])){
@@ -13,18 +13,18 @@ if(!empty($_GET["invoice_id"]) && !empty($_POST["mc_gross"])){
     $invoice_id = intval($_GET["invoice_id"]);
     $query = 'SELECT * FROM `nodes_invoice` WHERE `id` = "'.$invoice_id.'"';
     $res = engine::mysql($query);
-    $invoice = mysql_fetch_array($res);
+    $invoice = mysqli_fetch_array($res);
     $user_id = $invoice["user_id"];
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$user_id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     $balance = $user["balance"];
     $postdata = ""; 
     foreach ($_POST as $key=>$value) $postdata .= $key."=".urlencode($value)."&"; 
     $postdata .= "cmd=_notify-validate";  
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_test"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($data["value"]){ 
         $domain = 'ipnpb.sandbox.paypal.com';
         $gateway = "Paypal Sandbox";

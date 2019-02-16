@@ -3,9 +3,9 @@
 * Invoice page
 * @path /engine/code/invoice.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -13,11 +13,11 @@ if(!empty($_GET["id"])){
     $id = intval($_GET["id"]);
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "sandbox"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $sandbox = intval($data["value"]);
     $query = 'SELECT * FROM `nodes_invoice` WHERE `id` = "'.$id.'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($_SESSION["user"]["id"] != "1" && $_SESSION["user"]["id"] != $data["user_id"]){
         die(engine::error(401));
     }
@@ -25,15 +25,15 @@ if(!empty($_GET["id"])){
         $amount = $data["amount"];
         $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
         $res = engine::mysql($query);
-        $user = mysql_fetch_array($res);
+        $user = mysqli_fetch_array($res);
         if(intval($data["order_id"]) > 0){
             $query = 'SELECT * FROM `nodes_product_order` WHERE `order_id` = "'.$data["order_id"].'"';
             $res = engine::mysql($query);
             $flag = 0;
-            while($order = mysql_fetch_array($res)){
+            while($order = mysqli_fetch_array($res)){
                 $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$order["product_id"].'"';
                 $r = engine::mysql($query);
-                $product = mysql_fetch_array($r);
+                $product = mysqli_fetch_array($r);
                 if($flag) $caption .= '<hr style="border-color: #ddd;" />';
                 $caption .= '<table style="width: 100%;"><td><b>'.$product["title"].'</b></td><td style="text-align:right;" width=200>$'.$product["price"].'</td></table>';
                 $flag++;
@@ -49,16 +49,16 @@ if(!empty($_GET["id"])){
             engine::mysql($query);
             $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
             $res = engine::mysql($query);
-            $user = mysql_fetch_array($res);
+            $user = mysqli_fetch_array($res);
         }
         if($data["order_id"]>0){
             $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.$data["order_id"].'"';
             $r = engine::mysql($query);
-            $order = mysql_fetch_array($r);
+            $order = mysqli_fetch_array($r);
             if(!$order["status"]){
                 $query = 'SELECT * FROM `nodes_user`  WHERE `id` = "'.$user["id"].'"';
                 $res = engine::mysql($query);
-                $user = mysql_fetch_array($res);
+                $user = mysqli_fetch_array($res);
                 if($user["balance"] >= $data["amount"]){
                     $query = 'INSERT INTO `nodes_transaction`(user_id, invoice_id, order_id, amount, status, date, gateway, comment, ip) '
                             . 'VALUES("'.$user["id"].'", "'.$id.'", "'.$data["order_id"].'", "-'.$amount.'", "2", "'.date("U").'", "Demo", "Order payment", "'.$_SERVER["REMOTE_ADDR"].'")';
@@ -70,7 +70,7 @@ if(!empty($_GET["id"])){
                     email::new_purchase($data["order_id"]);
                     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$data["user_id"].'"';
                     $res = engine::mysql($query);
-                    $user = mysql_fetch_array($res);
+                    $user = mysqli_fetch_array($res);
                 }
             }
         }
@@ -83,7 +83,7 @@ if(!empty($_GET["id"])){
         $sum = 0;
         $flag = 0;
         $payment_date = '';
-        while($d = mysql_fetch_array($r)){
+        while($d = mysqli_fetch_array($r)){
             if($d["status"] == "2"){
                 $sum += $d["amount"];
                 $payment_date = $d["payment_date"];
@@ -99,10 +99,10 @@ if(!empty($_GET["id"])){
         $payment = '';
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "yandex_money"';
         $res = engine::mysql($query);
-        $yandex = mysql_fetch_array($res);
+        $yandex = mysqli_fetch_array($res);
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "paypal_id"';
         $res = engine::mysql($query);
-        $paypal = mysql_fetch_array($res);
+        $paypal = mysqli_fetch_array($res);
         if($data["order_id"] > 0){
             $atb = $amount-$sum-$user["balance"];
         }else{
@@ -139,27 +139,27 @@ if(!empty($_GET["id"])){
                 if($sandbox){
                     $button = '<br/><form method="POST">
                         <input type="hidden" name="demo_payment" value="'.($atb).'">
-                        <input type="submit" class="btn w280" value="'.lang("Make payment").'" />
+                        <input vr-control id="make-payment-input" type="submit" class="btn w280" value="'.lang("Make payment").'" />
                     </form>';
                 }else{
                     if($options == 1){
                         if(!empty($paypal["value"])){
-                            $button = '<br/><input type="button" onClick=\'document.getElementById("paypal_form").submit();\' class="btn w280" value="'.lang("Make payment").'" />';
+                            $button = '<br/><input vr-control id="make-payment-input"  type="button" onClick=\'document.getElementById("paypal_form").submit();\' class="btn w280" value="'.lang("Make payment").'" />';
                         }else if(!empty($yandex["value"])){
-                            $button = '<br/><input type="button" onClick=\'document.getElementById("yandex_form").submit();\' class="btn w280" value="'.lang("Make payment").'" />';
+                            $button = '<br/><input  vr-control id="make-payment-input" type="button" onClick=\'document.getElementById("yandex_form").submit();\' class="btn w280" value="'.lang("Make payment").'" />';
                         }
                     }else{
                         $button = '<br/>
-                            <select class="input w280" id="payment_method">';
+                            <select vr-control class="input w280" id="payment_method">';
                         if(!empty($paypal["value"])){
-                            $button .= '<option value="paypal">PayPal</option>';
+                            $button .= '<option vr-control id="option-paypal" value="paypal">PayPal</option>';
                         }
                         if(!empty($yandex["value"])){
-                            $button .= '<option value="yandex">Yandex Money</option>';
+                            $button .= '<option vr-control id="option-yandex" value="yandex">Yandex Money</option>';
                         }
                         $button .= '
                             </select><br/>
-                            <input type="button" class="btn w280" value="'.lang("Make payment").'" onClick=\''
+                            <input vr-control id="make-payment-input"  type="button" class="btn w280" value="'.lang("Make payment").'" onClick=\''
                                 . 'if(document.getElementById("payment_method").value=="paypal"){'
                                 . '     document.getElementById("paypal_form").submit();'
                                 . '}else if(document.getElementById("payment_method").value=="yandex"){'
@@ -169,23 +169,23 @@ if(!empty($_GET["id"])){
                 }
             }else{
                 if(intval($data["order_id"]) > 0){
-                    $button = '<br/><a href="'.$_SERVER["DIR"].'/account/purchases" target="_top" class="btn w280">'.lang("Back to account").'</a>';
+                    $button = '<br/><a vr-control id="back-to-account" href="'.$_SERVER["DIR"].'/account/purchases" target="_top" class="btn w280">'.lang("Back to account").'</a>';
                 }else{
-                    $button = '<br/><a href="'.$_SERVER["DIR"].'/account/finances" target="_top" class="btn w280">'.lang("Back to account").'</a>'; 
+                    $button = '<br/><a vr-control id="back-to-account" href="'.$_SERVER["DIR"].'/account/finances" target="_top" class="btn w280">'.lang("Back to account").'</a>'; 
                 }
             }
         }else{
-            $button = '<br/><a href="'.$_SERVER["DIR"].'/admin" target="_top" class="btn w280">'.lang("Back to admin").'</a>'; 
+            $button = '<br/><a vr-control id="back-to-admin" href="'.$_SERVER["DIR"].'/admin" target="_top" class="btn w280">'.lang("Back to admin").'</a>'; 
         }
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "invoice_image"';
         $r = engine::mysql($query);
-        $d = mysql_fetch_array($r);
+        $d = mysqli_fetch_array($r);
         if(!empty($d)){
             $logo = '<img src="'.$d["value"].'" />';
         }else{
             $query = 'SELECT * FROM `nodes_config` WHERE `name` = "name"';
             $r = engine::mysql($query);
-            $d = mysql_fetch_array($r);
+            $d = mysqli_fetch_array($r);
             $logo = $d["value"];
         }
 $fout = '<!DOCTYPE html>
@@ -199,7 +199,7 @@ $fout = '<!DOCTYPE html>
 <body class="nodes">
     <div class="invoice">
         <div class="invoice_logo">
-            <a href="'.$_SERVER["PUBLIC_URL"].'" target="_blank">'.$logo.'</a>
+            <a vr-control id="invoice-logo-img" href="'.$_SERVER["PUBLIC_URL"].'" target="_blank">'.$logo.'</a>
         </div>
         <div class="invoice_date">
             <div class="status">'.$status.'</div>

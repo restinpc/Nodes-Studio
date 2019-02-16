@@ -3,9 +3,9 @@
 * Print admin errors page.
 * @path /engine/core/admin/print_admin_errors.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_errors($cms){
             . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
             . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -66,9 +66,9 @@ function print_admin_errors($cms){
             ); foreach($array as $order=>$value){
                 $table .= '<th>';
                 if($_SESSION["order"]==$order){
-                    if($_SESSION["method"]=="ASC") $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "DESC"; submit_search_form();\'>'.lang($value).'&nbsp;&uarr;</a>';
-                    else $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'&nbsp;&darr;</a>';
-                }else $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'</a>';
+                    if($_SESSION["method"]=="ASC") $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "DESC"; submit_search_form();\'>'.lang($value).'&nbsp;&uarr;</a>';
+                    else $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'&nbsp;&darr;</a>';
+                }else $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'</a>';
                 $table .= '</th>';
             }
             $table .= '
@@ -76,10 +76,10 @@ function print_admin_errors($cms){
         </tr>
         </thead>';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         $arr_count++;
         $table .= '<tr>
-            <td align=left valign=middle onClick=\'alert("<b>GET</b> '.(!empty($data["get"])?$data["get"]:lang("Empty")).'<hr/>'
+            <td vr-control id="error-details-'.$arr_count.'" align=left valign=middle onClick=\'alert("<b>GET</b> '.(!empty($data["get"])?$data["get"]:lang("Empty")).'<hr/>'
                 . ' <b>POST</b> '.(!empty($data["post"])?$data["post"]:lang("Empty")).'<hr/>'
                 . ' <b>SESSION</b> '.(!empty($data["session"])?$data["session"]:lang("Empty")).'");\' class="pointer">'.mb_substr(str_replace($_SERVER["PROTOCOL"]."://".$_SERVER["HTTP_HOST"], "", $data["url"]),0,60).'</td>
             <td align=left valign=middle>'.$data["ip"].'</td>
@@ -90,7 +90,7 @@ function print_admin_errors($cms){
             $table .= '
                 <form method="POST">
                     <input type="hidden" name="id" value="'.$data["id"].'" />
-                    <input type="submit" value="'.lang("Delete").'" class="btn small" />
+                    <input vr-control id="input-delete-'.$arr_count.'" type="submit" value="'.lang("Delete").'" class="btn small" />
                 </form>';
         }
         $table .= '
@@ -109,15 +109,15 @@ function print_admin_errors($cms){
     <input type="hidden" name="reset" id="query_reset" value="0" />
     <div class="total-entry">';
     $res = engine::mysql($requery);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $count = $data[0];
     if($to > $count) $to = $count;
     if($data[0]>0){
-        $fout .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-            <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-             <option'; if($_SESSION["count"]=="20") $fout .= ' selected'; $fout .= '>20</option>
-             <option'; if($_SESSION["count"]=="50") $fout .= ' selected'; $fout .= '>50</option>
-             <option'; if($_SESSION["count"]=="100") $fout .= ' selected'; $fout .= '>100</option>
+        $fout.= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
+            <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+             <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $fout.= ' selected'; $fout.= '>20</option>
+             <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $fout.= ' selected'; $fout.= '>50</option>
+             <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $fout.= ' selected'; $fout.= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$fout .= '
     </div><div class="cr"></div>';
@@ -125,7 +125,7 @@ function print_admin_errors($cms){
        $fout .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
            if($_SESSION["page"]>1){
-                $fout .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                $fout .= '<span vr-control id="page-prev" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$fout .= '<ul>';
            $a = $b = $c = $d = $e = $f = 0;
            for($i = 1; $i <= $pages; $i++){
@@ -138,7 +138,7 @@ function print_admin_errors($cms){
                        $b = 1; $e = 0;
                       $fout .= '<li class="active-page">'.$i.'</li>';
                    }else{
-                       $fout .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                       $fout .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                    }
                }else if((!$c||!$b) && !$f && $i<$pages){
                    $f = 1; $e = 0;
@@ -147,14 +147,14 @@ function print_admin_errors($cms){
                    $fout .= '<li class="dots">. . .</li>';
                }
            }if($_SESSION["page"]<$pages){
-               $fout .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+               $fout .= '<li vr-control id="page-next" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
            }$fout .= '
      </ul>
     </div>';
          }$fout .= '<div class="clear"></div><br/>';
             if($admin_access == 2){
                 $fout .= '
-                <a href="'.$_SERVER["DIR"].'/admin/?mode=errors&act=reset"><input type="button" class="btn w280" value="'.lang("Clear logs").'" /></a><br/>';
+                <a vr-control id="clear-logs" href="'.$_SERVER["DIR"].'/admin/?mode=errors&act=reset"><input type="button" class="btn w280" value="'.lang("Clear logs").'" /></a><br/>';
             }
          $fout .= '
     </form>

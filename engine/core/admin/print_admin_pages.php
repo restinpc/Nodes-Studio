@@ -3,9 +3,9 @@
 * Print admin pages file.
 * @path /engine/core/admin/print_admin_pages.php
 * 
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $cms->site - Site object.
 * @var $cms->title - Page title.
@@ -24,7 +24,7 @@ function print_admin_pages($cms){
             . 'WHERE `access`.`user_id` = "'.$_SESSION["user"]["id"].'" '
             . 'AND `access`.`admin_id` = `admin`.`id`';
     $admin_res = engine::mysql($query);
-    $admin_data = mysql_fetch_array($admin_res);
+    $admin_data = mysqli_fetch_array($admin_res);
     $admin_access = intval($admin_data["access"]);
     if(!$admin_access){
         engine::error(401);
@@ -43,17 +43,17 @@ function print_admin_pages($cms){
     }
     $fout = '<div class="document980" style="max-width: 1200px;">
         <form method="POST" id="admin_lang_select">'.lang("Select your language").': 
-        <select class="input" name="lang" onChange=\'document.getElementById("admin_lang_select").submit();\'>';
+        <select vr-control id="select-lang" class="input" name="lang" onChange=\'document.getElementById("admin_lang_select").submit();\'>';
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "languages"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $arr = explode(";", $data["value"]);
     foreach($arr as $value){
         if(!empty($value)){
             if(!empty($_SESSION["Lang"])&&$_SESSION["Lang"]==$value){
-                $fout .= '<option value="'.$value.'" selected>'.$value.'</option>';
+                $fout .= '<option vr-control id="option-lang-'.$value.'" value="'.$value.'" selected>'.$value.'</option>';
             }else{
-                $fout .= '<option value="'.$value.'">'.$value.'</option>';
+                $fout .= '<option vr-control id="option-lang-'.$value.'" value="'.$value.'">'.$value.'</option>';
             }
         }
     }$fout .= '</select></form><br/>';
@@ -103,9 +103,9 @@ function print_admin_pages($cms){
             ); foreach($array as $order=>$value){
                 $table .= '<th>';
                 if($_SESSION["order"]==$order){
-                    if($_SESSION["method"]=="ASC") $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "DESC"; submit_search_form();\'>'.lang($value).'&nbsp;&uarr;</a>';
-                    else $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'&nbsp;&darr;</a>';
-                }else $table .= '<a class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'</a>';
+                    if($_SESSION["method"]=="ASC") $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "DESC"; submit_search_form();\'>'.lang($value).'&nbsp;&uarr;</a>';
+                    else $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'&nbsp;&darr;</a>';
+                }else $table .= '<a vr-control id="table-order-'.$order.'" class="link" href="#" onClick=\'document.getElementById("order").value = "'.$order.'"; document.getElementById("method").value = "ASC"; submit_search_form();\'>'.lang($value).'</a>';
                 $table .= '</th>';
             }
             $table .= '
@@ -113,7 +113,7 @@ function print_admin_pages($cms){
         </tr>
         </thead>';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         $arr_count++;
         $opt = array();
         $opt[$data["interval"]] = "selected";
@@ -123,48 +123,48 @@ function print_admin_pages($cms){
         <tr>
             <td align=left valign=middle>
                 <input type="hidden" name="id" value="'.$data["id"].'" />
-                <a href="'.$data["url"].'" target="_blank" class="nowrap" >'.$url.'</a>
+                <a vr-control id="link-'.$data["id"].'" href="'.$data["url"].'" target="_blank" class="nowrap" >'.$url.'</a>
             </td>
             <td align=left valign=middle>
-                <input type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="title" id="title_'.$data["id"].'" placeHolder="'.$data["tit"].'" value="'.$data["title"].'"
+                <input vr-control id="page-title-'.$data["id"].'" type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="title" id="title_'.$data["id"].'" placeHolder="'.$data["title"].'" value="'.$data["title"].'"
                     onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\'
                 />
             </td>
             <td align=left valign=middle>
-                <input type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="description" id="description_'.$data["id"].'" placeHolder="'.$data["desc"].'" value="'.$data["description"].'"
+                <input vr-control id="page-desc-'.$data["id"].'" type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="description" id="description_'.$data["id"].'" placeHolder="'.$data["desc"].'" value="'.$data["description"].'"
                    onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\' 
                 />
             </td>
             <td align=left valign=middle>
-                <input type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="keywords" id="keywords_'.$data["id"].'"  placeHolder="'.$data["key"].'" value="'.$data["keywords"].'" 
+                <input vr-control id="page-keywords-'.$data["id"].'" type="text" '.($admin_acces!=2?'disabled':'').' class="input" name="keywords" id="keywords_'.$data["id"].'"  placeHolder="'.$data["key"].'" value="'.$data["keywords"].'" 
                     onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\'
                 />
             </td>
             <td align=left valign=middle>
-                <select name="mode" '.($admin_acces!=2?'disabled':'').' class="input" id="mode_'.$data["id"].'"
+                <select vr-control name="mode" '.($admin_acces!=2?'disabled':'').' class="input" id="mode_'.$data["id"].'"
                     onChange=\'document.getElementById("button_'.$data["id"].'").style.display="block"; jQuery("#button_'.$data["id"].'").removeClass("hidden");\' >
-                    <option value="0">'.lang("Add").'</option>
-                    <option value="1" '.(($data["mode"]||is_null($data["mode"]))?'selected':'').'>'.lang("Replace").'</option>
+                    <option vr-control id="option-mode-0" value="0">'.lang("Add").'</option>
+                    <option vr-control id="option-mode-1" value="1" '.(($data["mode"]||is_null($data["mode"]))?'selected':'').'>'.lang("Replace").'</option>
                 </select>
             </td>
             <td align=left valign=middle>
                 <form method="POST" id="form_'.$data["id"].'"><input type="hidden" name="id" value="'.$data["id"].'" />
-                <select name="date" '.($admin_acces!=2?'disabled':'').' class="table_selector input w120" onChange=\'document.getElementById("form_'.$data["id"].'").submit();\'>
-                    <option value="-1" '.$opt[-1].'>'.lang("Not cathing").'</option>
-                    <option value="0" '.$opt[0].'>'.lang("Not refreshing").'</option>
-                    <option value="60" '.$opt[60].'>1 '.lang("minut").'</option>
-                    <option value="600" '.$opt[600].'>10 '.lang("minuts").'</option>
-                    <option value="3600" '.$opt[3600].'>1 '.lang("hours").'</option>
-                    <option value="43200" '.$opt[43200].'>12 '.lang("hours").'</option>
-                    <option value="86400" '.$opt[86400].'>'.lang("Dayly").'</option>
-                    <option value="-3">'.lang("Delete").'</option>
+                <select vr-control id="select-page-'.$arr_count.'" name="date" '.($admin_acces!=2?'disabled':'').' class="table_selector input w120" onChange=\'document.getElementById("form_'.$data["id"].'").submit();\'>
+                    <option vr-control id="option-interval-0" value="-1" '.$opt[-1].'>'.lang("Not cathing").'</option>
+                    <option vr-control id="option-interval-1" value="0" '.$opt[0].'>'.lang("Not refreshing").'</option>
+                    <option vr-control id="option-interval-2" value="60" '.$opt[60].'>1 '.lang("minut").'</option>
+                    <option vr-control id="option-interval-3" value="600" '.$opt[600].'>10 '.lang("minuts").'</option>
+                    <option vr-control id="option-interval-4" value="3600" '.$opt[3600].'>1 '.lang("hours").'</option>
+                    <option vr-control id="option-interval-5" value="43200" '.$opt[43200].'>12 '.lang("hours").'</option>
+                    <option vr-control id="option-interval-6" value="86400" '.$opt[86400].'>'.lang("Dayly").'</option>
+                    <option vr-control id="option-interval-7" value="-3">'.lang("Delete").'</option>
                 </select>
                 </form>
             </td>
             <td width=40 align=left valign=middle>';
         if($admin_access == 2){
         $table .= '
-            <input id="button_'.$data["id"].'" type="button" onClick=\'edit_seo("'.intval($data["id"]).'");\' class="btn small hidden" value="&#10004;" />
+            <input vr-control id="button_'.$data["id"].'" type="button" onClick=\'edit_seo("'.intval($data["id"]).'");\' class="btn small hidden" value="&#10004;" />
                 ';
         }
         $table .= '
@@ -183,15 +183,15 @@ function print_admin_pages($cms){
     <input type="hidden" name="reset" id="query_reset" value="0" />
     <div class="total-entry">';
     $res = engine::mysql($requery);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $count = $data[0];
     if($to > $count) $to = $count;
     if($data[0]>0){
         $fout .= '<p class="p5">'.lang("Showing").' '.$from.' '.lang("to").' '.$to.' '.lang("from").' '.$count.' '.lang("entries").', 
-            <nobr><select class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
-             <option'; if($_SESSION["count"]=="20") $fout .= ' selected'; $fout .= '>20</option>
-             <option'; if($_SESSION["count"]=="50") $fout .= ' selected'; $fout .= '>50</option>
-             <option'; if($_SESSION["count"]=="100") $fout .= ' selected'; $fout .= '>100</option>
+            <nobr><select vr-control id="select-pagination" class="input" onChange=\'document.getElementById("count_field").value = this.value; submit_search_form();\' >
+             <option vr-control id="option-pagination-20"'; if($_SESSION["count"]=="20") $fout.= ' selected'; $fout.= '>20</option>
+             <option vr-control id="option-pagination-50"'; if($_SESSION["count"]=="50") $fout.= ' selected'; $fout.= '>50</option>
+             <option vr-control id="option-pagination-100"'; if($_SESSION["count"]=="100") $fout.= ' selected'; $fout.= '>100</option>
             </select> '.lang("per page").'.</nobr></p>';
     }$fout .= '
     </div><div class="cr"></div>';
@@ -199,7 +199,7 @@ function print_admin_pages($cms){
        $fout .= '<div class="pagination" >';
             $pages = ceil($count/$_SESSION["count"]);
            if($_SESSION["page"]>1){
-                $fout .= '<span onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
+                $fout .= '<span vr-control id="page-prev" onClick=\'goto_page('.($_SESSION["page"]-1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Previous").'</a></span>';
             }$fout .= '<ul>';
            $a = $b = $c = $d = $e = $f = 0;
            for($i = 1; $i <= $pages; $i++){
@@ -212,7 +212,7 @@ function print_admin_pages($cms){
                        $b = 1; $e = 0;
                       $fout .= '<li class="active-page">'.$i.'</li>';
                    }else{
-                       $fout .= '<li onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
+                       $fout .= '<li vr-control id="page-'.$i.'" onClick=\'goto_page('.($i).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.$i.'</a></li>';
                    }
                }else if((!$c||!$b) && !$f && $i<$pages){
                    $f = 1; $e = 0;
@@ -221,7 +221,7 @@ function print_admin_pages($cms){
                    $fout .= '<li class="dots">. . .</li>';
                }
            }if($_SESSION["page"]<$pages){
-               $fout .= '<li class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
+               $fout .= '<li vr-control id="page-next" class="next" onClick=\'goto_page('.($_SESSION["page"]+1).');\'><a hreflang="'.$_SESSION["Lang"].'" href="#">'.lang("Next").'</a></li>';
            }$fout .= '
      </ul>
     </div>';

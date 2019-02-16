@@ -5,7 +5,7 @@
 * 
 * @name    MySQLDump    @version 2.20 - 02/11/2007
 * @author  Daniele Viganň - CreativeFactory.it <daniele.vigano@creativefactory.it>
-* @license http://opensource.org/licenses/gpl-license.php GNU Public License
+* @license http://opensource.org/licenses/gpl-license.php
 * 
 * @example <code>
 *  $dumper = new dump($dbname,'filename.sql',false,false);
@@ -41,7 +41,7 @@ function dump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue =
 */
 function setDatabase($db){
     $this->database = $db;
-    if ( !@mysql_select_db($this->database) )
+    if ( !@mysqli_select_db($_SERVER["sql_connection"], $this->database) )
         return false;
     return true;
  }
@@ -108,10 +108,10 @@ function getTableStructure($table){
     // Dump Structure
     $structure .= 'DROP TABLE IF EXISTS `'.$table.'`;'."\n";
     $structure .= "CREATE TABLE `".$table."` (\n";
-    $records = @mysql_query('SHOW FIELDS FROM `'.$table.'`');
-    if ( @mysql_num_rows($records) == 0 )
+    $records = @mysqli_query($_SERVER["sql_connection"], 'SHOW FIELDS FROM `'.$table.'`');
+    if ( @mysqli_num_rows($records) == 0 )
             return false;
-    while ( $record = mysql_fetch_assoc($records) ) {
+    while ( $record = mysqli_fetch_assoc($records) ) {
             $structure .= '`'.$record['Field'].'` '.$record['Type'];
             if ( @strcmp($record['Null'],'YES') != 0 )
                     $structure .= ' NOT NULL';
@@ -126,9 +126,9 @@ function getTableStructure($table){
     $structure .= $this->getSqlKeysTable($table);
     $structure .= "\n)";
     //Save table engine
-    $records = @mysql_query("SHOW TABLE STATUS LIKE '".$table."'");
+    $records = @mysqli_query($_SERVER["sql_connection"], "SHOW TABLE STATUS LIKE '".$table."'");
     // echo $query; - ???
-    if ( $record = @mysql_fetch_assoc($records) ) {
+    if ( $record = @mysqli_fetch_assoc($records) ) {
             if ( !empty($record['Engine']) )
                     $structure .= ' ENGINE='.$record['Engine'];
             if ( !empty($record['Auto_increment']) )
@@ -150,8 +150,8 @@ function getTableData($table,$hexValue = true) {
     $data = "-- \n";
     $data .= "-- Dumping data for table `$table` \n";
     $data .= "-- \n\n";
-    $records = mysql_query('SHOW FIELDS FROM `'.$table.'`');
-    $num_fields = @mysql_num_rows($records);
+    $records = mysqli_query($_SERVER["sql_connection"], 'SHOW FIELDS FROM `'.$table.'`');
+    $num_fields = @mysqli_num_rows($records);
     if ( $num_fields == 0 )
             return false;
     // Field names
@@ -159,7 +159,7 @@ function getTableData($table,$hexValue = true) {
     $insertStatement = "INSERT INTO `$table` (";
     $hexField = array();
     for ($x = 0; $x < $num_fields; $x++) {
-        $record = @mysql_fetch_assoc($records);
+        $record = @mysqli_fetch_assoc($records);
         if ( ($hexValue) && ($this->isTextValue($record['Type'])) ) {
                 $selectStatement .= 'HEX(`'.$record['Field'].'`)';
                 $hexField [$x] = true;
@@ -172,23 +172,24 @@ function getTableData($table,$hexValue = true) {
     }
     $insertStatement = @mb_substr($insertStatement,0,-2).') VALUES';
     $selectStatement = @mb_substr($selectStatement,0,-2).' FROM `'.$table.'`';
-    $records = @mysql_query($selectStatement);
-    $num_rows = @mysql_num_rows($records);
-    $num_fields = @mysql_num_fields($records);
+    $records = @mysqli_query($_SERVER["sql_connection"], $selectStatement);
+    $num_rows = @mysqli_num_rows($records);
+    $num_fields = @mysqli_num_fields($records);
     // Dump data
     if ( $num_rows > 0 ) {
         $data .= $insertStatement;
         for ($i = 0; $i < $num_rows; $i++) {
-            $record = @mysql_fetch_assoc($records);
+            $record = @mysqli_fetch_assoc($records);
             $data .= ' (';
             for ($j = 0; $j < $num_fields; $j++) {
-                $field_name = @mysql_field_name($records, $j);
+                $field_name = mysqli_fetch_field_direct($records, $j)->name;
+                            //@mysql_field_name($records, $j);
                 if ( isset($hexField[$j]) && $hexField[$j] && (@strlen($record[$field_name]) > 0) )
                         $data .= "0x".$record[$field_name];
                 else if ( is_null($record[$field_name]) )
                         $data .= "NULL";
                 else
-                        $data .= "'".@str_replace('\"','"',@mysql_escape_string($record[$field_name]))."'";
+                        $data .= "'".@str_replace('\"','"',@mysqli_escape_string($_SERVER["sql_connection"], $record[$field_name]))."'";
                 $data .= ',';
             }
             $data = @mb_substr($data,0,-1).")";
@@ -210,11 +211,11 @@ function getTableData($table,$hexValue = true) {
 * @return boolean
 */
 function getDatabaseStructure(){
-    $records = @mysql_query('SHOW TABLES');
-    if ( @mysql_num_rows($records) == 0 )
+    $records = @mysqli_query($_SERVER["sql_connection"], 'SHOW TABLES');
+    if ( @mysqli_num_rows($records) == 0 )
             return false;
     $structure = '';
-    while ( $record = @mysql_fetch_row($records) ) {
+    while ( $record = @mysqli_fetch_row($records) ) {
             $structure .= $this->getTableStructure($record[0]);
     }
     return true;
@@ -225,10 +226,10 @@ function getDatabaseStructure(){
 * @param boolean $hexValue It defines if the output is base-16 or not
 */
 function getDatabaseData($hexValue = true){
-    $records = @mysql_query('SHOW TABLES');
-    if ( @mysql_num_rows($records) == 0 )
+    $records = @mysqli_query($_SERVER["sql_connection"], 'SHOW TABLES');
+    if ( @mysqli_num_rows($records) == 0 )
             return false;
-    while ( $record = @mysql_fetch_row($records) ) {
+    while ( $record = @mysqli_fetch_row($records) ) {
             $this->getTableData($record[0],$hexValue);
     }
 }
@@ -264,10 +265,10 @@ function getSqlKeysTable ($table) {
     unset($unique);
     unset($index);
     unset($fulltext);
-    $results = mysql_query("SHOW KEYS FROM `{$table}`");
-    if ( @mysql_num_rows($results) == 0 )
+    $results = mysqli_query($_SERVER["sql_connection"], "SHOW KEYS FROM `{$table}`");
+    if ( @mysqli_num_rows($results) == 0 )
             return false;
-    while($row = mysql_fetch_object($results)) {
+    while($row = mysqli_fetch_object($results)) {
         if (($row->Key_name == 'PRIMARY') AND ($row->Index_type == 'BTREE')) {
             if ( $primary == "" )
                 $primary = "  PRIMARY KEY  (`{$row->Column_name}`";

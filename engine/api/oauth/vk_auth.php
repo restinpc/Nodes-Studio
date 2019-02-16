@@ -3,9 +3,9 @@
 * VK OAuth script.
 * @path /engine/api/oauth/vk_auth.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -19,11 +19,11 @@ if(!empty($_REQUEST["name"])){
                 engine::mysql($query);
                 $query = 'SELECT * FROM `nodes_user` WHERE `email` = "'.$_SESSION["user"]["email"].'"';
                 $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
+                $data = mysqli_fetch_array($res);
             }else{
                 $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$_REQUEST["url"].'"'; 
                 $res = engine::mysql($query);
-                $data = mysql_fetch_array($res);
+                $data = mysqli_fetch_array($res);
                 if(empty($data)){
                     $path = '';
                     $ext = explode('.', $_REQUEST["photo"]);
@@ -35,7 +35,7 @@ if(!empty($_REQUEST["name"])){
                     $res = engine::mysql($query);
                     $query = 'SELECT * FROM `nodes_user` WHERE `url` = "'.$_REQUEST["url"].'"';
                     $res = engine::mysql($query);
-                    $data = mysql_fetch_array($res);
+                    $data = mysqli_fetch_array($res);
                 }
             }
             unset($data["pass"]);

@@ -3,9 +3,9 @@
 * Print account purchases page.
 * @path /engine/core/account/print_purchases.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -24,7 +24,7 @@ function print_purchases($site){
     $query = 'SELECT * FROM `nodes_order` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `date` DESC';
     $res = engine::mysql($query);
     $flag = 0;
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($data["status"]=="1"){
             $site->onload .= '
                 alert("'.lang("Thank you for your order! Shipment in process now.").'");

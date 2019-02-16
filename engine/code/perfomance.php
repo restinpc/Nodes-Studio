@@ -3,9 +3,9 @@
 * Perfomance graph.
 * @path /engine/code/perfomance.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 $W=600;     // Width
 $H=300;     // Height
@@ -55,7 +55,7 @@ require_once("engine/nodes/session.php");
 if($_SESSION["user"]["id"]!=1){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "lastreport"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($data["value"]>=date("U")-26000){
         die(engine::error(401));
     }
@@ -93,17 +93,17 @@ for ($i=0;$i<10;$i++) {
     $script = 0;
     $server = 0;
     $count=0;
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         $script += $data["script_time"];
         $server += $data["server_time"];
         $count++;
     }
     $query = 'SELECT AVG(`script_time`) FROM `nodes_perfomance` WHERE `script_time` > 0';
     $res = engine::mysql($query);
-    $mid_script = mysql_fetch_array($res);
+    $mid_script = mysqli_fetch_array($res);
     $query = 'SELECT AVG(`server_time`) FROM `nodes_perfomance` WHERE `server_time` > 0';
     $res = engine::mysql($query);
-    $mid_server = mysql_fetch_array($res);
+    $mid_server = mysqli_fetch_array($res);
     if($script>0){
         $script_time = $script/$count;
     }else{ 

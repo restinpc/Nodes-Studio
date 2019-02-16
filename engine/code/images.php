@@ -3,9 +3,9 @@
 * Backend file.
 * @path /engine/code/images.php
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/session.php");
 if(empty($_SESSION["user"]["id"])) die(engine::error(401));
@@ -20,7 +20,7 @@ $fout = '<!DOCTYPE html>
 <body class="body_images nodes">';
 if(!empty($_GET["editor"]) && $_SESSION["user"]["admin"] == 1){
     if(!empty($_FILES) && !empty($_POST["name"])){
-        $name = mysql_real_escape_string($_POST["name"]);
+        $name = engine::escape_string($_POST["name"]);
         $file = file::upload('tiny_image', 'img/data', 1);
         if($file == "error"){
             $fout .= '<script>alert("'.lang("Error").'");parent.js_hide_wnd();</script>';
@@ -47,7 +47,7 @@ if(!empty($_GET["editor"]) && $_SESSION["user"]["admin"] == 1){
         if(file_exists('img/data/thumb/'.$_POST["file1"])){
             $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.intval($_GET["id"]).'"';
             $res = engine::mysql($query);
-            $data = mysql_fetch_array($res);
+            $data = mysqli_fetch_array($res);
             $images = explode(";", $data["img"]);
             if(empty($images[0])) $images = array($data["img"]);
             $imgs = array();

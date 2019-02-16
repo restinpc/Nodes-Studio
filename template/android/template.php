@@ -1,4 +1,4 @@
-<?php
+<?php /* Nodes Studio 2.0.2 script. Do not edit directly. 09/11/2018 */
 /**
 * Android template file.
 * @path /template/android/template.php
@@ -35,6 +35,7 @@ $header = '<form method="POST" id="lang_select"><input type="hidden" id="lang_va
 <!-- Navigation -->
     <div class="android-navigation-container">
         <nav class="android-navigation mdl-navigation">
+            <a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a>
             <a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a>
             <a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a>
             '; 
@@ -76,12 +77,13 @@ $header .= '
     }
     $header .= '
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/">'.lang("Home").'</a>
+        <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a>
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a>
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a>';
     if(empty($_SESSION["user"]["id"])){
         $header .= '
             <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/register" class="btn">'.lang("Sign Up").'</a>
-            <a class="mdl-navigation__link" href="#" onClick="login();">'.lang("Login").'</a>';
+            <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/login">'.lang("Login").'</a>';
     }
     $header .= '
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/privacy_policy">'.lang("Privacy Policy").'</a>  

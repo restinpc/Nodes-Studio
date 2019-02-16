@@ -3,16 +3,16 @@
 * firebase-messaging-sw.js script page.
 * @path /engine/code/firebase.php
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/mysql.php");
 require_once("engine/nodes/session.php");
 Header("Content-type: application/x-javascript");
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "firebase_sender_id"';
 $res = engine::mysql($query);
-$data = mysql_fetch_array($res);
+$data = mysqli_fetch_array($res);
 $sender_id = $data["value"];
 if(empty($sender_id)) die();
 ?>

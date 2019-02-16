@@ -3,9 +3,9 @@
 * Attendance graph.
 * @path /engine/code/attandance.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 $W=600;     // Width
 $H=300;     // Height
@@ -55,7 +55,7 @@ require_once("engine/nodes/session.php");
 if($_SESSION["user"]["id"]!=1){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "lastreport"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($data["value"]>=date("U")-26000){
         die(engine::error(401));
     }
@@ -82,7 +82,7 @@ for ($i=0;$i<10;$i++) {
     }
     $query = 'SELECT COUNT(DISTINCT `token`, `ip`) as `a`, COUNT(`id`) as `b` FROM `nodes_attendance` WHERE `date` >= "'.$from.'" AND `date` <= "'.$to.'" AND `display` = "1"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $DATA[0][]=$data['b'];
     $DATA[1][]=$data['a'];
 }

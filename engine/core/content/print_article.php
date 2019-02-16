@@ -3,9 +3,9 @@
 * Prints content article page.
 * @path /engine/core/content/print_article.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -26,8 +26,8 @@ function print_article($site, $data){
     $site->description = $data["text"];
     $query = 'SELECT * FROM `nodes_catalog` WHERE `id` = "'.$data["cat_id"].'"';
     $r = engine::mysql($query);
-    $d = mysql_fetch_array($r);
-    $fout .= '<h1>'.$data["caption"].'</h1><br/>';
+    $d = mysqli_fetch_array($r);
+    $fout .= '<h1 class="pt20">'.$data["caption"].'</h1><br/>';
     $fout .= '<div class="article">';
     preg_match_all('#<img[^>]+src="(.*?)"([^>]+alt="(.*?)")?#',$data["text"],$images);
     if(!empty($images)){
@@ -45,14 +45,14 @@ function print_article($site, $data){
     $fout .= '
     </div>
     <div class="clear"><br/></div>
-    <a onClick=\'document.getElementById("comments_block").style.display="block"; this.style.display="none";\'><button class="btn w280 mt15" >'.lang("Show comments").'</button><br/><br/></a>';
+    <a vr-control id="show-comments" onClick=\'document.getElementById("comments_block").style.display="block"; this.style.display="none";\'><button class="btn w280 mt15" >'.lang("Show comments").'</button><br/><br/></a>';
     $fout .= '<div id="comments_block">
         <a name="comments"></a>
         <div class="tal pl10 fs21"><b>'.lang("Latest comments").'</b><br/><br/></div>
         '.engine::print_comments($_SERVER["REQUEST_URI"]).'
         </div>';
     if($_SESSION["user"]["id"]=="1"){
-        $fout .= '<a href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["cat_id"].'&id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit article").'" /></a><br/><br/>';
+        $fout .= '<a vr-control id="edit-article-'.$data["id"].'" href="'.$_SERVER["DIR"].'/admin/?mode=content&cat_id='.$data["cat_id"].'&id='.$data["id"].'&act=edit"><input type="button" class="btn w280" value="'.lang("Edit article").'" /></a><br/><br/>';
     }
     $blocks = engine::print_more_articles($site, $data["url"]);
     if(!empty($blocks)){

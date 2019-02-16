@@ -3,20 +3,22 @@
 * Config.php generator.
 * @path /engine/code/config.php
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
+require_once("engine/nodes/config.php");
 if(!empty($_POST["admin_email"])){
-    if(mysql_connect($_POST["server"], 
+    $link = mysqli_connect($_POST["server"], 
         $_POST["login"],
-        $_POST["pass"])){
-        if(mysql_select_db($_POST["db"])){ 
+        $_POST["pass"]);
+    if($link){
+        if(mysqli_select_db($link, $_POST["db"])){ 
             if(!empty($_SERVER["HTTP_HOST"])&&
                 !empty($_SERVER["DOCUMENT_ROOT"])){
                 $query = 'SELECT * FROM `nodes_user` WHERE `id` = "1"';
-                $res = mysql_query($query);
-                $data = mysql_fetch_array($res);
+                $res = mysqli_query($link, $query);
+                $data = mysqli_fetch_array($res);
                 $email = strtolower($_POST["admin_email"]);
                 $pass = md5(trim(strtolower($_POST["admin_pass"]))); 
                 if($email==$data["email"]&&$pass==$data["pass"]){
@@ -26,20 +28,21 @@ if(!empty($_POST["admin_email"])){
 /**
 * Config file.
 *
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 ';
 $source = '/**'."\n".'
 * Framework config file'."\n".'
 */'."\n".'
 $_SERVER["config"] = array('."\n".'
-    "name" => "'. mysql_real_escape_string($_POST["name"]).'",'."\n".'
-    "sql_server" => "'. mysql_real_escape_string($_POST["mysql_server"]).'",'."\n".'
-    "sql_login" => "'. mysql_real_escape_string($_POST["mysql_login"]).'",'."\n".'
-    "sql_pass" => "'. mysql_real_escape_string($_POST["mysql_pass"]).'",'."\n".'
-    "sql_db" => "'. mysql_real_escape_string($_POST["mysql_db"]).'"'."\n".'
+    "name" => "'. mysqli_real_escape_string($link,$_POST["name"]).'",'."\n".'
+    "sql_server" => "'. mysqli_real_escape_string($link,$_POST["mysql_server"]).'",'."\n".'
+    "sql_login" => "'. mysqli_real_escape_string($link,$_POST["mysql_login"]).'",'."\n".'
+    "sql_pass" => "'. mysqli_real_escape_string($link,$_POST["mysql_pass"]).'",'."\n".'
+    "sql_db" => "'. mysqli_real_escape_string($link,$_POST["mysql_db"]).'",'."\n".'
+    "crypt_salt" => "'.$_SERVER["config"]["crypt_salt"].'"'."\n".'
 );';     
                     if(intval($_POST["encoding"])){
                         $encode = base64_encode($source);

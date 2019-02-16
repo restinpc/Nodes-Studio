@@ -3,9 +3,9 @@
 * Error file.
 * @path /engine/code/error.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/session.php");
 $fout .= '
@@ -79,9 +79,9 @@ $fout .= '
         <span class="error_text">'.lang("Access denied").'</span>
         <br/><br/><br/>';  
             if(empty($_SESSION["user"])){
-                $fout .= '<span id="redirect"><a href="'.$_SERVER["DIR"].'/login">'.lang("Login to website").'</a></span><br/>';
+                $fout .= '<span id="redirect"><a vr-control id="error-login" href="'.$_SERVER["DIR"].'/login">'.lang("Login to website").'</a></span><br/>';
             }else{
-                $fout .= '<span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>';
+                $fout .= '<span id="redirect"><a vr-control id="error-home-page" href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>';
             }
         }else if(isset($_GET["500"])){
             if(empty($_POST["jQuery"])){
@@ -91,9 +91,9 @@ $fout .= '
         <span class="error_code">500</span><br/><br/>
         <span class="error_text">'.lang("Internal Server Error").'</span>
         <br/><br/><br/>
-        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
+        <span id="redirect"><a vr-control id="error-home-page" href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
 <!--
-MySQL -> '.mysql_error().'; 
+MySQL -> '.mysqli_error($_SERVER["sql_connection"]).'; 
 PHP -> '.print_r(error_get_last(), 1).';
 -->
         ';  
@@ -105,7 +105,7 @@ PHP -> '.print_r(error_get_last(), 1).';
         <span class="error_code">404</span><br/><br/>
         <span class="error_text">'.lang("Page not found").'</span>
         <br/><br/><br/>
-        <span id="redirect"><a href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
+        <span id="redirect"><a vr-control id="error-home-page" href="'.$_SERVER["DIR"].'/">'.lang("Back to Home Page").'</a></span><br/>
                 ';
         }
         $fout .= '

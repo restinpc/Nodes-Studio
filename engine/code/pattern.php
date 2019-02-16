@@ -3,9 +3,9 @@
 * Playbacker of user sessions.
 * @path /engine/code/pattern.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -75,12 +75,12 @@ body{
         <div class="blind">&nbsp</div>';
     $query = 'SELECT * FROM `nodes_attendance` WHERE `token` = "'.$_GET["token"].'" ORDER BY `date` ASC';
     $res = engine::mysql($query);
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($page_time == 0) 
             $page_time = $data["date"];
         $query = 'SELECT * FROM `nodes_cache` WHERE `id` = "'.$data["cache_id"].'"';
         $r = engine::mysql($query);
-        $page = mysql_fetch_array($r);
+        $page = mysqli_fetch_array($r);
         $script_x = '
             function function'.($function_id).'(){
             ';
@@ -88,7 +88,7 @@ body{
         $query = 'SELECT * FROM `nodes_pattern` WHERE `attendance_id` = "'.$data["id"].'" ORDER BY `date` ASC';
         $rr = engine::mysql($query);
         $session_time = 0;
-        while($d = mysql_fetch_array($rr)){
+        while($d = mysqli_fetch_array($rr)){
             if($min_time == 0){
                 $min_time = $d["date"];
             }

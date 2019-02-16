@@ -1,4 +1,4 @@
-<?php
+<?php /* Nodes Studio 2.0.8 script. Do not edit directly. 10/11/2018 */
 /**
 * Bootstrap template file.
 * @path /template/bootstrap/template.php
@@ -33,13 +33,19 @@ $header = '
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="/content" title="'.lang("Content").'">
+                    <a href="'.$_SERVER["DIR"].'/aframe/panorama" title="'.lang("Panoramas").'">
+                        <noindex class="material-icons">3d_rotation</noindex> 
+                        <span class="navigation_caption">'.lang("Panoramas").'</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="'.$_SERVER["DIR"].'/content" title="'.lang("Content").'">
                         <noindex class="material-icons">apps</noindex> 
                         <span class="navigation_caption">'.lang("Content").'</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/product" title="'.lang("Products").'">
+                    <a href="'.$_SERVER["DIR"].'/product" title="'.lang("Products").'">
                         <noindex class="material-icons">credit_card</noindex> 
                         <span class="navigation_caption">'.lang("Products").'</span>
                     </a>
@@ -129,6 +135,7 @@ $footer .= '
     <div class="container footer_top">
         <a class="footer-brand" href="/">'.$this->configs["name"].'</a>
         <ul class="pull-center">
+            <li><a href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a></li> 
             <li><a href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a></li>  
             <li><a href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a></li>    
             <li><a href="'.$_SERVER["DIR"].'/privacy_policy">'.lang("Privacy Policy").'</a></li>

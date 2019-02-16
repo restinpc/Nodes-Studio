@@ -3,9 +3,9 @@
 * Do not edit directly.
 * @path /script/uploader.source.js
 *
-* @name    Nodes Studio    @version 2.0.8
-* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @name    Nodes Studio    @version 3.0.0.1
+* @author  Alexandr Vorkunov  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 //------------------------------------------------------------------------------
 /**
@@ -65,20 +65,17 @@ function drag(e){
         document.getElementById("l").value = posx-32;
     }else if(drag_mode == 2){
         var width1 = posx - parseInt(document.getElementById("frame").style.left);
-        if(width1+parseInt(document.getElementById("frame").style.left)>document.getElementById("img").clientWidth+24){
-            width1 = document.getElementById("img").clientWidth-parseInt(document.getElementById("frame").style.left)+24;
-        }
         var height1 = width1 * (twidth/theight);
         if( (width1-26 <= document.getElementById("img").clientWidth-parseInt(document.getElementById("frame").style.left))
             && (height1-26 <= document.getElementById("img").clientHeight-parseInt(document.getElementById("frame").style.top))
-            &&  height1 >= theight/2  && width1 >= twidth/2 )
+              && height1 >= theight/scale  && width1 >= twidth/scale  ) 
         {
             width = width1+4;
             height = height1+4;
             document.getElementById("frame").style.width = width+"px";
             document.getElementById("frame").style.height = height+"px";   
-            document.getElementById("w").value = width;
-            document.getElementById("h").value = height;
+            document.getElementById("w").value = width*scale;
+            document.getElementById("h").value = height*scale;
         }
     }else{
         fx = 0;
@@ -169,9 +166,8 @@ function UploadFile(file) {
     if (location.host.indexOf("sitepointstatic") >= 0) return;
     if( $id("fileselect").value != "") return;
     var xhr = new XMLHttpRequest();
-    if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/jpg" || file.type == "image/gif" || file.type == "image/png")) {
+    if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/jpg" || file.type == "image/gif" || file.type == "image/png") && file.size <= $id("MAX_FILE_SIZE").value) {
         var fname = file.name;
-        console.log(fname);
         xhr.onreadystatechange = function(e) {
             if (xhr.readyState == 4) {
                 if(xhr.responseText == "error"){
@@ -179,7 +175,7 @@ function UploadFile(file) {
                     document.getElementById("filedrag").style.display="none";
                     alert(no_drag_drop);
                 }else{
-                    document.getElementById("new_image").value=xhr.responseText;
+                    document.getElementById("new_image").value=fname;
                     document.getElementById("new_image_form").submit();
                 }
             }
@@ -190,7 +186,6 @@ function UploadFile(file) {
         xhr.setRequestHeader("HTTP_X_FILENAME", file.name);
         xhr.send(file);
         document.getElementById("filedrag").innerHTML = uploading+".."; 
-        console.log("done");
     }
 }
 //------------------------------------------------------------------------------

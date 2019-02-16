@@ -3,9 +3,9 @@
 * Print account header block.
 * @path /engine/core/account/print_header.php
 * 
-* @name    Nodes Studio    @version 2.0.3
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $site->title - Page title.
 * @var $site->content - Page HTML data.
@@ -23,7 +23,7 @@
 function print_header($site, $id){
     $query = 'SELECT * FROM `nodes_user` WHERE `id` = "'.$id.'"';
     $res = engine::mysql($query);
-    $user = mysql_fetch_array($res);
+    $user = mysqli_fetch_array($res);
     if($user["online"]>date("U")-300){
         $online = '<b>'.lang("Online").'</b><br/>';
     }else{

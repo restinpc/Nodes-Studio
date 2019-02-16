@@ -3,9 +3,9 @@
 * Product purchase processor.
 * @path /engine/code/order.php
 *
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 require_once("engine/nodes/headers.php");
 require_once("engine/nodes/session.php");
@@ -23,12 +23,12 @@ if(empty($_SESSION["user"]["id"])){
     engine::mysql($query);
     $query = 'SELECT * FROM `nodes_order` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     foreach($_SESSION["products"] as $key=>$value){
         if($value>0){
             $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$key.'"';
             $r = engine::mysql($query);
-            $d = mysql_fetch_array($r);
+            $d = mysqli_fetch_array($r);
             $query = 'INSERT INTO `nodes_product_order`(product_id, order_id, price, count, status, date) '
             . 'VALUES("'.$key.'", "'.$data["id"].'", "'.$d["price"].'", "'.$value.'", "0", "'.date("U").'")';
             engine::mysql($query);
@@ -56,7 +56,7 @@ if(empty($_SESSION["user"]["id"])){
             . ' `street2` = "'.$street2.'" AND'
             . ' `phone` = "'.$phone.'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data)){    
         $shipment = intval($data["id"]);
     }else{
@@ -65,7 +65,7 @@ if(empty($_SESSION["user"]["id"])){
         engine::mysql($query);  
         $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $shipment = $data["id"];
     }
     $query = 'UPDATE `nodes_order` SET `shipping` = "'.$shipment.'" WHERE `id` = "'.$_SESSION["order_confirm"].'"';
@@ -74,7 +74,7 @@ if(empty($_SESSION["user"]["id"])){
 }else if(!empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
     $query = 'SELECT * FROM `nodes_order` WHERE `id` = "'.intval($_SESSION["order_confirm"]).'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if($data["status"]){
         unset($_SESSION["order_confirm"]);
         unset($_SESSION["shipping_confirm"]);
@@ -92,19 +92,19 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         if($value>0){
             $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$key.'"';
             $res = engine::mysql($query);
-            $product = mysql_fetch_array($res);
+            $product = mysqli_fetch_array($res);
             $price += $product["price"];
             $query = 'SELECT * FROM `nodes_shipping` WHERE `id` = "'.$product["shipping"].'"';
             $res = engine::mysql($query);
-            $shipping = mysql_fetch_array($res);
+            $shipping = mysqli_fetch_array($res);
             $images = explode(";", $product["img"]);
             $fout .= '<div class="order_detail">
             <div class="order_detail_image" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
                 <b class="fs18">'.$product["title"].'</b><br/><br/>
                 <font class="fs18">$ '.$product["price"].'</font><br/><br/>
-                '.lang("Shipping from").': <a title="'.$shipping["country"].', '.$shipping["state"].', '.$shipping["city"].', '.$shipping["street1"].', '.$shipping["street2"].' ">'.$shipping["country"].'</a><br/>
+                '.lang("Shipping from").': <a vr-control id="link-shipping" onClick=\'alert("'.$shipping["country"].', '.$shipping["state"].', '.$shipping["city"].', '.$shipping["street1"].', '.$shipping["street2"].'");\' title="'.$shipping["country"].', '.$shipping["state"].', '.$shipping["city"].', '.$shipping["street1"].', '.$shipping["street2"].'">'.$shipping["country"].'</a><br/>
                 <div class="order_detail_button">
-                    <input type="button" class="btn small w150" name="remove" value="'.lang("Remove product").'" onClick=\'if(confirm("'.lang("Are you sure?").'"))remove_from_bin("'.$key.'");\' />
+                    <input vr-control id="remove-product-'.$key.'" type="button" class="btn small w150" name="remove" value="'.lang("Remove product").'" onClick=\'if(confirm("'.lang("Are you sure?").'"))remove_from_bin("'.$key.'");\' />
                 </div>
             <div class="clear"></div>
             </div>';
@@ -115,7 +115,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         $fout .= '<br/>'
             . '<div class="tar"><b class="fs21">'.lang("Total price").': $'.$price.'</b></div>'
             . '<br/><br/>'
-            . '<input type="submit" class="btn w280" value="'.lang("Next").'" />';
+            . '<input id="button-next" vr-control type="submit" class="btn w280" value="'.lang("Next").'" />';
     }
     $fout .= '
         </form>
@@ -125,7 +125,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
     echo '<div class="fs21 tal"><b>'.lang("Step").' 3 \ 5</b></div><br/>';
     $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $fout .= '<h1>'.lang("Shipping").'</h1><br/><br/>
         <style>
         .country-select{
@@ -134,16 +134,16 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         </style>
     <form method="POST">
         <input type="hidden" name="shipping_confirm" value="1" />
-        <input type="text" class="input w280" placeHolder="'.lang("First name").'" name="fname" required value="'.$data["fname"].'" /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("Last name").'" name="lname" required value="'.$data["lname"].'" /><br/><br/>
-        <input type="text" placeHolder="'.lang("Country").'" id="country_selector" name="country" required value="'.$data["country"].'" class="input w280"   /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("State").'" name="state" value="'.$data["state"].'" required /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("City").'" name="city" required value="'.$data["city"].'"  /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("Zip code").'" name="zip" required value="'.$data["zip"].'"  /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("Street").' 1" name="street1" required value="'.$data["street1"].'"  /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("Street").' 2" name="street2" value="'.$data["street2"].'"  /><br/><br/>
-        <input type="text" class="input w280" placeHolder="'.lang("Phone number").'" name="phone" required value="'.$data["phone"].'"  /><br/><br/>
-        <input type="submit" class="btn w280" value="'.lang("Next").'" />
+        <input vr-control id="input-fname" type="text" class="input w280" placeHolder="'.lang("First name").'" name="fname" required value="'.$data["fname"].'" /><br/><br/>
+        <input vr-control id="input-lname" type="text" class="input w280" placeHolder="'.lang("Last name").'" name="lname" required value="'.$data["lname"].'" /><br/><br/>
+        <input vr-control id="input-country" type="text" placeHolder="'.lang("Country").'" id="country_selector" name="country" required value="'.$data["country"].'" class="input w280"   /><br/><br/>
+        <input vr-control id="input-state" type="text" class="input w280" placeHolder="'.lang("State").'" name="state" value="'.$data["state"].'" required /><br/><br/>
+        <input vr-control id="input-city" type="text" class="input w280" placeHolder="'.lang("City").'" name="city" required value="'.$data["city"].'"  /><br/><br/>
+        <input vr-control id="input-zip" type="text" class="input w280" placeHolder="'.lang("Zip code").'" name="zip" required value="'.$data["zip"].'"  /><br/><br/>
+        <input vr-control id="input-s1" type="text" class="input w280" placeHolder="'.lang("Street").' 1" name="street1" required value="'.$data["street1"].'"  /><br/><br/>
+        <input vr-control id="input-s2" type="text" class="input w280" placeHolder="'.lang("Street").' 2" name="street2" value="'.$data["street2"].'"  /><br/><br/>
+        <input vr-control id="input-phone" type="text" class="input w280" placeHolder="'.lang("Phone number").'" name="phone" required value="'.$data["phone"].'"  /><br/><br/>
+        <input vr-control id="input-next" type="submit" class="btn w280" value="'.lang("Next").'" />
     </form><br/><br/>';
 }else if( !empty($_SESSION["user"]["id"])){
     if(!empty($_POST["checkout"])){
@@ -152,7 +152,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
                 . 'VALUES("'.$_SESSION["user"]["id"].'", "'.$_SESSION["order_confirm"].'", "'.  doubleval($_POST["checkout"]).'", "'.date("Y-m-d H:i:s").'")';
         engine::mysql($query);
         echo '<script>
-            window.location = "'.$_SERVER["DIR"].'/invoice.php?id='. mysql_insert_id().'";
+            window.location = "'.$_SERVER["DIR"].'/invoice.php?id='. mysqli_insert_id($_SERVER["sql_connection"]).'";
         </script>';
         die();
     }
@@ -164,14 +164,14 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
     $price = 0;
     $products = '<div class="order_detail_left">
         <b>'.lang("Order").'</b><br/><br/>';
-    while($data = mysql_fetch_array($res)){
+    while($data = mysqli_fetch_array($res)){
         if($data["count"]>0){
             $query = 'SELECT * FROM `nodes_product` WHERE `id` = "'.$data["product_id"].'"';
             $r = engine::mysql($query);
-            $product = mysql_fetch_array($r);
+            $product = mysqli_fetch_array($r);
             $query = 'SELECT * FROM `nodes_shipping` WHERE `id` = "'.$product["shipping"].'"';
             $r = engine::mysql($query);
-            $shipping = mysql_fetch_array($r);
+            $shipping = mysqli_fetch_array($r);
             $images = explode(";", $product["img"]);
             $products .= '<div class="order_detail">
             <div class="order_detail_preview" style="background-image: url('.$_SERVER["DIR"].'/img/data/thumb/'.$images[0].');">&nbsp;</div>
@@ -184,7 +184,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
     }$products .= '</div>';
     $query = 'SELECT * FROM `nodes_shipping` WHERE `user_id` = "'.$_SESSION["user"]["id"].'" ORDER BY `id` DESC LIMIT 0, 1';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $shipping = '<div class="order_detail_shipping">
         <b>'.lang("Shipping").'</b><br/><br/>
         '.lang("First name").': '.$data["fname"].'<br/><br/>
@@ -201,7 +201,7 @@ if(empty($_SESSION["order_confirm"]) && !empty($_SESSION["user"]["id"])){
         <h6>'.lang("Total price").': $'.$price.'</h6><br/><br/>
         <form method="POST">
             <input type="hidden" name="checkout" value="'.$price.'" />
-            <input type="submit" class="btn w280" value="'.lang("Checkout").'" />
+            <input id="input-checkout" vr-control type="submit" class="btn w280" value="'.lang("Checkout").'" />
         </form>';
     $fout .= '</div>';
 }

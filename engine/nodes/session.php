@@ -3,29 +3,21 @@
 * Framework session loader.
 * @path /engine/nodes/session.php
 * 
-* @name    Nodes Studio    @version 2.0.7
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
-ini_set('session.name', 'session_id');
-ini_set('session.gc_maxlifetime', 604800);
-ini_set('session.entropy_file', '/dev/urandom');
-ini_set('session.entropy_length', '512');
-if(empty($_SERVER["DIR"])) session_set_cookie_params(0, '/', '.'.$_SERVER["HTTP_HOST"]);
+$session_lifetime = 2592000;
+session_set_cookie_params($session_lifetime, '/', '.'.$_SERVER["HTTP_HOST"]);
 session_name('token');
 session_start();
 require_once("engine/nodes/mysql.php");
 if(!empty($_COOKIE["token"])){
-    if($_GET["mode"]=="logout"){
-        unset($_COOKIE['session_id']);
-        unset($_COOKIE['token']);
-        setcookie('token', null, -1, '/');
-        setcookie('session_id', null, -1, '/');
-    }else if(empty($_SESSION["user"])){
+    if(empty($_SESSION["user"])){
         $query = 'SELECT * FROM `nodes_user` WHERE `token` = "'.$_COOKIE["token"].'" '
                 . 'AND `ip` = "'.$_SERVER["REMOTE_ADDR"].'"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         if(!empty($data)){
             unset($data["pass"]);
             unset($data[5]);
@@ -35,7 +27,6 @@ if(!empty($_COOKIE["token"])){
         }
     }
 }else{
-    setcookie("token", session_id(), time() + 2592000, '/');
     $_COOKIE["token"] = session_id();
     if(!empty($_SESSION["user"])){
         $query = 'UPDATE `nodes_user` SET `token` = "'.session_id().'", '
@@ -48,13 +39,13 @@ if(!empty($_POST["template"])){
 }else if(empty($_SESSION["template"])){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "template"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $_SESSION["template"] = $template = $data["value"];
 }
 if(empty($_SESSION["Lang"])){ 
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "language"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $_SESSION["Lang"] = $data["value"];
 }
 if(!empty($_GET["lang"])){
@@ -65,16 +56,16 @@ if(!empty($_GET["lang"])){
 function lang($key){
     $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$key.'" AND `lang` = "'.$_SESSION["Lang"].'"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     if(!empty($data["value"])){
         return $data["value"];
     }else{
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "language"';
         $res = engine::mysql($query);
-        $data = mysql_fetch_array($res);
+        $data = mysqli_fetch_array($res);
         $query = 'SELECT * FROM `nodes_language` WHERE `name` LIKE "'.$key.'" AND `lang` = "en" AND `value` <> ""';
         $res = engine::mysql($query);
-        $d = mysql_fetch_array($res);
+        $d = mysqli_fetch_array($res);
         if(!empty($d)){
             return $d["value"];
         }else{
@@ -86,48 +77,69 @@ function lang($key){
 }
 $query = 'SELECT * FROM `nodes_config` WHERE `name` = "token_limit"';
 $res = engine::mysql($query);
-$data = mysql_fetch_array($res);
+$data = mysqli_fetch_array($res);
 $query = 'SELECT * FROM `nodes_attendance` WHERE `token` = "'.$_COOKIE["token"].'" ORDER BY `date` DESC LIMIT '.($data["value"]-1).', 1';
 $res = engine::mysql($query);
-$data= mysql_fetch_array($res);
+$data= mysqli_fetch_array($res);
 $date = $data["date"];
 if(date("U")-$date<60){
     die("Too many requests in this session. Try again after ".(60-(date("U")-$date))." seconds.");
 }else if(!empty($_SERVER["REMOTE_ADDR"]) && !intval($_SERVER["CRON"])){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "ip_limit"';
     $res = engine::mysql($query);
-    $data = mysql_fetch_array($res);
+    $data = mysqli_fetch_array($res);
     $query = 'SELECT * FROM `nodes_attendance` WHERE `ip` = "'.$_SERVER["REMOTE_ADDR"].'" ORDER BY `date` DESC LIMIT '.($data["value"]-1).', 1';
     $res = engine::mysql($query);
-    $data= mysql_fetch_array($res);
+    $data= mysqli_fetch_array($res);
     $date = $data["date"];
     if(date("U")-$date<60){
         die("Too many requests from your IP. Try again after ".(60-(date("U")-$date))." seconds.");
     }else{
         $query = 'SELECT * FROM `nodes_agent` WHERE `name` LIKE "'.$_SERVER["HTTP_USER_AGENT"].'"';
         $res = engine::mysql($query);
-        $agent = mysql_fetch_array($res);
+        $agent = mysqli_fetch_array($res);
         $is_bot = 0;
         if(!empty($agent)){ 
             $agent_id = $agent["id"];
             if($agent["bot"]) $is_bot = 1;
         }else{
-            $query = 'INSERT INTO `nodes_agent`(name, bot) VALUES("'.$_SERVER["HTTP_USER_AGENT"].'", "0")';
+            if(strpos($_SERVER["HTTP_USER_AGENT"], 'bot') || strpos($_SERVER["HTTP_USER_AGENT"], 'crawler')){
+                $bot = 1;
+            }else{
+                $bot = 0;
+            }
+            $query = 'INSERT INTO `nodes_agent`(name, bot) VALUES("'.$_SERVER["HTTP_USER_AGENT"].'", "'.$bot.'")';
             engine::mysql($query);
-            $agent_id = mysql_insert_id();
+            $agent_id = mysqli_insert_id($_SERVER["sql_connection"]);
         }
         $query = 'SELECT * FROM `nodes_referrer` WHERE `name` LIKE "'.$_SERVER["HTTP_REFERER"].'"';
         $res = engine::mysql($query);
-        $ref = mysql_fetch_array($res);
+        $ref = mysqli_fetch_array($res);
         if(!empty($agent)){ 
             $ref_id = $ref["id"];
         }else if(!empty($_SERVER["HTTP_REFERER"])){
             if(strpos($_SERVER["HTTP_REFERER"], $_SERVER["HTTP_HOST"]) === false){
                 $query = 'INSERT INTO `nodes_referrer`(name) VALUES("'.$_SERVER["HTTP_REFERER"].'")';
                 engine::mysql($query);
-                $ref_id = mysql_insert_id();
+                $ref_id = mysqli_insert_id($_SERVER["sql_connection"]);
             }else $ref_id = -1;
         }else $ref_id = 0;
+        if(empty($_SESSION["user"]["name"]) && empty($_POST["nocache"])){
+            $query = 'SELECT * FROM `nodes_anonim` WHERE `token` = "'.session_id().'"';
+            $res = engine::mysql($query);
+            $data = mysqli_fetch_array($res);
+            if(!empty($data)){
+                $_SESSION["user"]["name"] = lang("Anonim").' '.$data["id"];
+                $_SESSION["user"]["anonim"] = $data["id"];
+            }else{
+                $query = 'INSERT INTO `nodes_anonim`(`token`, `ip`, `date`) '
+                        . 'VALUES("'.session_id().'", "'.$_SERVER["REMOTE_ADDR"].'", "'.date("Y-m-d H:i:s").'")';
+                engine::mysql($query);
+                $anonim_id = mysqli_insert_id($_SERVER["sql_connection"]);
+                $_SESSION["user"]["name"] = lang("Anonim").' '.$anonim_id;
+                $_SESSION["user"]["anonim"] = $anonim_id;
+            }
+        }
         if(strpos($_SERVER["SCRIPT_URI"], "/search")===false
             && strpos($_SERVER["SCRIPT_URI"], "/account")===false
             && strpos($_SERVER["SCRIPT_URI"], "/admin")===false

@@ -3,9 +3,9 @@
 * Do not edit directly.
 * @path /template/default/template.source.css
 *
-* @name    Nodes Studio    @version 2.0.8
+* @name    Nodes Studio    @version 3.0.0.1
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
-* @license http://www.apache.org/licenses/LICENSE-2.0 GNU Public License
+* @license http://www.apache.org/licenses/LICENSE-2.0
 */
 @charset "UTF-8";
 .input{
@@ -214,7 +214,7 @@ textarea{
 }
 #contentSection{
     padding-top: 80px;
-    min-height: 300px;
+    min-height: 600px;
     padding: 0px;
 }
 #contentSection .container{
