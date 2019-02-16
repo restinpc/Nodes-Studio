@@ -1,4 +1,4 @@
-# Nodes Studio - Web 2.0 Framework
+# Nodes Studio - WebVR Framework
 
 Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
