@@ -4,8 +4,6 @@ Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, M
 
 ![](https://github.com/restinpc/Nodes-Studio/blob/master/nodes.jpg?raw=true)
 
-#### Faster than Wordpress, smarter than Joomla, easier than Drupal. And it's Freeware!
-
 Nodes Studio is a library of interface elements (framework) with integrated content management system (CMS), which is one of the most successful solutions for web development today.
 
 Framework provides developers with an object-oriented representation of the site and a library of functions to work with it.
@@ -20,7 +18,7 @@ Integrated CMS allows to fully manage both the content of the site and its softw
 
 Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
-1. Download and extract the Nodes Studio [Archive][download] | [Mirror][mirror].
+1. Download and extract the Nodes Studio [Archive][download] | [Mirror 1][mirror] | [Mirror 2][mirror_2].
 
 2. Copy the contents of the folder /public_html to the root directory of the site.
 
@@ -46,6 +44,7 @@ If there are any questions or you need more information, please contact us via:
 [ru]: <http://nodes-tech.ru>
 [download]: <http://nodes-studio.com/source/nodes_studio.zip>
 [mirror]: <https://drive.google.com/open?id=0B5PrSx06jievRVdHWHZDdUU3UmM>
+[mirror_2]: <https://www.dropbox.com/sh/d7z6lkiztlv4ghz/AABGAibKZt4fyr2tPLOoTo8Xa?dl=0>
 [vk]: <https://vk.com/nodes_studio>
 [fb]: <https://www.facebook.com/groups/nodesstudio/>
 [fl]: <https://www.freelancer.com/u/restinpc.html>
