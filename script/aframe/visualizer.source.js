@@ -3,7 +3,7 @@
 * Do not edit directly.
 * @path /script/aframe/visualizer.source.js
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 3.0.0.2
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -16,8 +16,6 @@ var mediaStreamSource = null;
 var fps = 0;
 var last_timestamp = 0;
 var color = new Array(128, 128, 128);
-var order = new Array(parseInt(Math.random()*2), parseInt(Math.random()*2), parseInt(Math.random()*2));
-var maxFrequency = new Array(0, 0, 0);
 var radius = 0;
 var audio_image_id = 1;
 var opacity_interval = null;
@@ -38,7 +36,7 @@ function rgbToHex(rgb) {
 
 function didntGetStream() {
     try{
-        audio = new Audio('/res/sounds/dmt.mp3');
+        audio = new Audio(root_dir+'/res/sounds/dmt.mp3');
         audio.play();
     }catch(E){}
     try{
@@ -104,6 +102,7 @@ function show_sphere(){
 function start_visualizer(){
     if(!is_start) is_start = 1;
     else return;
+    $id('nodes_scene').enterVR();
     setInterval(change_image, 30000);
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     audioContext = new AudioContext();
@@ -127,23 +126,30 @@ function start_visualizer(){
                 }
             }, gotStream, didntGetStream);
     } catch (e) {
-        console.log('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
         document.getElementById("dmt").play();
     }
-}
-
-function swap_color(){
-    try{
-        var red_color = parseInt(frequencyData[0]/maxFrequency[0]*255);
-        var green_color = parseInt(frequencyData[1]/maxFrequency[1]*255);
-        var blue_color = parseInt(frequencyData[2]/maxFrequency[2]*255);
-        document.querySelector("#sky").setAttribute('color', rgbToHex('rgb('+red_color+','+green_color+','+blue_color+')'));
-    }catch(e){}
 }
 
 delete AFRAME.components['nodes-camera'];
 AFRAME.registerComponent("nodes-camera", {
     tick: function () {
+    	try{
+            for(var i = 0; i < 3; i++){
+                if(color[i] < frequencyData[i] && color[i] < 245){
+                    color[i]+=10;
+                }else if(color[0] > frequencyData[i] && color[i] > 0){
+                    color[i]-=1;
+                }
+            }
+            var sum = color[0]+color[1]+color[2];
+            var red_color = parseInt(color[0]/sum *450);
+            var green_color = parseInt(color[1]/sum *450);
+            var blue_color = parseInt(color[2]/sum *450);
+            if(red_color > 255) red_color = 255;
+            if(green_color > 255) green_color = 255;
+            if(blue_color > 255) blue_color = 255;
+            document.querySelector("#sky").setAttribute('color', rgbToHex('rgb('+red_color+','+green_color+','+blue_color+')'));
+    	}catch(e){}
         if(last_timestamp == 0){
             last_timestamp = document.querySelector('a-scene').time;
         }else{
@@ -151,7 +157,9 @@ AFRAME.registerComponent("nodes-camera", {
             last_timestamp = document.querySelector('a-scene').time;
         }
         try{
-            radius = (radius*49+(frequencyData[16]/10))/50;
+            radius = (radius*99+(frequencyData[128]/10))/100;
+	    if(radius < 5) radius = 5;
+            if(radius > 15) radius = 15;
             document.querySelector("#sphere").setAttribute('radius', radius);
         }catch(e){}
         
@@ -160,9 +168,3 @@ AFRAME.registerComponent("nodes-camera", {
         document.querySelector("#sphere").setAttribute('rotation', (rotation.x-camera.x)+" "+(rotation.y-camera.y)+" "+(rotation.z-camera.z));
     }
 });
-
-setInterval(function(){
-    
-    
-}, 100);
-
