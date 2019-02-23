@@ -14,7 +14,7 @@ Integrated CMS allows to fully manage both the content of the site and its softw
 
 [Complete technical description][en].
 
-[РџРѕР»РЅРѕРµ С‚РµС…РЅРёС‡РµСЃРєРѕРµ РѕРїРёСЃР°РЅРёРµ][ru].
+[Полное техническое описание][ru].
 
 ## Installation
 
@@ -40,17 +40,16 @@ Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
 If there are any questions or you need more information, please contact us via:
 
-[Facebook][fb] | [Vkontakte][vk] | [Twitter][tw] | [Google+][gp] | [Freelancer][fl] | [LinkedIn][li] | [Github][gh] | [Email][email]
+[Facebook][fb] | [Vkontakte][vk] | [Freelancer][fl] | [LinkedIn][li] | [Github][gh] | [WhatsApp][whatsapp] | [Email][email]
 
 [en]: <http://nodes-studio.com>
 [ru]: <http://nodes-tech.ru>
 [download]: <http://nodes-studio.com/source/nodes_studio.zip>
 [mirror]: <https://drive.google.com/open?id=0B5PrSx06jievRVdHWHZDdUU3UmM>
 [vk]: <https://vk.com/nodes_studio>
-[fb]: <https://www.facebook.com/nodesstudio/>
+[fb]: <https://www.facebook.com/groups/nodesstudio/>
 [fl]: <https://www.freelancer.com/u/restinpc.html>
-[tw]: <https://twitter.com/nodes_studio>
-[gp]: <https://plus.google.com/110848129975428000891>
 [gh]: <https://github.com/restinpc>
 [li]: <https://www.linkedin.com/in/nodes-studio>
 [email]: <mailto:developing@nodes-tech.ru>
+[whatsapp]: <https://api.whatsapp.com/send?phone=79192168386>

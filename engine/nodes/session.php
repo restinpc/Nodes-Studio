@@ -83,6 +83,7 @@ $res = engine::mysql($query);
 $data= mysqli_fetch_array($res);
 $date = $data["date"];
 if(date("U")-$date<60){
+    header('HTTP/ 429 Too Many Requests', true, 429);
     die("Too many requests in this session. Try again after ".(60-(date("U")-$date))." seconds.");
 }else if(!empty($_SERVER["REMOTE_ADDR"]) && !intval($_SERVER["CRON"])){
     $query = 'SELECT * FROM `nodes_config` WHERE `name` = "ip_limit"';
@@ -93,6 +94,7 @@ if(date("U")-$date<60){
     $data= mysqli_fetch_array($res);
     $date = $data["date"];
     if(date("U")-$date<60){
+        header('HTTP/ 429 Too Many Requests', true, 429);
         die("Too many requests from your IP. Try again after ".(60-(date("U")-$date))." seconds.");
     }else{
         $query = 'SELECT * FROM `nodes_agent` WHERE `name` LIKE "'.$_SERVER["HTTP_USER_AGENT"].'"';
@@ -150,12 +152,13 @@ if(date("U")-$date<60){
             if(empty($_SERVER["SCRIPT_URI"])) $_SERVER["SCRIPT_URI"]='/';
             $cache = new cache();
             $cache_id = $cache->page_id();
+            $date_now = date("U");
             if($cache_id && !$is_bot){
                 $query = 'INSERT INTO `nodes_attendance`(cache_id, user_id, token, ref_id, ip, agent_id, date, display) '
-                        . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.session_id().'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "'.intval($_SESSION["display"]).'")';
+                        . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.session_id().'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.$date_now.'", "'.intval($_SESSION["display"]).'")';
             }else if($cache_id){
                 $query = 'INSERT INTO `nodes_attendance`(cache_id, user_id, token, ref_id, ip, agent_id, date, display) '
-                . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.session_id().'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.date("U").'", "0")';     
+                . 'VALUES("'.$cache_id.'", "'.intval($_SESSION["user"]["id"]).'", "'.session_id().'", "'.$ref_id.'", "'.$_SERVER["REMOTE_ADDR"].'", "'.$agent_id.'", "'.$date_now.'", "0")';     
             }
             engine::mysql($query);
         }  

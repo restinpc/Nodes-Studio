@@ -61,7 +61,10 @@ $fout .= '
             $fout .= '
         <span class="error_code">504</span><br/><br/>
         <span class="error_text">'.lang("Gateway Timeout").'</span>
-                ';  
+                ';
+            if(empty($_POST["jQuery"])){
+                header("HTTP/1.0 504 Gateway Timeout");
+            }
         }else if(isset($_GET["204"])){
             if(empty($_POST["jQuery"])){
                 header("HTTP/1.0 204 No Content");
@@ -72,7 +75,11 @@ $fout .= '
                 ';  
         }else if(isset($_GET["401"])){
             if(empty($_POST["jQuery"])){
-                header("HTTP/1.0 401 No Content");
+                if(empty($_SESSION["user"]["id"])){
+                    header("HTTP/1.0 401 Unauthorized");
+                }else{
+                    header("HTTP/1.0 403 Forbidden"); 
+                }
             }
             $fout .= '
         <span class="error_code">401</span><br/><br/>
