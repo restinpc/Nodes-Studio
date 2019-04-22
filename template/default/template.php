@@ -3,7 +3,7 @@
 * Default template file.
 * @path /template/default/template.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
@@ -35,7 +35,6 @@ if(!isset($_POST["jQuery"])){
         </div>
         <div id="nav">
         <ul>
-            <li><a vr-control id="link-content" href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a></li>
             <li><a vr-control id="link-content" href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a></li>
             <li><a vr-control id="link-products" href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a></li>
             '; 
@@ -73,7 +72,6 @@ if(!isset($_POST["jQuery"])){
 <section id="bigNav">
 <div class="container">
     <ul>
-        <li><a vr-control id="link-mobile-content" href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a></li>
         <li><a vr-control id="link-mobile-content" href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a></li>
         <li><a vr-control id="link-mobile-products" href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a></li>';
     if(empty($_SESSION["user"]["id"])){
@@ -120,12 +118,7 @@ $footer = '
             $footer .= '<a itemprop="sameAs" href="'.$this->configs["fb_link"].'" target="_blank">
                 <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" alt="Facebook"/></div>
                 <div class="pt7" title="'.lang("Connect us at").' Facebook">Facebook</div>
-            </a><div class="clear h20"></div>';
-        if(!empty($this->configs["gp_link"]))  
-            $footer .= '<a itemprop="sameAs" href="'.$this->configs["gp_link"].'" target="_blank">
-                <div class="social_img"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" alt="Google+"/></div>
-                <div class="pt7" title="'.lang("Connect us at").' Facebook">Google+</div>
-            </a><div class="clear h7"></div>';  
+            </a><div class="clear h20"></div>'; 
         $footer .= '
         </div>
         <br/>

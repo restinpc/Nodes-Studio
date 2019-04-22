@@ -33,12 +33,6 @@ $header = '
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="'.$_SERVER["DIR"].'/aframe/panorama" title="'.lang("Panoramas").'">
-                        <noindex class="material-icons">3d_rotation</noindex> 
-                        <span class="navigation_caption">'.lang("Panoramas").'</span>
-                    </a>
-                </li>
-                <li>
                     <a href="'.$_SERVER["DIR"].'/content" title="'.lang("Content").'">
                         <noindex class="material-icons">apps</noindex> 
                         <span class="navigation_caption">'.lang("Content").'</span>
@@ -68,7 +62,7 @@ if(empty($_SESSION["user"]["id"])){
                     </a>
                 </li>
                 <li>
-                    <a target="_parent" onClick="event.preventDefault(); login(); hide_menu();" id="b2" href="'.$_SERVER["DIR"].'/login" class="btn btn-round">
+                    <a target="_parent" id="b2" href="'.$_SERVER["DIR"].'/login" class="btn btn-round">
                         <noindex class="material-icons">account_circle</noindex> '.lang("Login").'
                     </a>
                 </li>
@@ -135,7 +129,6 @@ $footer .= '
     <div class="container footer_top">
         <a class="footer-brand" href="/">'.$this->configs["name"].'</a>
         <ul class="pull-center">
-            <li><a href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a></li> 
             <li><a href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a></li>  
             <li><a href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a></li>    
             <li><a href="'.$_SERVER["DIR"].'/privacy_policy">'.lang("Privacy Policy").'</a></li>
@@ -156,14 +149,6 @@ $footer .= '
             <li>
                 <a href="'.$this->configs["fb_link"].'" title="Facebook" target="_blank" class="btn btn-just-icon btn-simple">
                     <i class="fa fa-facebook-square"></i>
-                </a>
-            </li>';
-        }
-        if(!empty($this->configs["gp_link"])){
-           $footer .= ' 
-            <li>
-                <a href="'.$this->configs["gp_link"].'" title="Google+" target="_blank" class="btn btn-just-icon btn-simple">
-                    <i class="fa fa-google-plus"></i>
                 </a>
             </li>';
         }

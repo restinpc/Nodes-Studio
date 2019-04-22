@@ -3,7 +3,7 @@
 * Print account settings page.
 * @path /engine/core/account/print_settings.php
 * 
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
@@ -126,17 +126,12 @@ function print_settings($site){
         $query = 'SELECT * FROM `nodes_config` WHERE `name` = "tw_key"';
         $res = engine::mysql($query);
         $tw_key = mysqli_fetch_array($res);
-        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "gp_id"';
-        $res = engine::mysql($query);
-        $gp_id = mysqli_fetch_array($res);
         if(!empty($fb_id["value"])||
             !empty($tw_key["value"])||
-            !empty($gp_id["value"])||
             !empty($vk["value"])){
             $fout .= '<div class="settings_social">'.lang("Connect with social network").'<br/><br/>';
             if(!empty($fb_id["value"])) $fout .= '<a rel="nofollow" target="_parent"  href="'.$_SERVER["DIR"].'/account.php?mode=social&method=fb" class="settings_fb"><img src="'.$_SERVER["DIR"].'/img/social/fb.png" title="Facebook"/></a>';
             if(!empty($tw_key["value"])) $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=tw" class="m15"><img src="'.$_SERVER["DIR"].'/img/social/tw.png" title="Twitter"/></a>';
-            if(!empty($gp_id["value"])) $fout .= '<a rel="nofollow" target="_parent" href="'.$_SERVER["DIR"].'/account.php?mode=social&method=gp" class="m15"><img src="'.$_SERVER["DIR"].'/img/social/gp.png" title="Google+"/></a>';
             if(!empty($vk["value"])) $fout .= '<a rel="nofollow" target="_parent" href="https://oauth.vk.com/authorize?client_id='.$vk["value"].'&scope=notify&redirect_uri='.  urlencode($_SERVER["PUBLIC_URL"].'/account.php?mode=social&method=vk').'&display=page&response_type=token" class="settings_vk"><img src="'.$_SERVER["DIR"].'/img/social/vk.png" title="VK"/></a>';
             $fout .= '</div>';
         }

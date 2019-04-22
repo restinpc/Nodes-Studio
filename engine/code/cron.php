@@ -3,7 +3,7 @@
 * Crontab system script.
 * @path /engine/code/cron.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -80,26 +80,6 @@ if(!$flag){
 }
 //------------------------------------------------------------------------------
 /*
-* Checks for updates once a day.
-*/
-if(!$flag){
-    $query = 'SELECT * FROM `nodes_config` WHERE `name` = "autoupdate"';
-    $res = engine::mysql($query);
-    $data = mysqli_fetch_array($res);
-    if($data["value"]){
-        $query = 'SELECT * FROM `nodes_config` WHERE `name` = "checkupdate"';
-        $res = engine::mysql($query);
-        $data = mysqli_fetch_array($res);
-        if(intval($data["value"])<=date("U")-86400){
-            $flag = 3;
-            require_once("engine/code/update.php");
-            $query = 'UPDATE `nodes_config` SET `value` = "'.date("U").'" WHERE `name` = "checkupdate"';
-            engine::mysql($query);
-        }
-    }
-}
-//------------------------------------------------------------------------------
-/*
 * Unlinks temp images once a day.
 */
 if(!$flag){
@@ -107,7 +87,7 @@ if(!$flag){
     $res = engine::mysql($query);
     $data = mysqli_fetch_array($res);
     if($data["value"]<date("U")-86400){
-        $flag = 5;
+        $flag = 4;
         $images = array();
         $query = 'SELECT * FROM  `nodes_product`';
         $res = engine::mysql($query);
@@ -213,7 +193,7 @@ if(!$flag){
         $data = mysqli_fetch_array($res);
         $date = intval($data["value"])+$interval;
         if($date < date("U")){
-            $flag = 6;
+            $flag = 5;
             $dir = $root.'/backup';
             $count = 0;
             $first = 0;
@@ -276,7 +256,7 @@ if(!$flag){
         $res = engine::mysql($query);
         while($data = mysqli_fetch_array($res)){
             if($data["date"]<=intval(date("U")-$data["interval"])){
-                $flag = 7;
+                $flag = 6;
                 $url = $data["url"];
                 cache::update_cache($url,0,$data["lang"]);
             }
@@ -306,7 +286,7 @@ if(!$flag){
         $query = 'SELECT * FROM `nodes_cache` WHERE `title` = "" AND `url` NOT LIKE "cron.php" AND `url` LIKE "%'.$_SERVER["HTTP_HOST"].'%" ORDER BY `date` ASC LIMIT 0, 1';
         $res = engine::mysql($query);
         while($data = mysqli_fetch_array($res)){
-            $flag = 8;
+            $flag = 7;
             $url = $data["url"];
             $lang = $data["lang"];
             cache::update_cache($url,0,$lang);
@@ -331,7 +311,7 @@ if(!$flag){
                 $query = 'INSERT INTO `nodes_image`(name, color, width, height) 
                     VALUES("'.$file_name.'", "'.$color.'", "'.$size[0].'", "'.$size[1].'")';
                 engine::mysql($query);
-                $flag = 9;
+                $flag = 8;
                 break;
             }
         }

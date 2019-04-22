@@ -3,7 +3,7 @@
 * AJAX requsts processor.
 * @path /engine/code/bin.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -33,19 +33,6 @@ if(!empty($_POST["id"])){
     if($count){
         echo engine::print_cart($count);
     }
-}else if(intval($_POST["scene"])>0){
-    $fout = engine::curl_get_query($_SERVER["HTTP_HOST"].'/aframe/panorama/'.$_POST["scene"], 1);
-    preg_match_all('#(<a-scene.*?>.*</a-scene>)#', $fout, $m);
-    if(!empty($m[1][0])){ 
-        echo json_encode(engine::html_to_obj($m[1][0]));
-    }
-    die();
-}else if(intval($_POST["scene_reset"])>0 && $_SESSION["user"]["admin"] == 1){
-    $id = intval($_POST["scene_reset"]);
-    $query = 'DELETE FROM `nodes_vr_object` WHERE `scene_id` = "'.$id.'"';
-    engine::mysql($query);
-    $query = 'DELETE FROM `nodes_vr_object` WHERE `scene_id` = "'.$id.'"';
-    engine::mysql($query);
 }else if(!empty($_SESSION["user"]["id"])){
     if(!empty($_POST["check_message"])){
         $query = 'SELECT * FROM `nodes_inbox` WHERE `to` = "'.intval($_SESSION["user"]["id"]).'" '

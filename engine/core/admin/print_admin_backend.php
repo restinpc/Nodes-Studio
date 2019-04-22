@@ -3,7 +3,7 @@
 * Print admin backend page.
 * @path /engine/core/admin/print_admin_backend.php
 * 
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
@@ -58,7 +58,7 @@ function print_admin_backend($cms){
 * Backend '.$mode.' page file.
 * @path /engine/site/'.$file.'
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var \$this->title - Page title.

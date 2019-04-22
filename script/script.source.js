@@ -3,7 +3,7 @@
 * Do not edit directly.
 * @path /script/script.source.js
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */ 
@@ -527,17 +527,6 @@ function goto(href) {
                         showAnchor(anchor);
                     }
                 }, 300);
-                /*
-                try{
-                    alert("x"+vr_control_state);
-                    if(vr_control_state > 0){
-                        jQuery(".vr_left_eye").css("top", "0px");
-                        jQuery(".vr_right_eye").css("top", "0px");
-                        vr_load_state = 2;
-                        load_frame();
-                    }
-                }catch(e){alert("error");}
-                */
             },
             error: function(){
                 jQuery("#content").html(error); 
@@ -645,7 +634,11 @@ function submit_search_form(){
 */
 function addSiteFade() {
     if (jQuery('#nodes_fade').length == 0) {
-        return jQuery("<div id='nodes_fade' onClick=\'js_hide_wnd();\'></div>").appendTo('body').fadeIn(500);
+        if(document.getElementsByTagName("a-scene")[0]){
+            return jQuery("<div id='nodes_fade'></div>").appendTo('body').fadeIn(500);
+        }else{
+            return jQuery("<div id='nodes_fade' onClick=\'js_hide_wnd();\'></div>").appendTo('body').fadeIn(500);
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -917,7 +910,7 @@ function capture_mousemove(e){
 * Enabling handlers
 */
 addHandler(window, "load", material_icons);
-if(submit_patterns && !vr_state){
+if(submit_patterns){
     addHandler(window, "click", capture_click);
     addHandler(window, "mousemove", capture_mousemove);
     seconds = new Date().getTime() / 1000;

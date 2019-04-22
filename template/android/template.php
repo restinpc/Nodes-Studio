@@ -35,13 +35,12 @@ $header = '<form method="POST" id="lang_select"><input type="hidden" id="lang_va
 <!-- Navigation -->
     <div class="android-navigation-container">
         <nav class="android-navigation mdl-navigation">
-            <a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a>
             <a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a>
             <a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a>
             '; 
     if(empty($_SESSION["user"]["id"])){
         $header .= '<a class="mdl-navigation__link mdl-typography--text-uppercase" href="'.$_SERVER["DIR"].'/register" class="btn">'.lang("Sign Up").'</a>
-            <a class="mdl-navigation__link mdl-typography--text-uppercase" target="_parent" class="btn" onClick="event.preventDefault(); login();" href="'.$_SERVER["DIR"].'/login">'.lang("Login").'</a>';
+            <a class="mdl-navigation__link mdl-typography--text-uppercase" target="_parent" class="btn" href="'.$_SERVER["DIR"].'/login">'.lang("Login").'</a>';
     }else{
         $header .= ' <a class="mdl-typography--text-uppercase header_user" href="'.$_SERVER["DIR"].'/account"><img src="'.$_SERVER["DIR"].'/img/pic/'.$_SESSION["user"]["photo"].'" /> &nbsp;'.$_SESSION["user"]["name"].'</a>';
     }
@@ -77,7 +76,6 @@ $header .= '
     }
     $header .= '
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/">'.lang("Home").'</a>
-        <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/aframe/panorama">'.lang("Panoramas").'</a>
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/content">'.lang("Content").'</a>
         <a class="mdl-navigation__link" href="'.$_SERVER["DIR"].'/product">'.lang("Products").'</a>';
     if(empty($_SESSION["user"]["id"])){
@@ -109,9 +107,6 @@ $footer = '
         if(!empty($this->configs["fb_link"]))
             $footer .= '<a href="'.$this->configs["fb_link"].'" target="_blank" title="'.lang("Connect us at").' Facebook">'
                 . '<img src="'.$_SERVER["DIR"].'/img/social/fb.png" alt="Facebook"/></a> &nbsp; ';
-        if(!empty($this->configs["gp_link"]))    
-            $footer .= '<a href="'.$this->configs["gp_link"].'" target="_blank" title="'.lang("Connect us at").' Google+">'
-                . '<img src="'.$_SERVER["DIR"].'/img/social/gp.png" alt="Google+"/></a> &nbsp; ';
         $footer .= '
         </div>
         <div class="mdl-mega-footer--right-section floater">

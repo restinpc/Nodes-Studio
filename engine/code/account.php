@@ -3,7 +3,7 @@
 * User identity system script.
 * @path /engine/code/account.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -40,8 +40,6 @@ if($_GET["mode"] == "remember" && !empty($_GET["email"]) && !empty($_GET["code"]
         require_once("engine/api/oauth/vk_auth.php");
     }else if($_GET["method"]=="tw"){
         require_once("engine/api/oauth/twitter_auth.php");
-    }else if($_GET["method"]=="gp"){
-        require_once("engine/api/oauth/google_auth.php");
     }
 }else if($_GET["mode"] == "logout"){  
     unset($_SESSION["user"]);

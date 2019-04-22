@@ -1,2 +1,939 @@
-/* Nodes Studio 3.0.0.1 script. 15/02/2019 */
-var image_rotator,error,seconds,ua=navigator.userAgent.toLowerCase(),isOpera=-1<ua.indexOf("opera"),isIE=!isOpera&&-1<ua.indexOf("msie"),keys={37:1,38:1,39:1,40:1},window_state=0,pattern=new Array,pattern_catch=0,pattern_size=0,session_start=!1;function $id(e){return document.getElementById(e)}function getBodyScrollTop(){return self.pageYOffset||document.documentElement&&document.documentElement.scrollTop||document.body&&document.body.scrollTop}function getDocumentHeight(){return Math.max("CSS1Compat"!=document.compatMode?document.body.scrollHeight:document.documentElement.scrollHeight,getViewportHeight())}function getDocumentWidth(){return Math.max("CSS1Compat"!=document.compatMode?document.body.scrollWidth:document.documentElement.scrollWidth,getViewportWidth())}function getViewportHeight(){return!document.compatMode&&!isIE||isOpera?(document.parentWindow||document.defaultView).innerHeight:"CSS1Compat"==document.compatMode?document.documentElement.clientHeight:document.body.clientHeight}function getViewportWidth(){return!document.compatMode&&!isIE||isOpera?(document.parentWindow||document.defaultView).innerWidth:"CSS1Compat"==document.compatMode?document.documentElement.clientWidth:document.body.clientWidth}function addHandler(e,t,o,n){e.addEventListener?e.addEventListener(t,o,n||!1):e.attachEvent?e.attachEvent("on"+t,o):alert("Add handler is not supported")}function in_array(e,t,o){var n,a=!1;o=!!o;for(n in t)if(o&&t[n]===e||!o&&t[n]==e){a=!0;break}return a}function insertAfter(e,t){if(e&&t){var o=t.parentNode;t.nextSibling&&o?o.insertBefore(e,t.nextSibling):o&&o.appendChild(e)}}function js_pos_wnd(){try{var e=document.getElementById("nodes_login").clientHeight;(t=(getViewportHeight()-e)/3)<0&&(t=0),document.getElementById("nodes_login").style.top=t+"px"}catch(e){}try{e=document.getElementById("nodes_popup").clientHeight;var t,o=document.getElementById("nodes_popup").clientWidth;600<getViewportWidth()?document.getElementById("nodes_popup").style.marginLeft="-"+o/2+"px":document.getElementById("nodes_popup").style.marginLeft="0px",(t=(getViewportHeight()-e)/3)<0&&(t=0),document.getElementById("nodes_popup").style.top=t+"px"}catch(e){}}function js_hide_wnd(){enableScroll(),document.body.style.overflow="auto";try{document.body.removeChild(document.getElementById("nodes_window"))}catch(e){}try{document.body.removeChild(document.getElementById("nodes_popup"))}catch(e){}try{document.body.removeChild(document.getElementById("nodes_login"))}catch(e){}removeSiteFade()}function show_window(e){if(e&&"undefined"!=e){window.scrollTo(0,0),disableScroll(),document.body.style.overflow="hidden";var t=document.createElement("div");t.id="nodes_window",t.innerHTML="<div class=\"close_button close_wnd\" onClick='js_hide_wnd();'>&nbsp;</div>"+e,document.body.appendChild(t),addSiteFade()}else js_hide_wnd()}function show_popup_window(e){if(e&&"undefined"!=e){disableScroll(),document.body.style.overflow="hidden";var t=document.createElement("div");t.id="nodes_popup",t.innerHTML="<div class=\"close_button close_wnd\" onClick='js_hide_wnd();'>&nbsp;</div>"+e,document.body.appendChild(t),addSiteFade(),js_pos_wnd(),addHandler(window,"resize",js_pos_wnd)}else js_hide_wnd()}function show_editor(e){show_window('<div class="fl m5"><b>'+e+'</b></div><div class="clear"><br/></div><img src="'+root_dir+'/img/load.gif" id="loader" class="mt18p"><iframe width=100% height=95% frameborder=0 src="'+root_dir+"/edit.php?file="+e+'" onLoad=\'document.getElementById("loader").style.display="none";\' />')}function add_comment(e,t,o){show_popup_window('<form method="POST">\n<div id="new_comment">\n<input type="hidden" name="reply" value="'+o+'" />\n<strong>'+e+'</strong><br/><br/>\n<textarea id="comment_textarea" vr-control name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>\n<center><input vr-control id="submit-comment" type="submit" class="btn w280" value="'+t+'" /></center><br/>\n</div>\n</form>')}function delete_comment(e,t){confirm(e)&&jQuery.ajax({type:"POST",data:{comment_id:t},url:root_dir+"/bin.php",success:function(e){console.log("comment deleted: "+e),window.location.reload()}})}function show_photo_uploader(){show_popup_window('<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/images.php?editor=1" scrolling="yes" style="margin-top: 10px; min-height: 180px;"></iframe>')}function show_photo_editor(e,t){show_window('<iframe width=100% height=95% id="img_editor" frameborder=0 src="'+root_dir+"/images.php?id="+e+"&pos="+t+'" scrolling="yes" style="margin-top: 10px;" />')}function show_order(){show_window('<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/order.php" scrolling="yes" style="margin-top: 10px;" />')}function logout(){try{scrolltoTop()}catch(e){}var e='<iframe frameborder=0 id="nodes_iframe" class="hidden" src="'+root_dir+'/account.php?mode=logout"></iframe>';disableScroll(),document.body.style.overflow="hidden";var t=document.createElement("div");t.id="nodes_login",t.innerHTML=e,document.body.appendChild(t),addSiteFade()}function is_array(e){return e instanceof Array}function empty(e){return""===e||0===e||"0"===e||null===e||!1===e||is_array(e)&&0===e.length}function preventDefault(e){(e=e||window.event).preventDefault&&e.preventDefault(),e.returnValue=!1}function preventDefaultForScrollKeys(e){if(keys[e.keyCode])return preventDefault(e),!1}function disableScroll(){window.addEventListener&&window.addEventListener("DOMMouseScroll",preventDefault,!1),window.onwheel=preventDefault,window.onmousewheel=document.onmousewheel=preventDefault,window.ontouchmove=preventDefault,document.onkeydown=preventDefaultForScrollKeys}function enableScroll(){window.removeEventListener&&window.removeEventListener("DOMMouseScroll",preventDefault,!1),window.onmousewheel=document.onmousewheel=null,window.onwheel=null,window.ontouchmove=null,document.onkeydown=null}function base64_decode(e){for(var t,o,n,a,r,i,s="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",d=0,c="";t=(i=s.indexOf(e.charAt(d++))<<18|s.indexOf(e.charAt(d++))<<12|(a=s.indexOf(e.charAt(d++)))<<6|(r=s.indexOf(e.charAt(d++))))>>16&255,o=i>>8&255,n=255&i,c+=64==a?String.fromCharCode(t):64==r?String.fromCharCode(t,o):String.fromCharCode(t,o,n),d<e.length;);return c}function print_r(e,t){var o="";t||(t=0);for(var n="",a=0;a<t+1;a++)n+="    ";if("object"==typeof e)for(var r in e){var i=e[r];"object"==typeof i?(o+=n+"'"+r+"' :\n",o+=print_r(i,t+1)):o+=n+"'"+r+"' => \""+i+'"\n'}else o="===>"+e+"<===("+typeof e+")";return o}if(window.stateChangeIsLocal=!0,History.enabled=!0,window.jQuery){function submitPatterns(){submit_patterns&&pattern[0]&&jQuery.ajax({url:root_dir+"/behavior.php",data:{patterns:pattern},type:"POST",success:function(e){pattern=Array(),pattern_size=0,seconds=(new Date).getTime()/1e3}})}function searchText(e,t){return!!(e.search(t)+1)}function ajaxing(){window_state=0,jQuery("a").on("click",function(e){if(jQuery(this).attr("href")&&"_blank"!=jQuery(this).attr("target")&&"_parent"!=jQuery(this).attr("target")&&"_top"!=jQuery(this).attr("target")){try{"false"==jQuery(".mdl-layout__drawer").attr("aria-hidden")&&jQuery(".mdl-layout__obfuscator").click(),jQuery(".android-content").scrollTop(0),jQuery(".android-header").removeClass("is-casting-shadow")}catch(e){}try{hideMenu(),jQuery("body,html").scrollTop(0)}catch(e){}searchText(jQuery(this).attr("href"),location.hostname)?(e.preventDefault(),history.pushState("","",jQuery(this).attr("href")),goto(jQuery(this).attr("href"))):searchText(jQuery(this).attr("href"),"http")||(e.preventDefault(),history.pushState("","",jQuery(this).attr("href")),goto(jQuery(this).attr("href")))}})}function refresh_page(){jQuery("#content").animate({opacity:0},300),document.getElementById("query_form").submit()}function goto(e){if(!window_state)if("#"!=e[0]){submitPatterns(),document.documentElement.style.background="#fff url(/img/load.gif) no-repeat center center fixed",window_state=1;try{$id("load_bar").style.display="block"}catch(e){}jQuery("#content").animate({opacity:0},300);try{scrolltoTop()}catch(e){}var o=setTimeout(function(){jQuery("#content").html(error),jQuery("#content").animate({opacity:1},500)},3e4),n="",t=e.split("#");t[1]&&(e=t[0],n=t[1]),jQuery.ajax({url:e,async:!0,type:"POST",data:{jQuery:"true"},success:function(e){"="==e[e.length-1]&&(e=base64_decode(e)),setTimeout(ajaxing,1),setTimeout(checkAnchors,1);var t=jQuery(e).filter("title").text();document.title=t;try{jQuery(".site_title").text(t)}catch(e){}setTimeout(function(){jQuery("#content").html(e),jQuery("#content").animate({opacity:1},500),clearTimeout(o);try{onload_print_footer()}catch(e){}""!=n&&showAnchor(n)},300)},error:function(){jQuery("#content").html(error),jQuery("#content").animate({opacity:1},500);try{onload_print_footer()}catch(e){}}})}else{showAnchor(e.split("#")[1])}}function scrolltoTop(){jQuery("body,html").scrollTop(0)}function showAnchor(e){if(!empty(e)){try{jQuery(".android-content").animate({scrollTop:parseInt(jQuery("a[name='"+e+"']").offset().top-80)},200,"swing")}catch(e){}try{jQuery("html, body").animate({scrollTop:parseInt(jQuery("a[name='"+e+"']").offset().top-80)},200,"swing")}catch(e){}}}function checkAnchors(){var e=window.location.href.split("#");""!=e[1]&&showAnchor(e[1])}function goto_page(e){document.getElementById("page_field").value=e,refresh_page()}function admin_init(){var e=document.createElement("script");e.type="text/javascript",e.src=root_dir+"/script/admin.js",document.body.appendChild(e)}function tinymce_init(){var e=document.createElement("script");e.src=root_dir+"/script/tinymce/tinymce.js",document.body.appendChild(e),e.onload=function(){tinymce.init({selector:"textarea#editable",plugins:["advlist autolink lists link image charmap print preview anchor","searchreplace visualblocks code fullscreen","insertdatetime media table contextmenu paste code"],setup:function(e){e.on("init",function(e){var t=document.createElement("div");t.id="mceu_91",t.className="mce-widget mce-btn",t.title="Upload photo",t.innerHTML='<button vr-control id="tiny_button_'+parseInt(1e4*Math.random())+'"  tabindex="-1" id="mceu_91-button" role="presentation" type="button" onClick="show_photo_uploader();"><i class="mce-ico mce-i-image"></i></button>',insertAfter(t,$id("mceu_9"))})},toolbar1:"insertfile undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist link  image media preview | forecolor backcolor emoticons | codesample"})}}function submit_search_form(){document.getElementById("page_field").value=1,refresh_page()}function addSiteFade(){if(0==jQuery("#nodes_fade").length)return jQuery("<div id='nodes_fade' onClick='js_hide_wnd();'></div>").appendTo("body").fadeIn(500)}function removeSiteFade(){jQuery("#nodes_fade").fadeOut(function(){jQuery(this).remove()})}function browser_time(){jQuery(".utc_date").each(function(e){var t=new Date(1e3*jQuery(this).attr("alt"));jQuery(this).html(t.toLocaleString())})}function remove_from_bin(e){jQuery.ajax({type:"POST",data:{remove:e},url:root_dir+"/bin.php",success:function(e){window.location=root_dir+"/order.php"}})}function buy_now(e,t,o,n){jQuery.ajax({type:"POST",data:{id:e},url:root_dir+"/bin.php",success:function(e){try{show_bin()}catch(e){}}}),show_popup_window("<br/><p>"+t+'</p><br/><br/><input vr-control id="input-card-1" type="button" value="'+o+'" onClick=\'js_hide_wnd();\' class="btn w130" /> &nbsp; <input vr-control id="input-card-2" value="'+n+'" class="btn w130" type="button" onClick=\'js_hide_wnd(); setTimeout(show_order, 500);\' /><br/><br/>')}function withdrawal(e){alertify.prompt("","<h3>"+e+"</h3><br/>","",function(e,t){jQuery.ajax({type:"POST",data:{paypal:t},url:root_dir+"/bin.php",success:function(e){jQuery(".alertify").remove(),alert(e)}})},function(){jQuery(".alertify").remove()}).set("closable",!0)}function deposit(e){alertify.prompt("","<h3>"+e+"</h3><br/>","",function(e,t){try{document.getElementById("paypal_price").value=t}catch(e){}document.getElementById("pay_button").click()},function(){jQuery(".alertify").remove()})}function process_payment(e,t){jQuery.ajax({type:"POST",data:{price:t},url:root_dir+"/paypal.php?order_id="+e,success:function(e){console.log("process_payment: "+e),window.location=root_dir+"/account/purchases"}})}function post_message(e){var t=jQuery("#nodes_message_text").val();jQuery("#nodes_message_text").val(""),jQuery("#nodes_chat").html(document.getElementById("nodes_chat").innerHTML+'<br/><div class="chat_loader"><img src="/img/load.gif" /></div>'),jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight),jQuery.ajax({type:"POST",data:{text:t},url:root_dir+"/bin.php?message="+e,success:function(e){console.log(e),jQuery("#nodes_chat").html(e),jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight)}})}function refresh_chat(e){jQuery.ajax({type:"GET",url:root_dir+"/bin.php?message="+e,success:function(e){jQuery("#nodes_chat").html(e),jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight)}})}function star_rating(e){var t=17*e;jQuery(".rating_votes").width(t),jQuery(".rating_stars").hover(function(){jQuery(".rating_votes, .rating_hover").toggle()},function(){jQuery(".rating_votes, .rating_hover").toggle()});var o=jQuery(".rating_stars").offset();jQuery(".rating_stars").mousemove(function(e){var t=e.pageX-o.left;0==t&&(t=1),user_votes=Math.ceil(t/17),jQuery(".rating_hover").width(17*user_votes)}),jQuery(".rating_stars").click(function(){jQuery(".rating_votes").width(17*user_votes),document.getElementById("nodes_rating").value=user_votes})}function ScaleSlider(){var e=image_rotator.$Elmt.parentNode.clientWidth;e?(e=Math.min(e,600),image_rotator.$ScaleWidth(e)):window.setTimeout(ScaleSlider,30)}function show_rotator(e){try{image_rotator=new $JssorSlider$("jssor_1",{$AutoPlay:!0,$FillMode:5,$SlideshowOptions:{$Class:$JssorSlideshowRunner$,$Transitions:[{$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Zoom:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:.5},$Brother:{$Duration:1200,$Zoom:1,$Rotate:1,$Easing:$Jease$.$Swing,$Opacity:2,$Round:{$Rotate:.5},$Shift:90}},{$Duration:1400,x:.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1400,x:-.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10}},{$Duration:1200,$Zoom:11,$Rotate:1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Brother:{$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Shift:600}},{$Duration:1500,x:.5,$Cols:2,$ChessMode:{$Column:3},$Easing:{$Left:$Jease$.$InOutCubic},$Opacity:2,$Brother:{$Duration:1500,$Opacity:2}},{$Duration:1500,x:-.3,y:.5,$Zoom:1,$Rotate:.1,$During:{$Left:[.6,.4],$Top:[.6,.4],$Rotate:[.6,.4],$Zoom:[.6,.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1e3,$Zoom:11,$Rotate:-.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},{$Duration:1500,$Zoom:11,$Rotate:.5,$During:{$Left:[.4,.6],$Top:[.4,.6],$Rotate:[.4,.6],$Zoom:[.4,.6]},$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1e3,$Zoom:1,$Rotate:-.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},{$Duration:1500,x:.3,$During:{$Left:[.6,.4]},$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2,$Outside:!0,$Brother:{$Duration:1e3,x:-.3,$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2}},{$Duration:1200,x:.25,y:.5,$Rotate:-.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1200,x:-.1,y:-.7,$Rotate:.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},{$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},{$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},{$Duration:1600,y:-1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,y:1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},{$Duration:1200,y:1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},{$Duration:1200,x:1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,x:-1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},{$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},{$Duration:1500,x:-.1,y:-.7,$Rotate:.1,$During:{$Left:[.6,.4],$Top:[.6,.4],$Rotate:[.6,.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1e3,x:.2,y:.5,$Rotate:-.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},{$Duration:1600,x:-.2,$Delay:40,$Cols:12,$During:{$Left:[.4,.6]},$SlideOut:!0,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:260,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Outside:!0,$Round:{$Top:.5},$Brother:{$Duration:1e3,x:.2,$Delay:40,$Cols:12,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:1028,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Round:{$Top:.5}}}],$TransitionsOrder:1},$BulletNavigatorOptions:{$Class:$JssorBulletNavigator$}}),ScaleSlider(),addHandler(window,"load",ScaleSlider),addHandler(window,"resize",ScaleSlider),addHandler(window,"orientationchange",ScaleSlider)}catch(e){}initPhotoSwipeFromDOM(e)}function material_icons(){try{jQuery(".material-icons").css("display","inline-block")}catch(e){}}function nodes_galery(e){onpop_state=1;for(var t=0;t<20;t++)try{document.getElementById("nodes_galery_"+t).alt==e&&document.getElementById("nodes_galery_"+t).click()}catch(e){}}function capture_click(e){var t=(new Date).getTime()/1e3;pattern[pattern_size++]=Array("1",e.clientX,e.clientY,jQuery(window).scrollTop(),getViewportWidth(),getViewportHeight(),t-seconds),session_start||(submitPatterns(),session_start=!0)}function capture_mousemove(e){if(!pattern_catch){pattern_catch=1;var t=(new Date).getTime()/1e3;pattern[pattern_size++]=Array("2",e.clientX,e.clientY,jQuery(window).scrollTop(),getViewportWidth(),getViewportHeight(),t-seconds),setTimeout(function(){pattern_catch=0},1e3)}session_start||(submitPatterns(),session_start=!0)}jQuery(function(){setTimeout(function(){jQuery.ajax({url:root_dir+"/timeout.php?ref="+encodeURI(document.referrer),type:"GET",success:function(e){error=e}})},3e3),alertify?alert=alertify.alert:alert=function(e){return show_popup_window("<br/><p>"+e+'</p><br/><br/><input vr-control id="input-ok-btn" type="button" value="OK" onClick=\'js_hide_wnd();\' class="btn w130" /><br/><br/>'),!1},window.onpopstate=function(){goto(window.location.href)},ajaxing(),browser_time(),checkAnchors()}),addHandler(window,"load",material_icons),submit_patterns&&!vr_state&&(addHandler(window,"click",capture_click),addHandler(window,"mousemove",capture_mousemove),seconds=(new Date).getTime()/1e3,setInterval(submitPatterns,1e4))}
+/**
+* Nodes Framework JavaScript library source file.
+* Do not edit directly.
+* @path /script/script.source.js
+*
+* @name    Nodes Studio    @version 2.0.1.9
+* @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
+* @license http://www.apache.org/licenses/LICENSE-2.0
+*/ 
+var ua = navigator.userAgent.toLowerCase();         // Navigator
+var isOpera = (ua.indexOf('opera')  > -1);          // is Opera browser
+var isIE = (!isOpera && ua.indexOf('msie') > -1);   // is IE browser
+var keys = {37: 1, 38: 1, 39: 1, 40: 1};            // Keyboard "arrows"
+var window_state = 0;                               // is page loading
+var image_rotator;                                  // Image rotator
+var error;                                          // Gateway Timeout HTML data
+var pattern = new Array();                          // Array of patterns to swap
+var pattern_catch = 0;                              // Pattern flag
+var pattern_size = 0;                               // Count of patterns
+var seconds;                                        // Timer of session
+var session_start = false;                          // Flag of submitting pattern
+window.stateChangeIsLocal = true;
+History.enabled = true; 
+//------------------------------------------------------------------------------
+/**
+* Gets an DOM element using id.
+* 
+* @param {string} id Element id.
+* @return {object} Returns a DOM elemnt on success, or die with error.
+* @usage <code> var id = $id("content"); </code>
+*/
+function $id(id) {
+    return document.getElementById(id);
+}
+//------------------------------------------------------------------------------
+/**
+* Gets height of hidden top part of page after scrolling in px.
+*/
+function getBodyScrollTop(){
+    return self.pageYOffset || (document.documentElement && document.documentElement.scrollTop) 
+        || (document.body && document.body.scrollTop);
+}
+//------------------------------------------------------------------------------
+/**
+* Gets a document height in px.
+*/
+function getDocumentHeight(){
+    return Math.max(document.compatMode!='CSS1Compat'?document.body.scrollHeight:
+        document.documentElement.scrollHeight,getViewportHeight());
+}
+//------------------------------------------------------------------------------
+/**
+* Gets a document width in px.
+*/
+function getDocumentWidth(){
+    return Math.max(document.compatMode!='CSS1Compat'?document.body.scrollWidth:
+        document.documentElement.scrollWidth,getViewportWidth());
+}
+//------------------------------------------------------------------------------
+/**
+* Gets a viewport height in px.
+*/
+function getViewportHeight(){
+    return ((document.compatMode||isIE)&&!isOpera)?(document.compatMode=='CSS1Compat')?
+        document.documentElement.clientHeight:document.body.clientHeight:
+        (document.parentWindow||document.defaultView).innerHeight;
+}
+//------------------------------------------------------------------------------
+/**
+* Gets a viewport width in px.
+*/
+function getViewportWidth(){
+    return ((document.compatMode||isIE)&&!isOpera)?(document.compatMode=='CSS1Compat')?
+        document.documentElement.clientWidth:document.body.clientWidth:
+        (document.parentWindow||document.defaultView).innerWidth;
+}
+//------------------------------------------------------------------------------
+/**
+* Attaches an event handler to the specified element.
+* 
+* @param {object} object DOM Element.
+* @param {string} event A String that specifies the name of the event.
+* @param {function} handler Callback function.
+* @param {bool} useCapture Flag to execute in the capturing or in the bubbling phase.
+* @usage <code> addHandler(window, "resize", resize_footer); </code>
+*/
+function addHandler(object, event, handler, useCapture) {
+     if (object.addEventListener) {
+         object.addEventListener(event, handler, useCapture ? useCapture : false);
+     } else if (object.attachEvent) {
+         object.attachEvent('on' + event, handler);
+     } else alert("Add handler is not supported");
+}
+//------------------------------------------------------------------------------
+/*
+* Check is element exist in array.
+* 
+* @param {mixed} needle
+* @param {array} haystack
+* @param {bool} strict
+* @usage <code> in_array('1', ['1','2','3'], false); </code>
+*/
+function in_array(needle, haystack, strict) {
+    var found = false, key, strict = !!strict;
+    for (key in haystack) {
+        if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
+            found = true;
+            break;
+        }
+    } return found;
+}
+//------------------------------------------------------------------------------
+function insertAfter( node, referenceNode ) {
+    if ( !node || !referenceNode ) return;
+    var parent = referenceNode.parentNode, nextSibling = referenceNode.nextSibling;
+    if ( nextSibling && parent ) {
+        parent.insertBefore(node, referenceNode.nextSibling);
+    } else if ( parent ) {
+        parent.appendChild( node );
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Positions any popup windows.
+*/
+function js_pos_wnd(){
+    try{
+        var wnd_height = document.getElementById("nodes_login").clientHeight;
+        var top = ((getViewportHeight()-wnd_height)/3);
+        if(top<0) top = 0;
+        document.getElementById("nodes_login").style.top = top+"px"; 
+    }catch(e){}
+    try{
+        var wnd_height = document.getElementById("nodes_popup").clientHeight;
+        var wnd_width = document.getElementById("nodes_popup").clientWidth;
+        if(getViewportWidth()>600){
+            document.getElementById("nodes_popup").style.marginLeft = "-"+(wnd_width/2)+"px"; 
+        }else{
+            document.getElementById("nodes_popup").style.marginLeft = "0px";
+        }
+        var top = ((getViewportHeight()-wnd_height)/3);
+        if(top<0) top = 0;
+        document.getElementById("nodes_popup").style.top = top+"px"; 
+    }catch(e){}
+}
+//------------------------------------------------------------------------------
+/**
+* Hides any popup windows.
+*/
+function js_hide_wnd(){
+    enableScroll();
+    document.body.style.overflow = "auto";
+    try{
+        document.body.removeChild(document.getElementById("nodes_window"));
+    }catch(e){}
+    try{
+        document.body.removeChild(document.getElementById("nodes_popup"));
+    }catch(e){}
+    try{
+        document.body.removeChild(document.getElementById("nodes_login")); 
+    }catch(e){}
+    removeSiteFade();
+}
+//------------------------------------------------------------------------------
+/**
+* Displays a fullscreen window with specified content.
+*/
+function show_window(content){
+    if(content&&content!="undefined"){
+        window.scrollTo(0,0);
+        disableScroll();
+        document.body.style.overflow = "hidden";
+        var a = document.createElement("div");
+        a.id = "nodes_window";
+        a.innerHTML='<div class="close_button close_wnd" onClick=\'js_hide_wnd();\'>&nbsp;</div>'+content;
+        document.body.appendChild(a);
+        addSiteFade();
+    }else{
+        js_hide_wnd();
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Displays a popup window with specified content.
+*/
+function show_popup_window(content){
+    if(content&&content!="undefined"){
+        //window.scrollTo(0,0);
+        disableScroll();
+        document.body.style.overflow = "hidden";
+        var a = document.createElement("div");
+        a.id = "nodes_popup";
+        a.innerHTML='<div class="close_button close_wnd" onClick=\'js_hide_wnd();\'>&nbsp;</div>'+content;
+        document.body.appendChild(a);
+        addSiteFade();
+        js_pos_wnd();
+        addHandler(window, "resize", js_pos_wnd);
+    }else{
+        js_hide_wnd();
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Displays a popup window with specified content.
+*/
+function show_modal(content){
+    if(content&&content!="undefined"){
+        //window.scrollTo(0,0);
+        disableScroll();
+        document.body.style.overflow = "hidden";
+        var a = document.createElement("div");
+        a.id = "nodes_popup";
+        a.innerHTML=content;
+        document.body.appendChild(a);
+        addSiteFade();
+        js_pos_wnd();
+        addHandler(window, "resize", js_pos_wnd);
+    }else{
+        js_hide_wnd();
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Displays file source code viewer.
+*/
+function show_editor(file){
+    show_window('<div class="fl m5"><b>'+file+'</b></div><div class="clear"><br/></div><img src="'+root_dir+'/img/load.gif" id="loader" class="mt18p">'+
+        '<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/edit.php?file='+file+'" onLoad=\'document.getElementById("loader").style.display="none";\' />');  
+}
+//------------------------------------------------------------------------------
+/**
+* Displays new comment form.
+* 
+* @param {string} caption Header of form.
+* @param {string} submit Button text.
+* @param {int} reply @mysql[nodes_comment]->id.
+*/
+function add_comment(caption, submit, reply){
+    show_popup_window('<form method="POST">'+'\n'+
+            '<div id="new_comment">'+'\n'+
+            '<input type="hidden" name="reply" value="'+reply+'" />'+'\n'+
+                '<strong>'+caption+'</strong><br/><br/>'+'\n'+
+                '<textarea id="comment_textarea" vr-control name="comment" cols=50 class="comment_textarea"></textarea><br/><br/>'+'\n'+
+                '<center><input vr-control id="submit-comment" type="submit" class="btn w280" value="'+submit+'" /></center><br/>'+'\n'+
+            '</div>'+'\n'+
+        '</form>');  
+}
+//------------------------------------------------------------------------------
+/**
+* Removes a comment.
+* 
+* @param {string} text Text of message.
+* @param {int} id @mysql[nodes_order]->id.
+*/
+function delete_comment(text, id){
+    if(confirm(text)){
+        jQuery.ajax({
+            type: "POST",
+            data: {	"comment_id" : id },
+            url: root_dir+"/bin.php",
+            success: function(data){ 
+                console.log("comment deleted: "+data);
+                window.location.reload();
+            }
+        });
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Displays photo uploader.
+*/
+function show_photo_uploader(){
+    show_popup_window('<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/images.php?editor=1" scrolling="yes" style="margin-top: 10px; min-height: 180px;"></iframe>');
+}
+//------------------------------------------------------------------------------
+/**
+* Displays photo editor.
+*/
+function show_photo_editor(id, pos){
+    show_window('<iframe width=100% height=95% id="img_editor" frameborder=0 src="'+root_dir+'/images.php?id='+id+'&pos='+pos+'" scrolling="yes" style="margin-top: 10px;" />');
+}
+//------------------------------------------------------------------------------
+/**
+* Displays order window.
+*/
+function show_order(){
+    show_window('<iframe width=100% height=95% frameborder=0 src="'+root_dir+'/order.php" scrolling="yes" style="margin-top: 10px;" />');
+}
+//------------------------------------------------------------------------------
+/**
+* Destorys current user http-session and resets cookie data.
+*/
+function logout(){
+    try{ scrolltoTop(); }catch(e){};
+    var content = '<iframe frameborder=0 id="nodes_iframe" class="hidden" src="'+root_dir+'/account.php?mode=logout"></iframe>';
+    disableScroll();
+    document.body.style.overflow = "hidden";
+    var a = document.createElement("div");
+    a.id = "nodes_login";
+    a.innerHTML= content;
+    document.body.appendChild(a);
+    addSiteFade();
+}
+//------------------------------------------------------------------------------
+/**
+* Checking if variable an array.
+*/
+function is_array( mixed_var ) {
+    return ( mixed_var instanceof Array );
+}
+//------------------------------------------------------------------------------
+/**
+* Checking if variable is empty.
+*/
+function empty( mixed_var ) {	 
+    return( mixed_var === "" || mixed_var === 0 || mixed_var === "0" 
+        || mixed_var === null || mixed_var === false  
+        || (is_array(mixed_var) && mixed_var.length === 0 ));
+}
+//------------------------------------------------------------------------------
+/**
+* Prevents default event-listener function.
+*/
+function preventDefault(e) {
+  e = e || window.event;
+  if (e.preventDefault)
+      e.preventDefault();
+  e.returnValue = false;  
+}
+//------------------------------------------------------------------------------
+/**
+* Prevents scrolling by keys.
+*/
+function preventDefaultForScrollKeys(e) {
+    if (keys[e.keyCode]) {
+        preventDefault(e);
+        return false;
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Disables page scrolling.
+*/
+function disableScroll() {
+  if (window.addEventListener)
+      window.addEventListener('DOMMouseScroll', preventDefault, false);
+  window.onwheel = preventDefault;
+  window.onmousewheel = document.onmousewheel = preventDefault;
+  window.ontouchmove  = preventDefault;
+  document.onkeydown  = preventDefaultForScrollKeys;
+}
+//------------------------------------------------------------------------------
+/**
+* Enables page scrolling.
+*/
+function enableScroll() {
+    if (window.removeEventListener)
+        window.removeEventListener('DOMMouseScroll', preventDefault, false);
+    window.onmousewheel = document.onmousewheel = null; 
+    window.onwheel = null; 
+    window.ontouchmove = null;  
+    document.onkeydown = null;  
+}
+//------------------------------------------------------------------------------
+/**
+* Decodes a string from base64-encode.
+*/
+function base64_decode( data ) {
+    var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    var o1, o2, o3, h1, h2, h3, h4, bits, i=0, enc='';
+    do { 
+        h1 = b64.indexOf(data.charAt(i++));
+        h2 = b64.indexOf(data.charAt(i++));
+        h3 = b64.indexOf(data.charAt(i++));
+        h4 = b64.indexOf(data.charAt(i++));
+        bits = h1<<18 | h2<<12 | h3<<6 | h4;
+        o1 = bits>>16 & 0xff;
+        o2 = bits>>8 & 0xff;
+        o3 = bits & 0xff;
+        if (h3 == 64) enc += String.fromCharCode(o1);
+        else if (h4 == 64) enc += String.fromCharCode(o1, o2);
+        else enc += String.fromCharCode(o1, o2, o3);
+    } while (i < data.length);
+    return enc;
+}
+//------------------------------------------------------------------------------
+/**
+* Prints human-readable information about a variable.
+*/
+function print_r(arr, level) {
+    var print_red_text = "";
+    if(!level) level = 0;
+    var level_padding = "";
+    for(var j=0; j<level+1; j++) level_padding += "    ";
+    if(typeof(arr) == 'object') {
+        for(var item in arr) {
+            var value = arr[item];
+            if(typeof(value) == 'object') {
+                print_red_text += level_padding + "'" + item + "' :\n";
+                print_red_text += print_r(value,level+1);
+            }else print_red_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+        }
+    }else print_red_text = "===>"+arr+"<===("+typeof(arr)+")";
+    return print_red_text;
+}
+//------------------------------------------------------------------------------ 
+/**
+* Requests and 504-error page and update alert function.
+*/
+if(window.jQuery){
+jQuery(function() {
+    setTimeout(function(){
+        jQuery.ajax({
+            url: root_dir+'/timeout.php?ref='+encodeURI(document.referrer),
+            type: "GET",
+            success: function (data) {
+                error = data;
+            }
+        });
+    }, 3000);
+    if(!alertify){
+        alert = function alert(text){
+            show_popup_window('<br/><p>'+text+'</p><br/><br/><input vr-control id="input-ok-btn" type="button" value="OK" onClick=\'js_hide_wnd();\' class="btn w130" /><br/><br/>');
+            return false;
+        };
+    }else{
+        alert = alertify.alert;
+    }
+    window.onpopstate = function() {              
+        goto(window.location.href); 
+    }
+    ajaxing();
+    browser_time();
+    checkAnchors();
+});
+//------------------------------------------------------------------------------
+/**
+* Submits patterns from user to server.
+*/
+function submitPatterns() {
+    if(submit_patterns){
+        if(pattern[0]){
+            jQuery.ajax({
+                url: root_dir+'/behavior.php',
+                data: { "patterns" : pattern },
+                type: "POST",
+                success: function (data) {
+                    pattern = Array();
+                    pattern_size = 0;
+                    seconds = new Date().getTime() / 1000;
+                }
+            });
+        }
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Checks for an occurrence of a substring in a string.
+*/
+function searchText( string, needle ) {
+   return !!(string.search( needle ) + 1);
+}
+//------------------------------------------------------------------------------
+/**
+* Updates <a> tag onclick event with async jquery page loading function.
+*/
+function ajaxing(){
+    window_state = 0;
+    jQuery('a').on('click', function(e) {
+        if(jQuery(this).attr('href')){
+            if(jQuery(this).attr('target') != "_blank" && jQuery(this).attr('target') != "_parent" && jQuery(this).attr('target') != "_top"){
+                try{
+                    if(jQuery('.mdl-layout__drawer').attr('aria-hidden')=="false"){
+                        jQuery('.mdl-layout__obfuscator').click();
+                    }jQuery('.android-content').scrollTop(0);
+                    jQuery('.android-header').removeClass("is-casting-shadow");
+                }catch(err){};
+                try{
+                    hideMenu();
+                    jQuery('body,html').scrollTop(0);
+                }catch(err){};
+                if(searchText(jQuery(this).attr('href'), location.hostname)){
+                    e.preventDefault();
+                    history.pushState('', '', jQuery(this).attr('href'));
+                    goto(jQuery(this).attr('href'));
+                }else if(!searchText(jQuery(this).attr('href'), "http")){
+                    e.preventDefault();
+                    history.pushState('', '', jQuery(this).attr('href'));
+                    goto(jQuery(this).attr('href'));
+                }
+            }
+        }
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Submits a search results details form.
+*/
+function refresh_page(){
+    jQuery("#content").animate({opacity: 0}, 300);
+    document.getElementById("query_form").submit();
+}
+//------------------------------------------------------------------------------
+/**
+* Async page loading using AJAX.
+*/
+function goto(href) {
+    if(!window_state){
+        if( href[0] != "#"){
+            submitPatterns();
+            document.documentElement.style.background = "#fff url(/img/load.gif) no-repeat center center fixed";
+            window_state = 1;
+            try{$id("load_bar").style.display="block";}catch(e){};
+            jQuery("#content").animate({opacity: 0}, 300);
+            try{ scrolltoTop(); }catch(e){}
+            var to = setTimeout(function(){ 
+                jQuery("#content").html(error); 
+                jQuery("#content").animate({opacity: 1}, 500);
+            }, 30000);
+            var anchor = '';
+            var details = href.split('#');
+            if(details[1]){
+                href = details[0];
+                anchor = details[1];
+            }
+            jQuery.ajax({
+            url: href,
+            async: true,
+            type: "POST",
+            data: {'jQuery': 'true'},
+            success: function (data) {
+                if(data[data.length-1]=="=") 
+                    data = base64_decode(data);
+                setTimeout(ajaxing, 1);
+                setTimeout(checkAnchors, 1);
+                var title = jQuery(data).filter('title').text();
+                document.title = title;
+                try{ jQuery('.site_title').text(title); }catch(e){}
+                setTimeout(function(){ 
+                    jQuery("#content").html(data); 
+                    jQuery("#content").animate({opacity: 1}, 500); 
+                    clearTimeout(to); 
+                    try{
+                        onload_print_footer();
+                    }catch(e){}
+                    if(anchor != ''){
+                        showAnchor(anchor);
+                    }
+                }, 300);
+            },
+            error: function(){
+                jQuery("#content").html(error); 
+                jQuery("#content").animate({opacity: 1}, 500);
+                try{
+                    onload_print_footer();
+                }catch(e){}
+            }
+            });
+        }else{
+            var hash = href.split("#");
+            showAnchor(hash[1]);
+        }
+    }
+} 
+//------------------------------------------------------------------------------
+/**
+* Scrolls page to top.
+*/
+function scrolltoTop(){
+    jQuery('body,html').scrollTop(0);
+}
+//------------------------------------------------------------------------------
+/**
+* Scrolls a page to specified anchor.
+*/
+function showAnchor(anchor){
+    if(!empty(anchor)){
+        try{
+            jQuery('.android-content').animate({scrollTop:parseInt(jQuery("a[name='"+anchor+"']").offset().top-80)}, 200,'swing');  
+        }catch(e){};
+        try{
+            jQuery('html, body').animate({scrollTop:parseInt(jQuery("a[name='"+anchor+"']").offset().top-80)}, 200,'swing');  
+        }catch(e){};
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Checking for # in URL and scroll page to anchor if exists.
+*/
+function checkAnchors(){
+    var hash = window.location.href.split("#");
+    if(hash[1]!=""){
+        showAnchor(hash[1]);
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Loading specified table's page.
+*/
+function goto_page(page){
+    document.getElementById("page_field").value=page;
+    refresh_page();
+}
+//------------------------------------------------------------------------------
+/**
+* Initialize admin functions.
+*/
+function admin_init(){
+    var js = document.createElement("script");
+    js.type = "text/javascript";
+    js.src = root_dir+"/script/admin.js";
+    document.body.appendChild(js);
+}
+//------------------------------------------------------------------------------
+/**
+* Initialize event tinymce library.
+*/
+function tinymce_init(){
+    var script = document.createElement('script');
+    script.src = root_dir+"/script/tinymce/tinymce.js"
+    document.body.appendChild(script);
+    script.onload = function() { 
+        tinymce.init({ selector:'textarea#editable',   
+            plugins: [
+            'advlist autolink lists link image charmap print preview anchor',
+            'searchreplace visualblocks code fullscreen',
+            'insertdatetime media table contextmenu paste code'
+            ],
+            setup: function (ed) {
+                ed.on('init', function(args) {
+                    var a = document.createElement("div");
+                    a.id = "mceu_91";
+                    a.className = "mce-widget mce-btn";
+                    a.title = "Upload photo"
+                    a.innerHTML='<button vr-control id="tiny_button_'+parseInt(Math.random()*10000)+'"  tabindex="-1" id="mceu_91-button" role="presentation" type="button" onClick="show_photo_uploader();"><i class="mce-ico mce-i-image"></i></button>';
+                    insertAfter(a, $id("mceu_9"));
+                });
+            },
+          toolbar1: 'insertfile undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist link  image media preview | forecolor backcolor emoticons | codesample'
+        });
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Submits search form.
+*/
+function submit_search_form(){
+    document.getElementById("page_field").value=1;
+    refresh_page();
+}
+//------------------------------------------------------------------------------
+/**
+* Displays screen fade.
+*/
+function addSiteFade() {
+    if (jQuery('#nodes_fade').length == 0) {
+        if(document.getElementsByTagName("a-scene")[0]){
+            return jQuery("<div id='nodes_fade'></div>").appendTo('body').fadeIn(500);
+        }else{
+            return jQuery("<div id='nodes_fade' onClick=\'js_hide_wnd();\'></div>").appendTo('body').fadeIn(500);
+        }
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Removes screen fade.
+*/
+function removeSiteFade() {
+    jQuery('#nodes_fade').fadeOut(function() {
+        jQuery(this).remove()
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Converts dates in Unixtime format to current Local time format.
+*/
+function browser_time(){
+    jQuery('.utc_date').each(function (i) {
+        var utc = new Date(jQuery(this).attr("alt")*1000); 
+        jQuery(this).html(utc.toLocaleString());
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Removes a product from cart.
+*/
+function remove_from_bin(id){
+    jQuery.ajax({
+        type: "POST",
+        data: {	"remove" : id },
+        url: root_dir+"/bin.php",
+        success: function(data){ 
+            window.location = root_dir+"/order.php";
+        }
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Displays Add-To-Cart message.
+*/
+function buy_now(id, t0, t1, t2){
+    jQuery.ajax({
+        type: "POST",
+        data: {	"id" : id },
+        url: root_dir+"/bin.php",
+        success: function (data) {
+            try{ show_bin(); }catch(e){ }
+        }
+    });
+    show_popup_window('<br/><p>'+t0+'</p><br/><br/><input vr-control id="input-card-1" type="button" value="'+t1+'" onClick=\'js_hide_wnd();\' class="btn w130" /> &nbsp; <input vr-control id="input-card-2" value="'+t2+'" class="btn w130" type="button" onClick=\'js_hide_wnd(); setTimeout(show_order, 500);\' /><br/><br/>');
+}
+//------------------------------------------------------------------------------
+/**
+* Displays money withdrawal form.
+*/
+function withdrawal(text){
+    alertify.prompt('', '<h3>'+text+'</h3><br/>', '', 
+        function(evt, value) {
+            jQuery.ajax({
+                type: "POST",
+                data: {"paypal" : value },
+                url: root_dir+"/bin.php",
+                success: function(data){ 
+                    jQuery('.alertify').remove();
+                    alert(data);
+                }
+            });
+        }, 
+        function() { jQuery('.alertify').remove(); }
+    ).set('closable', true);
+}
+//------------------------------------------------------------------------------
+/**
+* Displays money deposit form.
+*/
+function deposit(text){
+    alertify.prompt('', '<h3>'+text+'</h3><br/>', '', 
+        function(evt, value) {
+            try{
+                document.getElementById("paypal_price").value = value;
+            }catch(err){}
+            document.getElementById("pay_button").click();
+        }, 
+        function() { jQuery('.alertify').remove(); }
+    ); 
+}
+//------------------------------------------------------------------------------
+/**
+* Redirects to PayPal payment page.
+*/
+function process_payment(id, price){
+    jQuery.ajax({
+        type: "POST",
+        data: {	"price" : price },
+        url: root_dir+"/paypal.php?order_id="+id,
+        success: function(data){ 
+            console.log("process_payment: "+data);
+            window.location = root_dir+"/account/purchases";
+        }
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Submits a new message to chat.
+*/
+function post_message(id){
+    var txt = jQuery("#nodes_message_text").val();
+    jQuery("#nodes_message_text").val("");
+    jQuery("#nodes_chat").html(document.getElementById("nodes_chat").innerHTML+
+            '<br/><div class="chat_loader"><img src="/img/load.gif" /></div>');
+    jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight);
+    jQuery.ajax({
+        type: "POST",
+        data: { "text" : txt },
+        url: root_dir+'/bin.php?message='+id,
+        success: function(data){
+            console.log(data);
+            jQuery("#nodes_chat").html(data);
+            jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight);
+        }
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Refreshes chat window.
+*/
+function refresh_chat(id){
+    jQuery.ajax({
+        type: "GET",
+        url: root_dir+'/bin.php?message='+id,
+        success: function(data){ 
+            jQuery("#nodes_chat").html(data);
+            jQuery("#nodes_chat").scrollTop(jQuery("#nodes_chat")[0].scrollHeight);
+        }
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Displays 1-to-5 stars vote form.
+*/
+function star_rating(total_rating){
+    var star_widht = total_rating * 17 ;
+    jQuery('.rating_votes').width(star_widht);
+    jQuery('.rating_stars').hover(function() {
+      jQuery('.rating_votes, .rating_hover').toggle();
+    },
+    function() {
+      jQuery('.rating_votes, .rating_hover').toggle();
+    });
+    var margin_doc = jQuery(".rating_stars").offset();
+    jQuery(".rating_stars").mousemove(function(e){
+        var widht_votes = e.pageX - margin_doc.left;
+        if (widht_votes == 0) widht_votes = 1 ;
+        user_votes = Math.ceil(widht_votes/17);  
+        jQuery('.rating_hover').width(user_votes*17);
+    });
+    jQuery('.rating_stars').click(function(){
+        jQuery('.rating_votes').width((user_votes)*17);
+        document.getElementById("nodes_rating").value = user_votes;
+    });
+}
+//------------------------------------------------------------------------------
+/**
+* Scales an image rotator.
+*/
+function ScaleSlider() {
+    var refSize = image_rotator.$Elmt.parentNode.clientWidth;
+    if (refSize) {
+        refSize = Math.min(refSize, 600);
+        image_rotator.$ScaleWidth(refSize);
+    }else {
+        window.setTimeout(ScaleSlider, 30);
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Displays an image rotator.
+*/
+function show_rotator(obj){
+    try{
+        image_rotator = new $JssorSlider$("jssor_1", {
+            $AutoPlay: true,
+            $FillMode: 5,
+            $SlideshowOptions: {
+                $Class: $JssorSlideshowRunner$,
+                $Transitions: [
+                    {$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Zoom:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:0.5},$Brother:{$Duration:1200,$Zoom:1,$Rotate:1,$Easing:$Jease$.$Swing,$Opacity:2,$Round:{$Rotate:0.5},$Shift:90}},
+                    {$Duration:1400,x:0.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1400,x:-0.25,$Zoom:1.5,$Easing:{$Left:$Jease$.$InWave,$Zoom:$Jease$.$InSine},$Opacity:2,$ZIndex:-10}},
+                    {$Duration:1200,$Zoom:11,$Rotate:1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Brother:{$Duration:1200,$Zoom:11,$Rotate:-1,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Round:{$Rotate:1},$ZIndex:-10,$Shift:600}},
+                    {$Duration:1500,x:0.5,$Cols:2,$ChessMode:{$Column:3},$Easing:{$Left:$Jease$.$InOutCubic},$Opacity:2,$Brother:{$Duration:1500,$Opacity:2}},
+                    {$Duration:1500,x:-0.3,y:0.5,$Zoom:1,$Rotate:0.1,$During:{$Left:[0.6,0.4],$Top:[0.6,0.4],$Rotate:[0.6,0.4],$Zoom:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,$Zoom:11,$Rotate:-0.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},
+                    {$Duration:1500,$Zoom:11,$Rotate:0.5,$During:{$Left:[0.4,0.6],$Top:[0.4,0.6],$Rotate:[0.4,0.6],$Zoom:[0.4,0.6]},$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,$Zoom:1,$Rotate:-0.5,$Easing:{$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Shift:200}},
+                    {$Duration:1500,x:0.3,$During:{$Left:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2,$Outside:true,$Brother:{$Duration:1000,x:-0.3,$Easing:{$Left:$Jease$.$InQuad,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,x:0.25,y:0.5,$Rotate:-0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1200,x:-0.1,y:-0.7,$Rotate:0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},
+                    {$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1600,x:1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,x:-1,$Rows:2,$ChessMode:{$Row:3},$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1600,y:-1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1600,y:1,$Cols:2,$ChessMode:{$Column:12},$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,y:1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,x:1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$Brother:{$Duration:1200,x:-1,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2}},
+                    {$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,y:-1,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},
+                    {$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Left:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Brother:{$Duration:1200,x:1,$Delay:40,$Cols:6,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Easing:{$Top:$Jease$.$InOutQuart,$Opacity:$Jease$.$Linear},$Opacity:2,$ZIndex:-10,$Shift:-100}},
+                    {$Duration:1500,x:-0.1,y:-0.7,$Rotate:0.1,$During:{$Left:[0.6,0.4],$Top:[0.6,0.4],$Rotate:[0.6,0.4]},$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2,$Brother:{$Duration:1000,x:0.2,y:0.5,$Rotate:-0.1,$Easing:{$Left:$Jease$.$InQuad,$Top:$Jease$.$InQuad,$Opacity:$Jease$.$Linear,$Rotate:$Jease$.$InQuad},$Opacity:2}},
+                    {$Duration:1600,x:-0.2,$Delay:40,$Cols:12,$During:{$Left:[0.4,0.6]},$SlideOut:true,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:260,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Outside:true,$Round:{$Top:0.5},$Brother:{$Duration:1000,x:0.2,$Delay:40,$Cols:12,$Formation:$JssorSlideshowFormations$.$FormationStraight,$Assembly:1028,$Easing:{$Left:$Jease$.$InOutExpo,$Opacity:$Jease$.$InOutQuad},$Opacity:2,$Round:{$Top:0.5}}}
+                ],
+                $TransitionsOrder: 1
+            },
+            $BulletNavigatorOptions: {
+              $Class: $JssorBulletNavigator$
+            }
+        });
+        ScaleSlider();
+        addHandler(window, "load", ScaleSlider);
+        addHandler(window, "resize", ScaleSlider);
+        addHandler(window, "orientationchange", ScaleSlider);
+    }catch(e){}
+    initPhotoSwipeFromDOM(obj);
+}
+//------------------------------------------------------------------------------
+function material_icons(){
+    try{
+        jQuery('.material-icons').css('display', 'inline-block');
+    }catch(e){}
+}
+//------------------------------------------------------------------------------
+/**
+* Displays an image viewer.
+*/
+function nodes_galery(src){
+    onpop_state = 1;
+    for(var i = 0; i<20; i++){
+        try{
+            if(document.getElementById('nodes_galery_'+i).alt == src){
+                document.getElementById('nodes_galery_'+i).click();
+            }
+        }catch(e){}
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Captures a click 
+*/
+function capture_click(e){
+    var left_seconds = new Date().getTime() / 1000;
+    pattern[pattern_size++] = Array("1", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight(), (left_seconds-seconds));
+    if(!session_start){
+        submitPatterns();
+        session_start = true;
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Captures a mouse movement
+*/
+function capture_mousemove(e){
+    if(!pattern_catch){
+        pattern_catch = 1;
+        var left_seconds = new Date().getTime() / 1000;
+        pattern[pattern_size++] = Array("2", e.clientX, e.clientY, jQuery(window).scrollTop(), getViewportWidth(), getViewportHeight(), (left_seconds-seconds));
+        setTimeout( function(){
+            pattern_catch = 0;
+        }, 1000);
+    }
+    if(!session_start){
+        submitPatterns();
+        session_start = true;
+    }
+}
+//------------------------------------------------------------------------------
+/**
+* Enabling handlers
+*/
+addHandler(window, "load", material_icons);
+if(submit_patterns){
+    addHandler(window, "click", capture_click);
+    addHandler(window, "mousemove", capture_mousemove);
+    seconds = new Date().getTime() / 1000;
+    setInterval(submitPatterns, 10000);
+}
+}

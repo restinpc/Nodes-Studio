@@ -3,7 +3,7 @@
 * Prints share friends block.
 * @path /engine/core/function/print_share.php
 * 
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
@@ -29,10 +29,6 @@ function share_facebook($url, $caption){
  return '
 <a  title="'.lang("Share friends in").' Facebook" onClick="window.open(\'http://www.facebook.com/sharer.php?u='.urlencode($url).'&t='.$caption.'\', \'Facebook\', \'toolbar=0,status=0,width=320,height=250\');" target="_parent" href="javascript: void(0);"><img src="'.$_SERVER["DIR"].'/img/social/fb.jpg" /></a>&nbsp;';
 }
-function share_gplus($url, $caption){
- return '
-<a title="'.lang("Share friends in").' Google+" onClick="window.open(\'https://plus.google.com/share?url='. urlencode($url).'\', \'Google+\', \'toolbar=0,status=0,width=320,height=250\');" target="_parent" href="javascript: void(0);"><img src="'.$_SERVER["DIR"].'/img/social/gp.jpg" /></a>';
-}
 function share_vkontakte($url, $caption){
  return '
 <a title="'.lang("Share friends in").' VK" onClick="window.open(\'http://vk.com/share.php?url='.urlencode($url).'&title='.$caption.'\', \'Vkontakte\', \'toolbar=0,status=0,width=320,height=250\');" target="_parent" href="javascript: void(0);"><img src="'.$_SERVER["DIR"].'/img/social/vk.jpg" /></a>&nbsp;';
@@ -41,6 +37,5 @@ function print_share($site, $url, $caption){
     return 
         share_twitter($url, $caption).
         share_facebook($url, $caption).
-        share_vkontakte($url, $caption).
-        share_gplus($url, $caption);
+        share_vkontakte($url, $caption);
 }

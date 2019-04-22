@@ -3,7 +3,7 @@
 * Framework site primary class.
 * @path /engine/nodes/site.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -116,31 +116,10 @@ function site(){
                 }
             }
         }
-        if(empty($_SESSION["vr_page"])) $_SESSION["page"] = '/';
-        $_SERVER["cardboard"] = 0;
         $_SERVER["aframe"] = 0;
-        if(strpos($this->content, "a-scene")){
-            $_SERVER["aframe"] = 1;
-            $_SERVER["cardboard"] = 1;
-            if(strpos($this->content, "a-scene")){
-                $_SESSION["vr_page"] = $_SERVER["REQUEST_URI"];
-                require_once("template/".$_SESSION["template"]."/template.php");
-                $template = $_SESSION["template"];
-            }else{
-                require_once("template/aframe/template.php");
-                $template = 'aframe';
-            }
-        }else{
-            if(strpos($this->content, "nodes_headset_content")){
-                require_once("template/aframe/template.php");
-                $template = 'aframe';
-                $_SERVER["cardboard"] = 1;
-            }else{
-                $_SESSION["vr_page"] = $_SERVER["REQUEST_URI"];
-                require_once("template/".$_SESSION["template"]."/template.php");
-                $template = $_SESSION["template"];
-            }
-        }
+        if(strpos($this->content, "a-scene")){ $_SERVER["aframe"] = 1; }
+        require_once("template/".$_SESSION["template"]."/template.php");
+        $template = $_SESSION["template"];
     }
     if(!isset($_POST["jQuery"])){
         $query = 'SELECT * FROM `nodes_meta` WHERE `url` LIKE "'.$_SERVER["SCRIPT_URI"].'" AND `lang` = "'.$_SESSION["Lang"].'"';
@@ -193,7 +172,7 @@ function site(){
         require_once("engine/nodes/meta.php");
         if($_SERVER["aframe"]){
             $fout .= '
-<script src="/script/aframe/aframe-master.js"></script>
+<script src="/script/aframe-master.js"></script>
 ';
         }
         $fout .= '
@@ -203,27 +182,11 @@ function site(){
 
 ';
 if(!isset($_POST["jQuery"])){
-    $fout .= '<script>';
-    if($_SERVER["cardboard"]){
-        $fout .= 'var vr_state = 1;';
-    }else{
-        $fout .= 'var vr_state = 0;';
-    }
-    $fout .= '
-    var vr_control_state = -1;'
+    $fout .= '<script>'
     . 'var loading_stages = 6;'
     . 'var loading_state = 0; '
     . 'var preloaded = 0;'
     . 'function display(){ '
-        . 'if(parent.vr_control_state == -1){'
-            . 'window.addEventListener("devicemotion", function(event) { '
-                . 'try{ '
-                    . 'if(event.rotationRate.alpha){ '
-                        . 'document.getElementById("cardboard-control").style.display = "block"; '
-                    . '} '
-                . '}catch(e){} '
-            . '});'
-        . '}'
         . 'if(!window.jQuery) setTimeout(function(){ '
             . 'document.body.style.opacity = "1";'
         . '}, 1000); '
@@ -293,9 +256,6 @@ if(!isset($_POST["jQuery"])) $fout .= ' var load_events = true;';
     $data = mysqli_fetch_array($res);
     if($data["value"]=="1"){
         $fout .= '<script type="text/javascript"> if(window.jQuery){jQuery.ajax({url: "'.$_SERVER["DIR"].'/cron.php", async: true, type: "GET"});}</script>';
-    }
-    if(!$_SERVER["cardboard"] && $this->configs["cardboard"]){
-        $fout .= '<a href="'.$_SERVER["DIR"].'/aframe" target="_parent"><div id="cardboard-control"></div></a>';
     }
     if(!isset($_POST["jQuery"])){
         $fout .= '

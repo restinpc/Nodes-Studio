@@ -3,7 +3,7 @@
 * Print admin templates page.
 * @path /engine/core/admin/print_admin_templates.php
 * 
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
@@ -48,7 +48,7 @@ function print_admin_templates($cms){
 * '.ucfirst($_POST["new_template"]).' template file.
 * @path /template/'.$_POST["new_template"].'/template.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
 * @var $this->title - Page title
@@ -94,7 +94,7 @@ $this->content = $header.$this->content.$footer;';
 * '.ucfirst($_POST["new_template"]).' template stylesheets file.
 * @path /template/'.$_POST["new_template"].'/template.css
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
 @charset "UTF-8";
@@ -160,7 +160,7 @@ a:hover{
 *  '.ucfirst($_POST["new_template"]).' template JavaScript file.
 * @path /template/'.$_POST["new_template"].'/template.js
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @license http://www.apache.org/licenses/LICENSE-2.0
 */
 (function() {

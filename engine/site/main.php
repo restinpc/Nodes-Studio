@@ -3,7 +3,7 @@
 * Backend main page file.
 * @path /engine/site/main.php
 *
-* @name    Nodes Studio    @version 3.0.0.1
+* @name    Nodes Studio    @version 2.0.1.9
 * @author  Aleksandr Vorkunov  <developing@nodes-tech.ru>
 * @license http://www.apache.org/licenses/LICENSE-2.0
 *
@@ -19,28 +19,19 @@ if(!empty($_GET[0])){
     $this->content = engine::error();
     return; 
 }
+ 
 $this->content = '<div class="lh2 p10 pt20">
     <h1><strong>'.$this->configs["name"].'</strong></h1>
     <p class="fs18">'.$this->configs["description"].'</p>
+    <form method="POST" id="template_selector">
+        <select class="input w280 mt15" name="template" onChange=\'$id("template_selector").submit();\'>
+            <option value="default" '.($_SESSION["template"]=="default"?'selected':'').'>Default Frontend Template</option>
+            <option value="android" '.($_SESSION["template"]=="android"?'selected':'').'>Android Frontend Template</option>
+            <option value="bootstrap" '.($_SESSION["template"]=="bootstrap"?'selected':'').'>Bootstrap Frontend Template</option>
+        </select>
+    </form>
 </div>
 <div class="document980">';
-
-$query = 'SELECT * FROM `nodes_aframe` ORDER BY `id` ASC LIMIT 0, 3';
-$res = engine::mysql($query);
-$virtual = '
-<div class="tal p10"><h2 class="fs21">'.lang("Virtual Reality").'</h2></div>
-<div class="preview_blocks">';
-$flag = 0;
-while($data = mysqli_fetch_array($res)){
-    $virtual .= engine::print_scene_preview($site, $data["caption"], "/aframe/".$data["url"], $_SERVER["DIR"].$data["image"], $data["text"]);
-    $flag = 1;
-}
-$virtual .= '
-</div>
-<div class="clear"><br/><br/></div>';
-if($flag){
-    $this->content .= $virtual;
-}
 
 $query = 'SELECT * FROM `nodes_content` WHERE `lang` = "'.$_SESSION["Lang"].'" ORDER BY `id` DESC LIMIT 0, 6';
 $res = engine::mysql($query);
