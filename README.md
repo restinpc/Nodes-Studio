@@ -1,6 +1,6 @@
 # Nodes Studio - Web Framework
 
-Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery, A-Frame.
+Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 ![](https://github.com/restinpc/Nodes-Studio/blob/master/nodes.jpg?raw=true)
 
