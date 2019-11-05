@@ -10,7 +10,7 @@ Framework provides developers with an object-oriented representation of the site
 
 Integrated CMS allows to fully manage both the content of the site and its software-functional component.
 
-[Complete technical description][[en]("/123")] ([Полное техническое описание][ru]).
+[Complete technical description][[en]/123] ([Полное техническое описание][ru]).
 
 ## Installation
 
