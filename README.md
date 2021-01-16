@@ -36,12 +36,12 @@ Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
 Nodes Studio load testing results (public hosting)
 
-[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_nodes.jpg?raw=true)][loadest]  
+[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_nodes.png?raw=true)][loadest]  
   
   
 Apache HTTP server load testing results (for comparison)
 
-[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_apache.jpg?raw=true)][loadest]
+[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_apache.png?raw=true)][loadest]
 
 
 ## Contact Us
