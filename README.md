@@ -10,7 +10,7 @@ Framework provides developers with an object-oriented representation of the site
 
 Integrated CMS allows to fully manage both the content of the site and its software-functional component.
 
-[Complete technical description][en] ([Полное техническое описание][ru]).
+[Software technical description][en] ([Техническое описание][ru]).
 
 ## Installation
 
@@ -32,6 +32,18 @@ Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
 8. Develop the necessary backend modules, scripts, styles, customize template and fill the site content.
 
+## Load Test
+
+Nodes Studio load testing results (public hosting)
+
+[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_nodes.jpg?raw=true)][loadest]  
+  
+  
+Apache HTTP server load testing results (for comparison)
+
+[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_apache.jpg?raw=true)][loadest]
+
+
 ## Contact Us
 
 If there are any questions or you need more information, please contact us via:
@@ -50,3 +62,4 @@ If there are any questions or you need more information, please contact us via:
 [li]: <https://www.linkedin.com/in/nodes-studio>
 [email]: <mailto:developing@nodes-tech.ru>
 [whatsapp]: <https://api.whatsapp.com/send?phone=79192168386>
+[loadest]: <http://loadest.io>
