@@ -10,7 +10,7 @@ Framework provides developers with an object-oriented representation of the site
 
 Integrated CMS allows to fully manage both the content of the site and its software-functional component.
 
-[Software technical description][en] ([Техническое описание][ru]).
+[Software technical description][site] ([Website installed example][demo]).
 
 ## Installation
 
@@ -36,28 +36,25 @@ Nodes Studio requires PHP 5.3 and MySQL 5.1 support or higher to run.
 
 Nodes Studio load testing results (public hosting)
 
-[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_nodes.png?raw=true)][loadest]  
+[![Load testing](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_nodes.png?raw=true)][loadest]  
   
   
 Apache HTTP server load testing results (for comparison)
 
-[![](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_apache.png?raw=true)][loadest]
+[![Load test](https://github.com/restinpc/Nodes-Studio/blob/master/loadest_apache.png?raw=true)][loadest]
 
 
-## Contact Us
+## Contacts
 
-If there are any questions or you need more information, please contact us via:
+If there are any questions, or you need more information, please contact us via:
 
-[Facebook][fb] | [Vkontakte][vk] | [Freelancer][fl] | [LinkedIn][li] | [Github][gh] | [WhatsApp][whatsapp] | [Email][email]
+[LinkedIn][li] | [Github][gh] | [WhatsApp][whatsapp] | [Email][email]
 
-[en]: <http://nodes-studio.com>
-[ru]: <http://nodes-tech.ru>
-[download]: <http://nodes-studio.com/source/nodes_studio.zip>
+[demo]: <http://nodes-studio.com>
+[site]: <http://nodes-tech.ru>
+[download]: <http://nodes-tech.ru/source/nodes_studio.zip>
 [mirror]: <https://drive.google.com/open?id=0B5PrSx06jievRVdHWHZDdUU3UmM>
 [mirror_2]: <https://www.dropbox.com/sh/d7z6lkiztlv4ghz/AABGAibKZt4fyr2tPLOoTo8Xa?dl=0>
-[vk]: <https://vk.com/nodes_studio>
-[fb]: <https://www.facebook.com/groups/nodesstudio/>
-[fl]: <https://www.freelancer.com/u/restinpc.html>
 [gh]: <https://github.com/restinpc>
 [li]: <https://www.linkedin.com/in/nodes-studio>
 [email]: <mailto:developing@nodes-tech.ru>
