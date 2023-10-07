@@ -1,10 +1,10 @@
 # Nodes Studio - Web Framework
 
-Software platform for express development of web-Sites based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
+Software platform for express development of web-sites based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 ![](https://github.com/restinpc/Nodes-Studio/blob/master/nodes.jpg?raw=true)
 
-Nodes Studio is a framework with integrated content management system (CMS), which is one of the most successful solutions for web development today.
+Nodes Studio is a framework (contain legacy, require refactoring) with integrated content management system (CMS), which is successful solutions for express development.
 
 Framework provides developers with an object-oriented representation of the site and a library of functions to work with it.
 
