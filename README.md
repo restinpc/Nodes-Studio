@@ -1,10 +1,10 @@
 # Nodes Studio - Web Framework
 
-Software platform for the building Premium Web-Sites, based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
+Software platform for express development of web-Sites based on PHP, HTML, CSS, MySQL, JavaScript, jQuery.
 
 ![](https://github.com/restinpc/Nodes-Studio/blob/master/nodes.jpg?raw=true)
 
-Nodes Studio is a library of interface elements (framework) with integrated content management system (CMS), which is one of the most successful solutions for web development today.
+Nodes Studio is a framework with integrated content management system (CMS), which is one of the most successful solutions for web development today.
 
 Framework provides developers with an object-oriented representation of the site and a library of functions to work with it.
 
@@ -48,15 +48,13 @@ Apache HTTP server load testing results (for comparison)
 
 If there are any questions, or you need more information, please contact us via:
 
-[LinkedIn][li] | [Github][gh] | [WhatsApp][whatsapp] | [Email][email]
+[Github][gh] | [Email][email]
 
-[demo]: <http://nodes-studio.com>
-[site]: <http://nodes-tech.ru>
-[download]: <http://nodes-tech.ru/source/nodes_studio.zip>
+[demo]: <https://framework.nodes-studio.com>
+[site]: <https://nodes-studio.com>
+[download]: <https://nodes-studio.com/source/nodes_studio.zip>
 [mirror]: <https://drive.google.com/open?id=0B5PrSx06jievRVdHWHZDdUU3UmM>
 [mirror_2]: <https://www.dropbox.com/sh/d7z6lkiztlv4ghz/AABGAibKZt4fyr2tPLOoTo8Xa?dl=0>
 [gh]: <https://github.com/restinpc>
-[li]: <https://www.linkedin.com/in/nodes-studio>
 [email]: <mailto:developing@nodes-tech.ru>
-[whatsapp]: <https://api.whatsapp.com/send?phone=79192168386>
 [loadest]: <http://loadest.io>
