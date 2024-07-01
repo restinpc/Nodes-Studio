@@ -47,7 +47,7 @@ function print_admin_products($cms){
         if(!empty($_POST["product"]) && !empty($_SESSION["user"]["id"])){
             $title = trim(htmlspecialchars($_POST["title"]));
             $text = trim(htmlspecialchars($_POST["text"]));
-            $price = doubleval($_POST["price"]);
+            $price = floatval($_POST["price"]);
             $description = trim(engine::escape_string($_POST["description"]));
             $date = date("U");
             $query = 'INSERT INTO `nodes_product`(`user_id`, `title`, `text`, `description`, `img`, `price`, `date`, `status`, `views`) '
@@ -263,7 +263,7 @@ function print_admin_products($cms){
                 }
                 $title = trim(htmlspecialchars($_POST["title"]));
                 $text = trim(htmlspecialchars($_POST["text"]));
-                $price = doubleval($_POST["price"]);
+                $price = floatval($_POST["price"]);
                 $description = engine::escape_string($_POST["description"]);
                 $query = 'UPDATE `nodes_product` SET '
                         . '`title` = "'.$title.'", '
